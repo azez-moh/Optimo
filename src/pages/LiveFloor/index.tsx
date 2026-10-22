@@ -9,11 +9,11 @@ import {
 import { useDemo, focusClub, machinesOf, usageReport, alertsIn, FLOOR_SIZE_M, MALQA_PLACEMENTS, LIVE_CLUB_ID, addDays, hhmm } from '../../data';
 import type { Machine, MachineType } from '../../data/types';
 import { useScope } from '../../layout/filters';
-import { useAuth } from '../../layout/auth';
 import { useI18n } from '../../i18n';
 import { useTheme } from '../../theme/theme';
 import { FAMILY_ORDER, MAIN_CANVAS, locationOf, hourlyUse, openingMinute, readCanvases, seqColor, stateAt, writeCanvases, type FloorCanvasDef, type Placement, type ShownState } from './model';
 import type { FloorMachine } from './FloorScene';
+import { CamWindow } from './CamWindow';
 import './liveFloor.css';
 
 const FloorScene = lazy(() => import('./FloorScene'));
@@ -42,10 +42,10 @@ const shortId = (id: string) => id.split(':').pop() ?? id;
 export default function LiveFloorPage() {
   const d = useDemo();
   const { scope, setScope, clubs: scopeClubs } = useScope();
-  const { user } = useAuth();
   const i18n = useI18n();
   const { t, pick, fmtNumber, fmtPercent, fmtDuration, lang } = i18n;
   const { theme, chart } = useTheme();
+  const canvasLabel = (c: { id: string; name: string }) => (c.id === MAIN_CANVAS.id && c.name === MAIN_CANVAS.name ? t('liveFloor.canvas.defaultName') : c.name);
   const [params, setParams] = useSearchParams();
 
   // ---------- club context (AV-14) ----------
@@ -187,13 +187,17 @@ export default function LiveFloorPage() {
     deepDone.current = q;
     setCanvasId(MAIN_CANVAS.id);
     setSelectedId(target.id);
+    setCamPopFor(target.id);
     setPanelTab('machines');
     // after the intro fly-in has settled (not cleared on re-run, so StrictMode cannot cancel it)
     window.setTimeout(() => setFocus((f) => ({ id: target.id, n: f.n + 1 })), reducedMotion ? 60 : 2700);
   }, [params, d.machines, club.id, setScope, reducedMotion]);
 
+  // camera pop-up (Build 8.7): every new selection opens it for that machine's camera; X or Esc hides it until the next one
+  const [camPopFor, setCamPopFor] = useState<string | null>(null);
   const select = useCallback((id: string | null, fly = false) => {
     setSelectedId(id);
+    setCamPopFor(id);
     if (id) setPanelTab('machines');
     if (id && fly) setFocus((f) => ({ id, n: f.n + 1 }));
     if (!id && params.get('machine')) { params.delete('machine'); setParams(params, { replace: true }); }
@@ -333,6 +337,29 @@ export default function LiveFloorPage() {
   const camMachine = selected ?? placed.find((m) => d.cameras.find((c) => c.id === m.cameraId)?.online) ?? null;
   const cam = camMachine ? camerasById.get(camMachine.cameraId) : undefined;
   const blur = d.settings.blurCameras;
+  const camPopped = !!selected && camPopFor === selected.id;
+  const camShown = prefs.camera || camPopped;
+  const closeCam = useCallback(() => { setCamPopFor(null); if (prefs.camera) setPrefs({ camera: false }); },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [prefs.camera]);
+  const camZones = useMemo(() => (cam && camMachine ? d.zones.filter((z) => z.cameraId === cam.id) : []), [d.zones, cam, camMachine]);
+  const stageRef = useRef<HTMLDivElement>(null);
+  const [stageSize, setStageSize] = useState({ w: 800, h: 480 });
+  useEffect(() => {
+    const el = stageRef.current;
+    if (!el || typeof ResizeObserver === 'undefined') return;
+    const ro = new ResizeObserver(([e]) => setStageSize({ w: Math.round(e.contentRect.width), h: Math.round(e.contentRect.height) }));
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [isLive]);
+  const [phone, setPhone] = useState(() => { try { return window.matchMedia('(max-width: 640px)').matches; } catch { return false; } });
+  useEffect(() => {
+    let mq: MediaQueryList;
+    try { mq = window.matchMedia('(max-width: 640px)'); } catch { return; }
+    const on = () => setPhone(mq.matches);
+    mq.addEventListener('change', on);
+    return () => mq.removeEventListener('change', on);
+  }, []);
 
   // ---------- render ----------
   const timeShown = replayMin ?? nowMin;
@@ -408,8 +435,15 @@ export default function LiveFloorPage() {
             </div>
           </div>
 
+          {/* camera pop-up docks full width under the toolbar on phones */}
+          {camShown && phone && (
+            <CamWindow cam={cam} machineName={camMachine ? pick(camMachine.nameEn, camMachine.nameAr) : ''}
+              zones={camZones.filter((z) => z.machineId === camMachine?.id)} otherZones={camZones.filter((z) => z.machineId !== camMachine?.id)}
+              blur={blur} docked stage={stageSize} onClose={closeCam} />
+          )}
+
           {/* stage */}
-          <div className="lf-stage-wrap">
+          <div className="lf-stage-wrap" ref={stageRef}>
             {webgl ? (
               <Suspense fallback={<div className="lf-loading" aria-busy="true"><span>{t('liveFloor.loading')}</span></div>}>
                 <FloorScene machines={floorMachines} bounds={{ x: FLOOR_SIZE_M.x, z: FLOOR_SIZE_M.z }}
@@ -451,21 +485,10 @@ export default function LiveFloorPage() {
               <div className="lf-replay-badge" role="status"><Badge tone="info">{t('liveFloor.replay.at', { time: fmtClock(replayMin) })}</Badge></div>
             )}
 
-            {prefs.camera && (
-              <div className="lf-pip">
-                <div className="lf-pip__head">
-                  <span className="lf-pip__name">{cam ? pick(cam.nameEn, cam.nameAr) : t('liveFloor.cam.title')}</span>
-                  <button type="button" className="btn btn--icon btn--ghost btn--sm" aria-label={t('common.close')} onClick={() => setPrefs({ camera: false })}><X aria-hidden /></button>
-                </div>
-                {cam ? (
-                  <div className={`lf-pip__frame${blur ? ' is-blurred' : ''}`}>
-                    <CameraArt seed={cam.id} offline={!cam.online} />
-                    {!cam.online && <span className="lf-pip__off">{t('liveFloor.cam.offline')}</span>}
-                    <span className="lf-pip__wm">{user?.email} · {fmtClock(nowMin)}</span>
-                    {blur && cam.online && <span className="lf-pip__blur">{t('liveFloor.cam.blurred')}</span>}
-                  </div>
-                ) : <p className="lf-pip__none">{t('liveFloor.cam.none')}</p>}
-              </div>
+            {camShown && !phone && (
+              <CamWindow cam={cam} machineName={camMachine ? pick(camMachine.nameEn, camMachine.nameAr) : ''}
+                zones={camZones.filter((z) => z.machineId === camMachine?.id)} otherZones={camZones.filter((z) => z.machineId !== camMachine?.id)}
+                blur={blur} docked={false} stage={stageSize} onClose={closeCam} />
             )}
 
             {status && <div className="lf-toast" role="status">{status}</div>}
@@ -534,7 +557,7 @@ export default function LiveFloorPage() {
                 <div className="lf-panel__body">
                   <div className="lf-row">
                     <Select label={t('liveFloor.canvas.select')} value={canvas.id} onChange={(v) => { setCanvasId(v); setDraft({}); setEditing(false); select(null); }}
-                      options={canvases.map((c) => ({ value: c.id, label: c.name }))} className="lf-grow" />
+                      options={canvases.map((c) => ({ value: c.id, label: canvasLabel(c) }))} className="lf-grow" />
                     <Button size="sm" icon={Plus} onClick={newCanvas}>{t('liveFloor.canvas.new')}</Button>
                   </div>
                   <div className="lf-row">
@@ -568,7 +591,7 @@ export default function LiveFloorPage() {
               ) : (
                 <div className="lf-panel__body">
                   <Select label={t('liveFloor.canvas.select')} value={canvas.id} onChange={(v) => { setCanvasId(v); setDraft({}); setEditing(false); }}
-                    options={canvases.map((c) => ({ value: c.id, label: c.name }))} />
+                    options={canvases.map((c) => ({ value: c.id, label: canvasLabel(c) }))} />
                   <Button size="sm" icon={Plus} onClick={newCanvas} className="lf-full">{t('liveFloor.canvas.new')}</Button>
                   <TextField label={t('liveFloor.canvas.name')} value={draftCanvas.name} onChange={(v) => setDraftCanvas({ ...draftCanvas, name: v })} />
                   <TextField label={t('liveFloor.canvas.label')} value={draftCanvas.label} onChange={(v) => setDraftCanvas({ ...draftCanvas, label: v })} />
@@ -596,7 +619,7 @@ export default function LiveFloorPage() {
       </div>
 
       <ConfirmDialog open={confirmDelete} onCancel={() => setConfirmDelete(false)} onConfirm={deleteCanvas}
-        title={t('liveFloor.canvas.deleteTitle', { name: canvas.name })} body={t('liveFloor.canvas.deleteBody')} confirmLabel={t('liveFloor.canvas.delete')} />
+        title={t('liveFloor.canvas.deleteTitle', { name: canvasLabel(canvas) })} body={t('liveFloor.canvas.deleteBody')} confirmLabel={t('liveFloor.canvas.delete')} />
       <ConfirmDialog open={confirmReset} onCancel={() => setConfirmReset(false)} onConfirm={resetLayout}
         title={t('liveFloor.edit.resetTitle')} body={t('liveFloor.edit.resetBody')} confirmLabel={t('liveFloor.edit.resetConfirm')} />
     </div>
@@ -622,26 +645,6 @@ function LegendItem({ kind, color, label, n }: { kind: string; color: string; la
       <span>{label}</span>
       <span className="num lf-legend__n">{n}</span>
     </li>
-  );
-}
-
-/** Stylised camera frame (no real image exists in the demo); blurred and watermarked like every camera view. */
-function CameraArt({ seed, offline }: { seed: string; offline: boolean }) {
-  let h = 0;
-  for (const ch of seed) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
-  const rows = 3 + (h % 2);
-  return (
-    <svg viewBox="0 0 160 90" preserveAspectRatio="xMidYMid slice" aria-hidden className={offline ? 'is-off' : ''}>
-      <defs>
-        <radialGradient id={`v${h}`} cx="50%" cy="50%" r="70%"><stop offset="0%" stopColor="#3e4846" /><stop offset="100%" stopColor="#0d1513" /></radialGradient>
-      </defs>
-      <rect width="160" height="90" fill={`url(#v${h})`} />
-      <path d="M0 90 L40 30 L120 30 L160 90 Z" fill="#26302e" />
-      {Array.from({ length: rows }, (_, r) => Array.from({ length: 5 }, (_, i) => (
-        <rect key={`${r}-${i}`} x={30 + i * 21 + r * 2} y={36 + r * 15} width={12} height={8} fill={(h >> (r * 5 + i)) & 1 ? '#c7c3a0' : '#5d6664'} opacity={0.9} />
-      )))}
-      <circle cx={80} cy={45} r={44} fill="none" stroke="#000" strokeOpacity={0.4} strokeWidth={10} />
-    </svg>
   );
 }
 

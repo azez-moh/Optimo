@@ -117,7 +117,7 @@ export function SystemsTable({ zones, ac, lights, tab, onTab, selected, onClearS
   } else if (tab === 'presence') {
     summary = { text: t('bmsOverview.peopleIn', { n: fmtNumber(peopleNow), areas: fmtNumber(occupied) }), info: t('bmsOverview.info.presence') };
   } else {
-    summary = { text: t('bmsOverview.zonesCount', { n: fmtNumber(zones.length) }), info: t('bmsOverview.info.zones') };
+    summary = { text: (zones.length === 1 ? t('bmsOverview.zonesCountOne') : t('bmsOverview.zonesCount', { n: fmtNumber(zones.length) })), info: t('bmsOverview.info.zones') };
   }
 
   return (

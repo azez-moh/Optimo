@@ -200,6 +200,8 @@ export function Shell() {
   const { t } = useI18n();
   const { pathname } = useLocation();
   const [drawer, setDrawer] = useState(false);
+  const { role: viewerRole } = useScope();
+  useEffect(() => { document.documentElement.dataset.role = viewerRole; }, [viewerRole]);
   useEffect(() => { window.scrollTo(0, 0); setDrawer(false); }, [pathname]);
   useEffect(() => {
     if (!drawer) return;

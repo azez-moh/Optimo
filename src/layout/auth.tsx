@@ -19,7 +19,7 @@ export interface AuthCtx {
   signOut: () => void;
 }
 
-export const DEFAULT_EMAIL = 'coo@optimo.com.sa';
+export const DEFAULT_EMAIL = 'coo@optimo.demo';
 const KEY = 'opt.auth';
 
 /** First page after sign-in: the Kingdom map. */
