@@ -1,8 +1,8 @@
 import type { ReactNode } from 'react';
-import { useScope } from '../layout/filters';
 
-/** Renders children only for the Admin role (write and destructive controls). COO sees `fallback` (default nothing). */
-export function AdminOnly({ children, fallback = null }: { children: ReactNode; fallback?: ReactNode }) {
-  const { isAdmin } = useScope();
-  return <>{isAdmin ? children : fallback}</>;
+// Product rule: no control or page is hidden by role. Every role sees the same
+// functions as Build 8.7; destructive actions go through ConfirmDialog instead.
+// Kept as a passthrough so existing call sites keep working.
+export function AdminOnly({ children }: { children: ReactNode; fallback?: ReactNode }) {
+  return <>{children}</>;
 }
