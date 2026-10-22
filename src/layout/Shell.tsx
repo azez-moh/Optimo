@@ -217,6 +217,7 @@ export function Shell() {
           <button type="button" className="btn btn--icon btn--ghost" onClick={() => setDrawer(false)} aria-label={t('nav.closeMenu')}><X aria-hidden /></button>
         </div>
         <Sidebar onNavigate={() => setDrawer(false)} />
+        <NavLink to="/control?view=designer" className="shell__sidemodel" onClick={() => setDrawer(false)}>{t('shell.model')}</NavLink>
         <div className="shell__sidefoot">{t('app.poweredBy')}</div>
       </aside>
       {drawer && <div className="shell__scrim" onClick={() => setDrawer(false)} aria-hidden />}

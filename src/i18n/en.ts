@@ -68,6 +68,7 @@ const en = {
     langSwitch: 'العربية',
     langSwitchLabel: 'Switch language to Arabic',
     signOut: 'Sign out',
+    model: 'Building model',
     alerts: 'Alerts',
     alertsCount: '{n} open alerts',
     alertsNone: 'No open alerts',

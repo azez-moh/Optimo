@@ -1,6 +1,138 @@
-import { ComingNext } from '../../components';
+import { useEffect, useMemo, useRef } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { Activity, Bell, Building2, Gauge, Leaf, Users, Zap } from 'lucide-react';
+import { KpiTile, PageHeader, Segmented, Tabs, type TabDef } from '../../components';
+import { useI18n } from '../../i18n';
+import { useScope } from '../../layout/filters';
+import { scopeLabel } from '../../layout/scopeLabel';
+import { useDemo, TARIFF_SAR_PER_KWH } from '../../data';
+import { clubRows, machineBaseline, mean, peopleLastWeek, PERIODS, type Period } from './metrics';
+import { AsAtLine, CountUp, useFmtMwh, useFmtSarCompact } from './shared';
+import { ClubRanking, METRICS, type Metric } from './Ranking';
+import { BusinessSection } from './Business';
+import { EnergySection } from './Energy';
+import { BmsSection } from './Bms';
 
-/** STUB: Overview. Replace this file (and add files in this folder). Strings go in src/i18n/pages/overview.ts. */
+type Section = 'business' | 'energy' | 'bms';
+const SECTIONS: Section[] = ['business', 'energy', 'bms'];
+
 export default function OverviewPage() {
-  return <ComingNext titleKey="nav.overview" />;
+  const i18n = useI18n();
+  const { t, fmtNumber } = i18n;
+  const data = useDemo();
+  const { scope, clubs } = useScope();
+  const [params, setParams] = useSearchParams();
+  const navigate = useNavigate();
+  const mwh = useFmtMwh();
+  const sarC = useFmtSarCompact();
+
+  const period: Period = PERIODS.includes(params.get('p') as Period) ? (params.get('p') as Period) : 'now';
+  const metric: Metric = METRICS.includes(params.get('metric') as Metric) ? (params.get('metric') as Metric) : 'people';
+  const section: Section = SECTIONS.includes(params.get('section') as Section) ? (params.get('section') as Section) : 'business';
+
+  const setParam = (k: string, v: string | null) => {
+    const n = new URLSearchParams(params);
+    if (v == null) n.delete(k); else n.set(k, v);
+    setParams(n, { replace: true });
+  };
+  const linkWith = (k: string, v: string, extra?: Record<string, string>) => {
+    const n = new URLSearchParams(params);
+    n.set(k, v);
+    if (extra) for (const [a, b] of Object.entries(extra)) n.set(a, b);
+    return `/overview?${n.toString()}`;
+  };
+
+  const rows = useMemo(() => clubRows(data, clubs, period), [data, clubs, period]);
+
+  // ---------- 4 summary KPIs ----------
+  const cap = clubs.reduce((a, c) => a + c.capacity, 0);
+  const people = peopleLastWeek(data, clubs, period);
+  const peopleDelta = people.before ? ((people.now - people.before) / people.before) * 100 : 0;
+  const fullPct = cap ? Math.round((rows.reduce((a, r) => a + r.peopleIn, 0) / cap) * 100) : 0;
+  const machineNow = Math.round(mean(rows.map((r) => r.machinePct)));
+  const machineBase = machineBaseline(data, clubs, period);
+  const energyKwh = period === 'week' ? rows.reduce((a, r) => a + r.energyWeekKwh, 0) : rows.reduce((a, r) => a + r.energyTodayKwh, 0);
+  const savedPct = Math.round(mean(rows.map((r) => (period === 'week' ? r.savedWeekPct : r.savedTodayPct))) * 10) / 10;
+  const savedMonthSar = rows.reduce((a, r) => a + r.savedMonthSar, 0);
+  const alerts = rows.flatMap((r) => r.alerts);
+  const nCrit = alerts.filter((a) => a.level === 'critical').length;
+  const nWarn = alerts.filter((a) => a.level === 'warning').length;
+  const nInfo = alerts.length - nCrit - nWarn;
+
+  // Scroll to the details when a tile opens a section (not on first load).
+  const detailsRef = useRef<HTMLDivElement>(null);
+  const prevSection = useRef(section);
+  useEffect(() => {
+    if (prevSection.current !== section) detailsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    prevSection.current = section;
+  }, [section]);
+
+  const title = scopeLabel(scope, i18n, data.clubs, data.districts);
+  const peopleLabel = period === 'now' ? t('overview.kpi.people') : period === 'today' ? t('overview.kpi.peopleToday') : t('overview.kpi.peopleWeek');
+  const peopleInfo = period === 'now' ? t('overview.kpi.peopleInfo') : period === 'today' ? t('overview.kpi.peopleTodayInfo') : t('overview.kpi.peopleWeekInfo');
+  const peopleCmp = period === 'now' ? t('overview.kpi.vsLastWeekHour') : period === 'today' ? t('overview.kpi.vsLastWeekTime') : t('overview.kpi.vsPrevWeek');
+
+  const tabs: TabDef<Section>[] = [
+    { id: 'business', label: t('overview.sections.business'), icon: Activity },
+    { id: 'energy', label: t('overview.sections.energy'), icon: Zap },
+    { id: 'bms', label: t('overview.sections.bms'), icon: Building2, count: alerts.length },
+  ];
+
+  return (
+    <div className="page ov-page">
+      <div className="ov-head">
+        <PageHeader
+          title={title}
+          actions={(
+            <Segmented ariaLabel={t('overview.period.label')} value={period} onChange={(v) => setParam('p', v === 'now' ? null : v)}
+              options={PERIODS.map((p) => ({ value: p, label: t(`overview.period.${p}`) }))} />
+          )}
+        />
+        <AsAtLine />
+      </div>
+
+      <div className="grid-kpi ov-kpis">
+        <KpiTile icon={Users} label={peopleLabel} info={peopleInfo} to={linkWith('section', 'business')}
+          value={fmtNumber(period === 'week' ? people.now : period === 'today' ? people.now : rows.reduce((a, r) => a + r.peopleIn, 0))}
+          unit={period === 'now' ? t('overview.kpi.peopleOf', { cap: fmtNumber(cap) }) : undefined}
+          delta={{ value: peopleDelta, label: peopleCmp, goodWhen: 'up' }}
+          hint={period === 'now' ? t('overview.kpi.peopleFull', { pct: fmtNumber(fullPct) }) : undefined} />
+        <KpiTile icon={Gauge} label={t('overview.kpi.machine')} info={t('overview.kpi.machineInfo')} to={linkWith('section', 'business')}
+          value={fmtNumber(machineNow)} unit="%"
+          delta={{ value: machineNow - machineBase, unit: 'pp', label: t('overview.kpi.vs4w') }}
+          hint={period === 'now' ? t('overview.kpi.machineSub') : period === 'today' ? t('overview.kpi.machineSubToday') : t('overview.kpi.machineSubWeek')} />
+        <KpiTile icon={Zap} label={period === 'week' ? t('overview.kpi.energyWeek') : t('overview.kpi.energy')}
+          info={t('overview.kpi.energyInfo', { tariff: i18n.fmtCurrency(TARIFF_SAR_PER_KWH, 2) })} to={linkWith('section', 'energy')}
+          className="ov-kpi-energy"
+          value={mwh.value(energyKwh)} unit={mwh.unit}
+          delta={{ value: -savedPct, goodWhen: 'down', label: t('overview.kpi.saved') }}
+          hint={(
+            <span className="ov-sar-hint">
+              <Leaf aria-hidden />
+              <strong className="num"><CountUp value={savedMonthSar} format={(v) => sarC(v)} /></strong>
+              <span>{t('overview.kpi.savedMonth')}</span>
+            </span>
+          )} />
+        <KpiTile icon={Bell} label={t('overview.kpi.alerts')} info={t('overview.kpi.alertsInfo')}
+          to={linkWith('section', 'bms', nCrit ? { level: 'critical' } : undefined)}
+          className={nCrit ? 'ov-kpi-alert is-crit' : 'ov-kpi-alert'}
+          value={<span className={nCrit ? 'ov-crit' : ''}>{fmtNumber(alerts.length)}</span>}
+          hint={<span className={nCrit ? 'ov-crit-text' : ''}>{t('overview.kpi.alertsSplit', { c: fmtNumber(nCrit), w: fmtNumber(nWarn), i: fmtNumber(nInfo) })}</span>} />
+      </div>
+
+      <ClubRanking rows={rows} metric={metric} period={period} onMetric={(m) => setParam('metric', m === 'people' ? null : m)}
+        onShowCard={(id) => navigate(`/branches?club=${encodeURIComponent(id)}`)} />
+
+      <div ref={detailsRef} className="ov-details">
+        <Tabs ariaLabel={t('overview.sections.label')} tabs={tabs} value={section} onChange={(s) => setParam('section', s)} />
+        <div role="tabpanel" className="ov-panel">
+          {section === 'business' && <BusinessSection rows={rows} period={period} />}
+          {section === 'energy' && <EnergySection rows={rows} />}
+          {section === 'bms' && (
+            <BmsSection rows={rows} level={params.get('level')} onLevel={(l) => setParam('level', l === 'all' ? null : l)} />
+          )}
+        </div>
+      </div>
+    </div>
+  );
 }

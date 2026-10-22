@@ -4,9 +4,10 @@ import { OrbitControls, Grid } from '@react-three/drei';
 import { useTheme } from '../theme/theme';
 
 /*
-  Shared 3D stage: canvas, lights, optional grid, orbit controls helper.
+  Shared 3D stage: canvas, soft studio lights, optional grid, orbit controls.
   Usage: <Scene camera={[8, 10, 14]} target={[0, 0, 6]}><MachineModel type="treadmill" /></Scene>
-  `mode="2d"` gives a top-down orthographic-like view (camera straight above, rotation locked).
+  `mode="2d"` gives a top-down plan view (camera straight above, rotation locked).
+  `controls={false}` leaves the camera to the caller (custom controls or animated camera).
 */
 
 export interface SceneProps {
@@ -25,6 +26,14 @@ export interface SceneProps {
   maxDistance?: number;
   className?: string;
   ariaLabel: string;
+  /** Built-in OrbitControls (default true). */
+  controls?: boolean;
+  /** Half size of the area that receives sharp shadows, in metres (default 6). */
+  shadowExtent?: number;
+  /** Called on a click that hits no object. */
+  onPointerMissed?: (e: MouseEvent) => void;
+  /** Keep the drawing buffer (needed for canvas snapshots). */
+  preserveDrawingBuffer?: boolean;
 }
 
 export function sceneColors(theme: 'light' | 'dark') {
@@ -33,19 +42,36 @@ export function sceneColors(theme: 'light' | 'dark') {
     : { bg: '#f0f0ee', floor: '#ffffff', grid: '#e2e3e1', gridStrong: '#c9cbc9', wall: '#e9e9e9', frame: '#6b7270', soft: '#c9cbc9', outline: '#6b6f6e', label: '#020c0a' };
 }
 
+/** Soft studio light rig shared by every 3D view. */
+export function StudioLights({ theme, extent = 6 }: { theme: 'light' | 'dark'; extent?: number }) {
+  const dark = theme === 'dark';
+  return (
+    <>
+      <hemisphereLight args={[dark ? '#dfe7e5' : '#ffffff', dark ? '#0b1513' : '#d9d9d6', dark ? 0.75 : 1.0]} />
+      <ambientLight intensity={dark ? 0.18 : 0.25} />
+      <directionalLight position={[extent * 0.6, extent * 1.6, extent * 0.9]} intensity={dark ? 1.25 : 1.45} castShadow
+        shadow-mapSize={[2048, 2048]} shadow-bias={-0.0004} shadow-normalBias={0.02}
+        shadow-camera-left={-extent} shadow-camera-right={extent} shadow-camera-top={extent} shadow-camera-bottom={-extent}
+        shadow-camera-near={0.5} shadow-camera-far={extent * 6} />
+      <directionalLight position={[-extent, extent * 0.8, -extent]} intensity={dark ? 0.35 : 0.4} />
+    </>
+  );
+}
+
 export function Scene({
   children, camera = [8, 9, 12], target = [0, 0, 0], fov = 40, height = 420, grid = true, gridSize = [50, 50], mode = '3d',
-  autoRotate, wheelZoom = false, minDistance = 2, maxDistance = 60, className = '', ariaLabel,
+  autoRotate, wheelZoom = false, minDistance = 2, maxDistance = 60, className = '', ariaLabel, controls = true, shadowExtent = 6,
+  onPointerMissed, preserveDrawingBuffer,
 }: SceneProps) {
   const { theme } = useTheme();
   const c = sceneColors(theme);
   const cam: [number, number, number] = mode === '2d' ? [target[0], Math.max(18, camera[1] * 1.6), target[2] + 0.001] : camera;
   return (
     <div className={`scene ${className}`.trim()} style={{ height, background: c.bg, position: 'relative' }} role="img" aria-label={ariaLabel}>
-      <Canvas shadows dpr={[1, 2]} camera={{ position: cam, fov }} key={mode}>
+      <Canvas shadows dpr={[1, 2]} camera={{ position: cam, fov }} key={mode} onPointerMissed={onPointerMissed}
+        gl={{ antialias: true, preserveDrawingBuffer }}>
         <color attach="background" args={[c.bg]} />
-        <hemisphereLight args={[theme === 'dark' ? '#cfd8d6' : '#ffffff', theme === 'dark' ? '#0b1513' : '#d9d9d6', theme === 'dark' ? 0.55 : 0.9]} />
-        <directionalLight position={[5, 10, 7]} intensity={theme === 'dark' ? 1.1 : 1.4} castShadow shadow-mapSize={[1024, 1024]} />
+        <StudioLights theme={theme} extent={shadowExtent} />
         <Suspense fallback={null}>
           {grid && (
             <Grid args={gridSize} position={[target[0], 0, target[2]]} cellSize={1} sectionSize={5} cellColor={c.grid} sectionColor={c.gridStrong}
@@ -53,8 +79,10 @@ export function Scene({
           )}
           {children}
         </Suspense>
-        <OrbitControls makeDefault target={target} enableRotate={mode === '3d'} enableZoom={wheelZoom} enablePan
-          autoRotate={autoRotate} autoRotateSpeed={0.6} minDistance={minDistance} maxDistance={maxDistance} maxPolarAngle={Math.PI / 2.05} />
+        {controls && (
+          <OrbitControls makeDefault target={target} enableRotate={mode === '3d'} enableZoom={wheelZoom} enablePan enableDamping
+            autoRotate={autoRotate} autoRotateSpeed={0.6} minDistance={minDistance} maxDistance={maxDistance} maxPolarAngle={Math.PI / 2.05} />
+        )}
       </Canvas>
     </div>
   );

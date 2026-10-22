@@ -125,3 +125,6 @@
 @media (max-width: 400px) {
   .topbar__brand { display: none; }
 }
+
+.shell__sidemodel { display: block; padding: 10px 16px; font-size: 13px; color: var(--text-muted); text-decoration: none; border-top: 1px solid var(--border); }
+.shell__sidemodel:hover, .shell__sidemodel:focus-visible { color: var(--text); }

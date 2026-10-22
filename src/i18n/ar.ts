@@ -69,6 +69,7 @@ const ar: Dict = {
     langSwitch: 'English',
     langSwitchLabel: 'تغيير اللغة إلى الإنجليزية',
     signOut: 'تسجيل الخروج',
+    model: 'نموذج المبنى',
     alerts: 'التنبيهات',
     alertsCount: '{n} تنبيهات مفتوحة',
     alertsNone: 'لا توجد تنبيهات مفتوحة',

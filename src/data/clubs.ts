@@ -12,8 +12,6 @@ export const DISTRICTS: District[] = [
   { id: 'yasmin', region: 'riyadh', cityEn: 'Riyadh', cityAr: 'الرياض', nameEn: 'Al Yasmin', nameAr: 'الياسمين', lat: 24.8268, lng: 46.6433 },
   { id: 'nada', region: 'riyadh', cityEn: 'Riyadh', cityAr: 'الرياض', nameEn: 'An Nada', nameAr: 'الندى', lat: 24.8031, lng: 46.7005 },
   { id: 'rayyan', region: 'riyadh', cityEn: 'Riyadh', cityAr: 'الرياض', nameEn: 'Ar Rayyan', nameAr: 'الريان', lat: 24.7071, lng: 46.7853 },
-  { id: 'shubra', region: 'riyadh', cityEn: 'Riyadh', cityAr: 'الرياض', nameEn: 'Shubra', nameAr: 'شبرا', lat: 24.5826, lng: 46.6797 },
-  { id: 'townsquare', region: 'makkah', cityEn: 'Jeddah', cityAr: 'جدة', nameEn: 'Town Square', nameAr: 'تاون سكوير', lat: 21.6268, lng: 39.1121 },
   { id: 'hira', region: 'makkah', cityEn: 'Jeddah', cityAr: 'جدة', nameEn: 'Hira', nameAr: 'حراء', lat: 21.5654, lng: 39.1682 },
 ];
 
@@ -34,35 +32,20 @@ interface Seed {
 const SEEDS: Seed[] = [
   { id: 'optimo-malqa-men', code: 'OPT-MLQ-M', brand: 'optimo', district: 'malqa', gender: 'men', lat: 24.795832, lng: 46.586712, areaM2: 3700, capacity: 160,
     addressEn: 'Anas Ibn Malik Rd, Al Malqa, Riyadh 13522', addressAr: 'طريق أنس بن مالك، الملقا، الرياض 13522', openedEn: 'Nov 2022', openedAr: 'نوفمبر 2022', live: true },
-  { id: 'optimo-malqa-women', code: 'OPT-MLQ-W', brand: 'optimo', district: 'malqa', gender: 'women', lat: 24.7967287, lng: 46.5895369, areaM2: 3200, capacity: 140,
-    addressEn: 'Anas Ibn Malik Rd, Al Malqa, Riyadh 13522', addressAr: 'طريق أنس بن مالك، الملقا، الرياض 13522', openedEn: '2023', openedAr: '2023' },
   { id: 'optimo-nakheel-men', code: 'OPT-NKH-M', brand: 'optimo', district: 'nakheel', gender: 'men', lat: 24.742592, lng: 46.645165, areaM2: 3400, capacity: 140,
     addressEn: 'Al Takhassousi St 6775, An Nakheel, Riyadh 12381', addressAr: 'شارع التخصصي 6775، النخيل، الرياض 12381', openedEn: '2023', openedAr: '2023' },
-  { id: 'bfit-shubra-women', code: 'BFT-SHB-W', brand: 'bfit', district: 'shubra', gender: 'women', areaM2: 1800, capacity: 90,
-    addressEn: 'Shubra, Riyadh', addressAr: 'شبرا، الرياض', openedEn: '2021', openedAr: '2021' },
-  { id: 'bfit-rayyan-women', code: 'BFT-RYN-W', brand: 'bfit', district: 'rayyan', gender: 'women', areaM2: 2000, capacity: 100,
-    addressEn: 'Ar Rayyan, Riyadh', addressAr: 'الريان، الرياض', openedEn: '2020', openedAr: '2020' },
   { id: 'bfit-rayyan-men', code: 'BFT-RYN-M', brand: 'bfit', district: 'rayyan', gender: 'men', areaM2: 2400, capacity: 120,
     addressEn: 'Ar Rayyan, Riyadh', addressAr: 'الريان، الرياض', openedEn: '2020', openedAr: '2020' },
   { id: 'bfit-yasmin-men', code: 'BFT-YSM-M', brand: 'bfit', district: 'yasmin', gender: 'men', areaM2: 2600, capacity: 130,
     addressEn: 'Al Yasmin, Riyadh', addressAr: 'الياسمين، الرياض', openedEn: '2021', openedAr: '2021' },
-  { id: 'bfit-nada-women', code: 'BFT-NDA-W', brand: 'bfit', district: 'nada', gender: 'women', areaM2: 1900, capacity: 95,
-    addressEn: 'An Nada, Riyadh', addressAr: 'الندى، الرياض', openedEn: '2022', openedAr: '2022' },
   { id: 'bfit-nada-men', code: 'BFT-NDA-M', brand: 'bfit', district: 'nada', gender: 'men', areaM2: 2300, capacity: 115,
     addressEn: 'An Nada, Riyadh', addressAr: 'الندى، الرياض', openedEn: '2022', openedAr: '2022' },
-  { id: 'bfit-townsquare-women', code: 'BFT-TSQ-W', brand: 'bfit', district: 'townsquare', gender: 'women', areaM2: 2000, capacity: 100,
-    addressEn: 'Town Square, Jeddah', addressAr: 'تاون سكوير، جدة', openedEn: '2022', openedAr: '2022' },
   { id: 'bfit-hira-men', code: 'BFT-HRA-M', brand: 'bfit', district: 'hira', gender: 'men', areaM2: 2500, capacity: 125,
-    addressEn: 'Hira St, Jeddah', addressAr: 'شارع حراء، جدة', openedEn: '2021', openedAr: '2021' },
-  { id: 'bfit-hira-women', code: 'BFT-HRA-W', brand: 'bfit', district: 'hira', gender: 'women', areaM2: 1900, capacity: 95,
     addressEn: 'Hira St, Jeddah', addressAr: 'شارع حراء، جدة', openedEn: '2021', openedAr: '2021' },
 ];
 
 /** Pins of two clubs in one district are spread about 200 m apart so both markers stay clickable. */
 const SPREAD: Record<string, [number, number]> = {
-  'bfit-rayyan-women': [0.0011, -0.0012], 'bfit-rayyan-men': [-0.0011, 0.0012],
-  'bfit-nada-women': [0.0011, -0.0012], 'bfit-nada-men': [-0.0011, 0.0012],
-  'bfit-hira-men': [0.0011, -0.0012], 'bfit-hira-women': [-0.0011, 0.0012],
 };
 
 const DISTRICT_BY_ID = Object.fromEntries(DISTRICTS.map((d) => [d.id, d]));
