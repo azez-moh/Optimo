@@ -63,7 +63,7 @@ export const en = {
   info: {
     running: 'Counts the air-conditioning units that report they are on, out of every unit mapped in this building.',
     lit: 'Fittings currently lit, out of every fitting on the mapped lighting switches.',
-    presence: 'People estimated in each area now, from the AI Vision count of people in the club.',
+    presence: 'People estimated in each area now, from the AI Vision count of people in the gym.',
     zones: 'Every area of the building with the worst state of its air-conditioning units and its average reading.',
   },
   col: {
@@ -150,7 +150,7 @@ export const ar: typeof en = {
   info: {
     running: 'عدد وحدات التكييف التي تبلغ أنها تعمل من بين جميع الوحدات المربوطة في هذا المبنى.',
     lit: 'وحدات الإنارة المضاءة الآن من بين جميع الوحدات على مفاتيح الإضاءة المربوطة.',
-    presence: 'العدد التقديري للأشخاص في كل منطقة الآن، من عدّ الرؤية الذكية للأشخاص في النادي.',
+    presence: 'العدد التقديري للأشخاص في كل منطقة الآن، من عدّ الرؤية الذكية للأشخاص في الصالة الرياضية.',
     zones: 'جميع مناطق المبنى مع أسوأ حالة لوحدات التكييف فيها ومتوسط قراءتها.',
   },
   col: {

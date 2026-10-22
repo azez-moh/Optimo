@@ -20,9 +20,9 @@ export const en = {
   expandRow: 'Show today\'s usage for {name}',
   expandType: 'Show the machines of type {name}',
   kpi: {
-    machines: 'Machines tracked', machinesInfo: 'Enabled machines at this club that the cameras watch.',
+    machines: 'Machines tracked', machinesInfo: 'Enabled machines at this gym that the cameras watch.',
     inUse: 'In use now', inUseInfo: 'Machines whose zones see use at this moment. The same number shows in Reports and on the Live Floor.',
-    sessions: 'Sessions today', sessionsInfo: 'Separate uses counted since the club opened today, all machines together.',
+    sessions: 'Sessions today', sessionsInfo: 'Separate uses counted since the gym opened today, all machines together.',
     util: 'Utilisation today', utilInfo: 'Used time divided by used plus idle time during opening hours today, all machines together.',
     ofMachines: 'of {n} machines',
     inOpen: 'since opening',
@@ -71,7 +71,7 @@ export const en = {
     'preacher-curl': 'Seated preacher curl',
     'standing-preacher': 'Standing preacher curl',
   },
-  empty: 'No machines are linked to cameras at this club yet.',
+  empty: 'No machines are linked to cameras at this gym yet.',
 };
 
 export const ar: typeof en = {
@@ -94,9 +94,9 @@ export const ar: typeof en = {
   expandRow: 'عرض استخدام اليوم لـ {name}',
   expandType: 'عرض أجهزة نوع {name}',
   kpi: {
-    machines: 'الأجهزة المرصودة', machinesInfo: 'الأجهزة المفعلة في هذا النادي التي تراقبها الكاميرات.',
+    machines: 'الأجهزة المرصودة', machinesInfo: 'الأجهزة المفعلة في هذه الصالة الرياضية التي تراقبها الكاميرات.',
     inUse: 'قيد الاستخدام الآن', inUseInfo: 'الأجهزة التي ترصد مناطقها استخدامًا في هذه اللحظة. يظهر الرقم نفسه في التقارير وعلى المخطط الحي.',
-    sessions: 'جلسات اليوم', sessionsInfo: 'مرات الاستخدام المنفصلة منذ فتح النادي اليوم، لكل الأجهزة معًا.',
+    sessions: 'جلسات اليوم', sessionsInfo: 'مرات الاستخدام المنفصلة منذ فتح الصالة الرياضية اليوم، لكل الأجهزة معًا.',
     util: 'نسبة الاستخدام اليوم', utilInfo: 'وقت الاستخدام مقسومًا على وقت الاستخدام والخمول خلال ساعات العمل اليوم، لكل الأجهزة معًا.',
     ofMachines: 'من {n} جهازًا',
     inOpen: 'منذ الافتتاح',
@@ -145,5 +145,5 @@ export const ar: typeof en = {
     'preacher-curl': 'ثني الذراع جلوسًا',
     'standing-preacher': 'ثني الذراع وقوفًا',
   },
-  empty: 'لا توجد أجهزة مرتبطة بالكاميرات في هذا النادي بعد.',
+  empty: 'لا توجد أجهزة مرتبطة بالكاميرات في هذه الصالة الرياضية بعد.',
 };

@@ -23,7 +23,7 @@ export const en = {
   removed: '{name} removed.',
   kpi: {
     cameras: 'Cameras',
-    camerasInfo: 'Cameras registered for this club, including test cameras.',
+    camerasInfo: 'Cameras registered for this gym, including test cameras.',
     online: 'Online',
     onlineInfo: 'Cameras sending a picture right now.',
     zones: 'Zones',
@@ -57,7 +57,7 @@ export const ar: typeof en = {
   removed: 'تم حذف {name}.',
   kpi: {
     cameras: 'الكاميرات',
-    camerasInfo: 'الكاميرات المسجلة لهذا النادي، ومنها كاميرات الاختبار.',
+    camerasInfo: 'الكاميرات المسجلة لهذه الصالة الرياضية، ومنها كاميرات الاختبار.',
     online: 'متصلة',
     onlineInfo: 'الكاميرات التي ترسل صورة الآن.',
     zones: 'المناطق',

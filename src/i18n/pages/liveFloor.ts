@@ -10,7 +10,7 @@ export const en = {
     inUseOf: 'of {n} machines',
     inUseInfo: 'Machines a person is using at this moment, from the camera zones that watch each machine. Updated every 10 seconds.',
     sessions: 'Sessions today',
-    sessionsInfo: 'Number of separate uses of the machines on this floor since the club opened today. A session starts when the zones see motion and ends after 15 seconds without it.',
+    sessionsInfo: 'Number of separate uses of the machines on this floor since the gym opened today. A session starts when the zones see motion and ends after 15 seconds without it.',
     used: 'Time in use today',
     usedInfo: 'Total time the machines on this floor were in use today, added across all machines.',
     util: 'Machine use today',
@@ -67,7 +67,7 @@ export const en = {
     backLive: 'Back to live',
     at: 'Showing {time}',
     slider: 'Time of day to show',
-    closed: 'The club is closed, nothing to replay yet.',
+    closed: 'The gym is closed, nothing to replay yet.',
   },
   panel: {
     machines: 'Machines',
@@ -92,7 +92,7 @@ export const en = {
     used: 'Time in use',
     usedInfo: 'Total time this machine was in use, added across its sessions.',
     util: 'Utilisation',
-    utilInfo: 'Time in use divided by the time the club was open in the period.',
+    utilInfo: 'Time in use divided by the time the gym was open in the period.',
     avg: 'Average session',
     avgInfo: 'Time in use divided by the number of sessions.',
     hourly: 'Use by hour today',
@@ -110,7 +110,7 @@ export const en = {
   alert: {
     out: 'Marked out of service',
     camOffline: 'Its camera is offline, so use is not being counted',
-    idleLong: 'Not used for {d} while the club is open',
+    idleLong: 'Not used for {d} while the gym is open',
     lowWeek: 'Used less than 2% of the time over the last 4 weeks',
   },
   edit: {
@@ -163,10 +163,10 @@ export const en = {
     location: 'Location',
   },
   empty: {
-    title: 'No floor plan for this club yet',
-    body: 'The 3D floor is set up for Optimo Al Malqa (Men). Other clubs show their floor once their machines are placed.',
-    many: 'Choose one club to see its floor',
-    manyBody: 'The floor belongs to one club. Pick the club to open.',
+    title: 'No floor plan for this gym yet',
+    body: 'The 3D floor is set up for Optimo Al Malqa (Men). Other gyms show their floor once their machines are placed.',
+    many: 'Choose one gym to see its floor',
+    manyBody: 'The floor belongs to one gym. Pick the gym to open.',
     open: 'Open {name}',
   },
 };
@@ -174,7 +174,7 @@ export const en = {
 export const ar: typeof en = {
   title: 'الصالة المباشرة',
   eyebrow: '{club}',
-  canvasAria: 'صالة النادي ثلاثية الأبعاد فيها {n} جهازًا ملونة حسب الحالة',
+  canvasAria: 'مخطط الصالة الرياضية ثلاثي الأبعاد وفيه {n} جهازًا ملونة حسب الحالة',
   loading: 'جار تحميل الصالة ثلاثية الأبعاد',
   noWebgl: 'لا يمكن عرض الصالة ثلاثية الأبعاد في هذا المتصفح.',
   kpi: {
@@ -182,7 +182,7 @@ export const ar: typeof en = {
     inUseOf: 'من {n} جهازًا',
     inUseInfo: 'الأجهزة التي يستخدمها شخص في هذه اللحظة، حسب مناطق الكاميرا التي تراقب كل جهاز. تتحدث كل 10 ثوانٍ.',
     sessions: 'جلسات اليوم',
-    sessionsInfo: 'عدد مرات الاستخدام المنفصلة لأجهزة هذه الصالة منذ افتتاح النادي اليوم. تبدأ الجلسة عند رصد حركة في المناطق وتنتهي بعد 15 ثانية دون حركة.',
+    sessionsInfo: 'عدد مرات الاستخدام المنفصلة لأجهزة هذه الصالة منذ افتتاح الصالة الرياضية اليوم. تبدأ الجلسة عند رصد حركة في المناطق وتنتهي بعد 15 ثانية دون حركة.',
     used: 'مدة الاستخدام اليوم',
     usedInfo: 'إجمالي مدة استخدام أجهزة هذه الصالة اليوم، مجموعة لكل الأجهزة.',
     util: 'استخدام الأجهزة اليوم',
@@ -239,7 +239,7 @@ export const ar: typeof en = {
     backLive: 'العودة إلى المباشر',
     at: 'العرض عند {time}',
     slider: 'وقت اليوم المعروض',
-    closed: 'النادي مغلق، ولا يوجد ما يعاد عرضه بعد.',
+    closed: 'الصالة الرياضية مغلقة، ولا يوجد ما يعاد عرضه بعد.',
   },
   panel: {
     machines: 'الأجهزة',
@@ -264,7 +264,7 @@ export const ar: typeof en = {
     used: 'مدة الاستخدام',
     usedInfo: 'إجمالي مدة استخدام هذا الجهاز، مجموعة لكل جلساته.',
     util: 'نسبة الاستخدام',
-    utilInfo: 'مدة الاستخدام مقسومة على مدة فتح النادي في الفترة.',
+    utilInfo: 'مدة الاستخدام مقسومة على مدة فتح الصالة الرياضية في الفترة.',
     avg: 'متوسط الجلسة',
     avgInfo: 'مدة الاستخدام مقسومة على عدد الجلسات.',
     hourly: 'الاستخدام حسب الساعة اليوم',
@@ -282,7 +282,7 @@ export const ar: typeof en = {
   alert: {
     out: 'محدد كخارج الخدمة',
     camOffline: 'كاميرته غير متصلة، لذلك لا يحتسب الاستخدام',
-    idleLong: 'لم يستخدم منذ {d} والنادي مفتوح',
+    idleLong: 'لم يستخدم منذ {d} والصالة الرياضية مفتوحة',
     lowWeek: 'استخدم أقل من 2% من الوقت خلال آخر 4 أسابيع',
   },
   edit: {
@@ -335,10 +335,10 @@ export const ar: typeof en = {
     location: 'الموقع',
   },
   empty: {
-    title: 'لا يوجد مخطط صالة لهذا النادي بعد',
-    body: 'الصالة ثلاثية الأبعاد معدة لنادي أوبتيمو الملقا (رجال). تظهر صالات الأندية الأخرى بعد توزيع أجهزتها.',
-    many: 'اختر ناديًا واحدًا لعرض صالته',
-    manyBody: 'الصالة تخص ناديًا واحدًا. اختر النادي لفتحه.',
+    title: 'لا يوجد مخطط أرضية لهذه الصالة الرياضية بعد',
+    body: 'المخطط ثلاثي الأبعاد معد لصالة أوبتيمو الملقا الرياضية (رجال). تظهر مخططات الصالات الرياضية الأخرى بعد توزيع أجهزتها.',
+    many: 'اختر صالة رياضية واحدة لعرض مخططها',
+    manyBody: 'المخطط يخص صالة رياضية واحدة. اختر الصالة الرياضية لفتحها.',
     open: 'فتح {name}',
   },
 };

@@ -100,7 +100,10 @@ export interface I18n {
   fmtCurrency: (sar: number, decimals?: number) => string;
   /** Energy with unit: "1,840 kWh", or "52.3 MWh" when >= 10,000 kWh. Arabic "كيلوواط ساعة" / "ميغاواط ساعة". */
   fmtEnergy: (kwh: number) => string;
-  /** "12 clubs" / "12 ناديًا" with Arabic number agreement. */
+  /**
+   * Gym count: "1 gym", "6 gyms" / Arabic with number agreement: "صالة رياضية واحدة", "صالتان رياضيتان",
+   * "3 صالات رياضية" (3 to 10), "11 صالة رياضية" (11 and above). Name kept for existing callers.
+   */
   fmtClubs: (n: number) => string;
   /** Kept for Dunkin-ported code: same as fmtClubs. */
   fmtBranches: (n: number) => string;
@@ -187,6 +190,11 @@ export function I18nProvider({ children }: { children: ReactNode }) {
       const n = Math.floor(s / 86400);
       return lang === 'ar' ? `${n} ${n <= 10 ? 'أيام' : 'يومًا'}` : `${n} ${u.d}`;
     };
+    /** Gym count, EN "1 gym" / "6 gyms"; AR 1, 2, 3 to 10 and 11+ forms of "صالة رياضية". */
+    const fmtGyms = (n: number) => {
+      const k = n === 1 ? 'One' : n === 2 ? 'Two' : n >= 3 && n <= 10 ? 'Few' : '';
+      return translate(lang, `scope.clubsCount${k}`, { n: fmtNumber(n) });
+    };
     const fmtAgo = (sec: number) => (lang === 'ar' ? `منذ ${fmtAge(sec)}` : `${fmtAge(sec)} ago`);
     const timeFmt = new Intl.DateTimeFormat(loc, { hour: 'numeric', minute: '2-digit', hour12: true });
     return {
@@ -220,14 +228,8 @@ export function I18nProvider({ children }: { children: ReactNode }) {
       minUnit: u.m,
       fmtAgo,
       fmtAge,
-      fmtClubs: (n) => {
-        const k = n === 1 ? 'One' : n === 2 ? 'Two' : n >= 3 && n <= 10 ? 'Few' : '';
-        return translate(lang, `scope.clubsCount${k}`, { n: fmtNumber(n) });
-      },
-      fmtBranches: (n) => {
-        const k = n === 1 ? 'One' : n === 2 ? 'Two' : n >= 3 && n <= 10 ? 'Few' : '';
-        return translate(lang, `scope.clubsCount${k}`, { n: fmtNumber(n) });
-      },
+      fmtClubs: (n) => fmtGyms(n),
+      fmtBranches: (n) => fmtGyms(n),
       fmtEnergy: (kwh) => {
         if (!Number.isFinite(kwh)) return '–';
         if (Math.abs(kwh) >= 10000) return `${fmtNumber(kwh / 1000, 1)} ${lang === 'ar' ? 'ميغاواط ساعة' : 'MWh'}`;

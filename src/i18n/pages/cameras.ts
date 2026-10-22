@@ -157,7 +157,7 @@ export const ar: typeof en = {
     editTitle: 'تعديل الكاميرا',
     nameEn: 'الاسم بالإنجليزية',
     nameAr: 'الاسم بالعربية',
-    area: 'منطقة النادي',
+    area: 'منطقة الصالة الرياضية',
     feed: 'نوع البث',
     rtsp: 'RTSP',
     mjpeg: 'MJPEG',
