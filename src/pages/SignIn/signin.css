@@ -1,0 +1,63 @@
+.signin {
+  min-height: 100vh; min-height: 100dvh; display: flex; flex-direction: column; align-items: center; padding: var(--sp-6) var(--sp-4);
+  background: var(--bg); color: var(--text); position: relative;
+}
+.signin::before {
+  content: ''; position: absolute; inset: 0; pointer-events: none;
+  background-image: linear-gradient(to right, var(--border) 1px, transparent 1px);
+  background-size: calc(100% / 6) 100%; opacity: 0.6;
+}
+.signin__lang {
+  position: absolute; z-index: 1; inset-block-start: var(--sp-4); inset-inline-end: var(--sp-4); display: inline-flex; align-items: center; gap: 6px;
+  height: 34px; padding: 0 12px; border: 1px solid var(--border-strong); background: var(--bg); color: var(--text); font-size: var(--fs-sm);
+}
+.signin__lang:hover { border-color: var(--hairline-strong); }
+.signin__lang svg { width: 15px; height: 15px; color: var(--text-muted); }
+.signin__main { position: relative; z-index: 1; flex: 1; width: 100%; display: flex; align-items: center; justify-content: center; padding-block: var(--sp-10); }
+.signin__card {
+  width: 100%; max-width: 520px; background: var(--surface); border: 1px solid var(--border-strong);
+  padding: var(--sp-10) var(--sp-8) var(--sp-8); display: flex; flex-direction: column; gap: var(--sp-5);
+}
+.signin__logo { display: flex; justify-content: center; margin-block-end: var(--sp-2); }
+.signin__title { margin: 0; text-align: center; font-family: var(--font-display); font-weight: 400; font-size: var(--fs-3xl); line-height: 1.1; }
+.signin__lead { margin: calc(-1 * var(--sp-3)) 0 var(--sp-2); text-align: center; color: var(--text-muted); }
+.signin__field { display: flex; flex-direction: column; gap: 8px; }
+.signin__label { font-size: var(--label-size); letter-spacing: var(--label-tracking); text-transform: uppercase; color: var(--text-muted); }
+:root[lang='ar'] .signin__label { text-transform: none; font-size: var(--fs-sm); }
+.signin__input { height: 44px; padding: 0 14px; border: 1px solid var(--border-strong); background: var(--bg); color: var(--text); font-size: var(--fs-md); text-align: start; }
+:root[dir='rtl'] .signin__input { text-align: right; }
+.signin__input:focus-visible { box-shadow: var(--focus-ring); }
+.signin__submit { height: 46px; width: 100%; font-size: var(--fs-md); }
+.signin__submit svg { width: 18px; height: 18px; }
+:root[dir='rtl'] .signin__submit svg { transform: scaleX(-1); }
+.signin__foot { position: relative; z-index: 1; font-size: var(--fs-xs); color: var(--text-faint); }
+
+.rolepick { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--sp-2); }
+.rolepick__opt {
+  position: relative; display: flex; flex-direction: column; align-items: flex-start; gap: 12px; padding: 16px; min-height: 140px;
+  border: 1px solid var(--border-strong); background: transparent; color: var(--text); text-align: start;
+  transition: border-color 0.2s var(--ease), background 0.2s var(--ease);
+}
+.rolepick__opt:hover { border-color: var(--hairline-strong); }
+.rolepick__opt.is-on { border-color: var(--primary); background: var(--primary-soft); }
+:root[data-theme='light'] .rolepick__opt.is-on { border-color: var(--text); }
+.rolepick__icon { width: 36px; height: 36px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--border-strong); color: var(--text-muted); }
+.rolepick__opt.is-on .rolepick__icon { background: var(--primary); border-color: var(--primary); color: var(--primary-contrast); }
+.rolepick__icon svg { width: 18px; height: 18px; }
+.rolepick__text { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.rolepick__name { font-size: var(--fs-md); line-height: 1.25; }
+.rolepick__scope { font-size: var(--fs-xs); color: var(--primary-text); }
+.rolepick__desc { font-size: var(--fs-xs); color: var(--text-muted); line-height: 1.45; }
+.rolepick__check { position: absolute; inset-block-start: 12px; inset-inline-end: 12px; width: 18px; height: 18px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--border-strong); }
+.rolepick__opt.is-on .rolepick__check { background: var(--primary); border-color: var(--primary); color: var(--primary-contrast); }
+.rolepick__check svg { width: 12px; height: 12px; }
+
+@media (max-width: 480px) {
+  .signin__card { padding: var(--sp-8) var(--sp-5) var(--sp-6); }
+  .signin__main { padding-block: var(--sp-12) var(--sp-6); align-items: flex-start; }
+  .rolepick { grid-template-columns: minmax(0, 1fr); }
+  .rolepick__opt { flex-direction: row; align-items: center; min-height: 0; padding: 12px 44px 12px 12px; gap: 12px; }
+  [dir='rtl'] .rolepick__opt { padding: 12px 12px 12px 44px; }
+  .rolepick__check { inset-block-start: 50%; transform: translateY(-50%); }
+  .rolepick__icon { flex-shrink: 0; }
+}

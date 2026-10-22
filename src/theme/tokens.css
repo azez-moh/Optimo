@@ -1,0 +1,202 @@
+/*
+  OPTIMO Operations Centre · design tokens
+  Brand (optimo.com.sa): near-black #020C0A, white, electric yellow #FCEA10 as the only brand accent.
+  Square corners (radius 0 everywhere), 1px hairlines, no drop shadows on cards.
+  Status colours are separate from the brand: muted red (critical), amber (warning), green (ok).
+  Yellow is never used for alerts. Dark is the default theme (the brand's native look).
+  Token names mirror the Dunkin kit so components port 1:1; chart values are mirrored in chartTokens.ts.
+*/
+
+:root,
+:root[data-theme='dark'],
+.theme-scope[data-theme='dark'] {
+  color-scheme: dark;
+
+  --brand-ink: #020c0a;
+  --brand-yellow: #fcea10;
+  --brand-white: #ffffff;
+
+  --bg: #020c0a;
+  --surface: #0b1513;
+  --surface-2: #111c1a;
+  --surface-3: #1a2624;
+  --surface-sunken: #050f0d;
+  --border: rgba(255, 255, 255, 0.1);
+  --border-strong: rgba(255, 255, 255, 0.24);
+  --hairline-strong: #ffffff;
+
+  --text: #ffffff;
+  --text-muted: rgba(255, 255, 255, 0.72);
+  --text-faint: rgba(255, 255, 255, 0.48);
+
+  /* Brand roles: yellow fills, ink text on it */
+  --primary: #fcea10;
+  --primary-hover: #fff35c;
+  --primary-contrast: #020c0a;
+  --primary-text: #fcea10;
+  --primary-soft: rgba(252, 234, 16, 0.1);
+  --primary-line: rgba(252, 234, 16, 0.3);
+  --logo-fill: #fcea0f;
+
+  /* Status (always paired with an icon or label) */
+  --success: #3d9a6a;
+  --success-fg: #6fc897;
+  --success-bg: rgba(61, 154, 106, 0.14);
+  --warning: #d9962b;
+  --warning-fg: #f0b85c;
+  --warning-bg: rgba(217, 150, 43, 0.14);
+  --danger: #c2453d;
+  --danger-fg: #ef8a82;
+  --danger-bg: rgba(194, 69, 61, 0.16);
+  --info: #7f9c98;
+  --info-fg: #b5c9c6;
+  --info-bg: rgba(127, 156, 152, 0.14);
+  --neutral-fg: rgba(255, 255, 255, 0.72);
+  --neutral-bg: rgba(255, 255, 255, 0.06);
+
+  /* Chart: yellow is the one highlight series, the rest are white and grey steps */
+  --chart-1: #fcea10;
+  --chart-2: #e6e9e8;
+  --chart-3: #8f9a97;
+  --chart-4: #55625f;
+  --chart-5: #4fa39c;
+  --chart-6: #9a8fd1;
+  --chart-grid: rgba(255, 255, 255, 0.07);
+  --chart-axis: rgba(255, 255, 255, 0.5);
+  --chart-baseline: rgba(255, 255, 255, 0.22);
+  --seq-0: #111c1a;
+  --seq-1: #26301f;
+  --seq-2: #3d4520;
+  --seq-3: #5a5f1d;
+  --seq-4: #7d7d18;
+  --seq-5: #a7a214;
+  --seq-6: #d2c711;
+  --seq-7: #fcea10;
+
+  --shadow-1: none;
+  --shadow-2: 0 12px 32px -12px rgba(0, 0, 0, 0.7);
+  --shadow-3: 0 28px 70px -20px rgba(0, 0, 0, 0.85);
+  --focus-ring: 0 0 0 2px var(--bg), 0 0 0 3px #fcea10;
+  --overlay: rgba(1, 6, 5, 0.72);
+}
+
+:root[data-theme='light'],
+.theme-scope[data-theme='light'] {
+  color-scheme: light;
+
+  --bg: #f4f4f2;
+  --surface: #ffffff;
+  --surface-2: #f0f0ee;
+  --surface-3: #e9e9e9;
+  --surface-sunken: #ebebe8;
+  --border: rgba(2, 12, 10, 0.12);
+  --border-strong: rgba(2, 12, 10, 0.3);
+  --hairline-strong: #020c0a;
+
+  --text: #020c0a;
+  --text-muted: #363636;
+  --text-faint: #6b6f6e;
+
+  --primary: #fcea10;
+  --primary-hover: #f2df00;
+  --primary-contrast: #020c0a;
+  --primary-text: #7a6f00;
+  --primary-soft: rgba(252, 234, 16, 0.22);
+  --primary-line: rgba(122, 111, 0, 0.35);
+  --logo-fill: #020c0a;
+
+  --success: #2f7d55;
+  --success-fg: #22603f;
+  --success-bg: #e3f1e9;
+  --warning: #b9781a;
+  --warning-fg: #7d4f0c;
+  --warning-bg: #fbefd9;
+  --danger: #b23a32;
+  --danger-fg: #922c25;
+  --danger-bg: #f8e4e2;
+  --info: #4f6f6b;
+  --info-fg: #3b5753;
+  --info-bg: #e6eeed;
+  --neutral-fg: #363636;
+  --neutral-bg: #ececea;
+
+  --chart-1: #b5a500;
+  --chart-2: #020c0a;
+  --chart-3: #6b7270;
+  --chart-4: #aab0ae;
+  --chart-5: #2f7e79;
+  --chart-6: #6e5bb0;
+  --chart-grid: #ececea;
+  --chart-axis: #6b6f6e;
+  --chart-baseline: #c9cbc9;
+  --seq-0: #f0f0ee;
+  --seq-1: #f7f3c4;
+  --seq-2: #f6ec8a;
+  --seq-3: #f2e14a;
+  --seq-4: #e0cd12;
+  --seq-5: #b5a500;
+  --seq-6: #7a6f00;
+  --seq-7: #3f3a00;
+
+  --shadow-1: none;
+  --shadow-2: 0 12px 32px -14px rgba(2, 12, 10, 0.25);
+  --shadow-3: 0 28px 70px -24px rgba(2, 12, 10, 0.35);
+  --focus-ring: 0 0 0 2px var(--bg), 0 0 0 3px #020c0a;
+  --overlay: rgba(2, 12, 10, 0.4);
+}
+
+/* Typography, radii, spacing */
+:root {
+  --font-display: 'Bodoni Moda', 'GFS Didot', Didot, Georgia, serif;
+  --font-body: 'Questrial', 'Jost', 'Century Gothic', system-ui, sans-serif;
+  --font-num: 'Questrial', system-ui, sans-serif;
+  --font-mono: ui-monospace, 'SFMono-Regular', Menlo, monospace;
+
+  --fs-xs: 0.75rem;   /* 12 */
+  --fs-sm: 0.8125rem; /* 13 */
+  --fs-md: 0.9375rem; /* 15 */
+  --fs-lg: 1.125rem;  /* 18 */
+  --fs-xl: 1.375rem;  /* 22 */
+  --fs-2xl: 1.75rem;  /* 28 */
+  --fs-3xl: 2.25rem;  /* 36 */
+  --lh-tight: 1.15;
+  --lh-body: 1.5;
+  --fw-display: 400;
+
+  /* Square corners everywhere (brand). Kept as tokens so the kit can reference them. */
+  --r-xs: 0;
+  --r-sm: 0;
+  --r-md: 0;
+  --r-card: 0;
+  --r-lg: 0;
+  --r-pill: 0;
+
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 20px;
+  --sp-6: 24px;
+  --sp-8: 32px;
+  --sp-10: 40px;
+  --sp-12: 48px;
+
+  --gutter: 16px;
+  --content-max: 1440px;
+  --topbar-h: 60px;
+  --sidebar-w: 248px;
+  --ease: cubic-bezier(0.6, 0.04, 0.12, 0.96);
+  --label-size: 11px;
+  --label-tracking: 0.06em;
+}
+
+@media (min-width: 768px) { :root { --gutter: 24px; } }
+@media (min-width: 1200px) { :root { --gutter: 32px; } }
+
+:root[lang='ar'] {
+  --font-display: 'Tajawal', system-ui, sans-serif;
+  --font-body: 'Tajawal', 'Questrial', system-ui, sans-serif;
+  --font-num: 'Questrial', 'Tajawal', system-ui, sans-serif;
+  --lh-body: 1.6;
+  --label-tracking: 0;
+}
