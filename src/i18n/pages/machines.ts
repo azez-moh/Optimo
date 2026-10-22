@@ -36,6 +36,8 @@ export const en = {
     rare: 'Rarely used machines',
     rareInfo: 'The machines with the least used time today. Expand a machine to see its hours or find it on the floor.',
     sessions: '{n} sessions',
+    sessions1: '1 session',
+    sessions2: '2 sessions',
   },
   rename: {
     button: 'Rename {name}',
@@ -110,6 +112,8 @@ export const ar: typeof en = {
     rare: 'أجهزة نادرة الاستخدام',
     rareInfo: 'الأجهزة الأقل وقت استخدام اليوم. افتح الجهاز لرؤية ساعاته أو تحديد موقعه على المخطط.',
     sessions: '{n} جلسات',
+    sessions1: 'جلسة واحدة',
+    sessions2: 'جلستان',
   },
   rename: {
     button: 'إعادة تسمية {name}',

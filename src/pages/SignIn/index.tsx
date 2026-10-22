@@ -10,7 +10,7 @@ import type { Role } from '../../data/types';
 import './signin.css';
 
 /** Prefilled address per role (BUILD-DECISIONS: email only, no password). */
-const ROLE_EMAIL: Record<Role, string> = { coo: 'coo@optimo.demo', admin: 'admin@optimo.demo' };
+const ROLE_EMAIL: Record<Role, string> = { coo: 'coo@optimo.com.sa', admin: 'admin@optimo.com.sa' };
 const PREFILLED = new Set(Object.values(ROLE_EMAIL));
 
 /**

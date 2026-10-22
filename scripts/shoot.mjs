@@ -76,7 +76,7 @@ try {
         await page.evaluate(() => { try { sessionStorage.removeItem('opt.auth'); } catch { /* ignore */ } }).catch(() => {});
       } else {
         await page.goto(`${base}?now=${nowMs}#/signin`, { waitUntil: 'load' });
-        await page.evaluate(([ro]) => sessionStorage.setItem('opt.auth', JSON.stringify({ email: `${ro}@optimo.demo`, name: ro, role: ro })), [role]);
+        await page.evaluate(([ro]) => sessionStorage.setItem('opt.auth', JSON.stringify({ email: `${ro}@optimo.com.sa`, name: ro, role: ro })), [role]);
       }
       // a distinct query string forces a full load, so the session and storage are read fresh
       await page.goto(`${base}?now=${nowMs}&r=${encodeURIComponent(route)}#/${route}`, { waitUntil: 'load' });

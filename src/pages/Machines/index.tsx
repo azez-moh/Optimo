@@ -106,7 +106,7 @@ export default function MachinesPage() {
                       onClick={() => { setTab('machine'); if (!open.has(m.id)) toggle(m.id); window.setTimeout(() => document.getElementById(`mr-row-${m.id}`)?.scrollIntoView({ block: 'center', behavior: 'smooth' }), 50); }}>
                       {pick(m.nameEn, m.nameAr)}
                     </button>
-                    <span className="mr-hl__val num">{t('machines.hl.sessions', { n: fmtNumber(m.live.sessionsToday) })} · {fmtDuration(m.live.usedMinToday * 60)}</span>
+                    <span className="mr-hl__val num">{m.live.sessionsToday === 1 ? t('machines.hl.sessions1') : m.live.sessionsToday === 2 ? t('machines.hl.sessions2') : t('machines.hl.sessions', { n: fmtNumber(m.live.sessionsToday) })} · {fmtDuration(m.live.usedMinToday * 60)}</span>
                   </li>
                 ))}
               </ul>

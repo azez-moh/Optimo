@@ -34,7 +34,7 @@
 .ov-rank__list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
 .ov-rank__row {
   display: grid; align-items: center; gap: 12px;
-  grid-template-columns: 26px minmax(250px, 1.5fr) minmax(120px, 1.6fr) 92px 64px 64px 128px 104px;
+  grid-template-columns: 26px minmax(250px, 1.5fr) minmax(120px, 1.6fr) 92px 64px 64px 128px max-content;
   padding: 8px 0; border-block-start: 1px solid var(--border);
 }
 .ov-rank__row:first-child { border-block-start: 0; }
@@ -50,6 +50,7 @@
 .ov-rank__sub { color: var(--text-faint); font-size: var(--fs-xs); white-space: nowrap; }
 .ov-rank__status { display: flex; justify-content: flex-end; }
 .ov-rank__act { display: flex; justify-content: flex-end; }
+.ov-rank__open { white-space: nowrap; }
 .ov-rank__open svg { width: 14px; height: 14px; }
 .ov-rank__current { font-size: var(--fs-xs); color: var(--text-faint); white-space: nowrap; }
 @keyframes ov-grow { from { transform: scaleX(0); } to { transform: scaleX(1); } }

@@ -8,6 +8,8 @@ export const en = {
   tableInfo: 'One row per machine. Where the cameras send several records for one machine, the latest one is shown.',
   col: { state: 'State', rule: 'Rule', zones: 'Zones' },
   zonesN: '{n} zones',
+  zonesN1: '1 zone',
+  zonesN2: '2 zones',
 };
 
 export const ar: typeof en = {
@@ -19,4 +21,6 @@ export const ar: typeof en = {
   tableInfo: 'صف واحد لكل جهاز. إذا أرسلت الكاميرات عدة سجلات لجهاز واحد يظهر أحدثها.',
   col: { state: 'الحالة', rule: 'القاعدة', zones: 'المناطق' },
   zonesN: '{n} مناطق',
+  zonesN1: 'منطقة واحدة',
+  zonesN2: 'منطقتان',
 };

@@ -88,7 +88,7 @@ export default function ReportsPage() {
                           <td><StatePill state={m.live.state} /></td>
                           <td className="dt--hide-sm mr-muted-cell">{t(`machines.logic.${m.rule}`)}</td>
                           <td className="dt--hide-sm">
-                            <span className="num">{t('reports.zonesN', { n: fmtNumber(m.zoneIds.length) })}</span>
+                            <span className="num">{m.zoneIds.length === 1 ? t('reports.zonesN1') : m.zoneIds.length === 2 ? t('reports.zonesN2') : t('reports.zonesN', { n: fmtNumber(m.zoneIds.length) })}</span>
                             <span className="mr-sub">{camNames.map((c) => pick(c!.nameEn, c!.nameAr)).join(' · ')}</span>
                           </td>
                         </tr>
