@@ -106,7 +106,7 @@ export function describe(i: Insight, x: Tx): Described {
         t('text.retireWhy', { util: num(r.networkUtil) }),
         t('text.retireWhyPeak', { a: num(i.weeksHeld), b: num(i.weeksOf) }),
       ],
-      impact: [t('text.retireImpactSar', { sar: sar(r.resaleSar) }), t('text.retireImpactKeep')],
+      impact: [t('text.retireImpactSar'), t('text.retireImpactKeep')],
     };
   }
   if (i.service) {
