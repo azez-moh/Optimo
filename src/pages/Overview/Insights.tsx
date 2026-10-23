@@ -1,149 +1,21 @@
 /* eslint-disable react-refresh/only-export-components */
-import { useMemo, useState } from 'react';
-import { ArrowLeftRight, BatteryCharging, Check, ClipboardList, PackageMinus, ShoppingCart, Trash2, Users, Wrench, X, type LucideIcon } from 'lucide-react';
+import { useEffect, useId, useMemo, useRef, useState } from 'react';
+import { ArrowLeftRight, BatteryCharging, Check, ChevronDown, ClipboardList, PackageMinus, ShoppingCart, Trash2, Users, Wrench, X, type LucideIcon } from 'lucide-react';
 import { Card, ChipGroup, ConfirmDialog, Drawer, EmptyState, Modal, Segmented, Select } from '../../components';
-import { useI18n, translate, LOCALE, type Lang } from '../../i18n';
-import { useDemo, type Club, type DemoContextValue, type MachineType } from '../../data';
+import { useI18n } from '../../i18n';
+import { brief, describe, makeTx, type Tx } from './describe';
+import { useDemo } from '../../data';
 import type { Insight, InsightKind } from './insights';
 import './insights.css';
 import { DISMISS_REASONS, PLAN_STATUSES, type DismissReason, type Plan } from './plan';
 
-// ---------- formatting in a given language (also used to snapshot both languages into the plan) ----------
-
-export interface Tx {
-  lang: Lang;
-  t: (k: string, v?: Record<string, string | number>) => string;
-  num: (n: number, dp?: number) => string;
-  sar: (v: number) => string;
-  gym: (id: string) => string;
-  types: (type: MachineType, n: number) => string;
-  typeLabel: (type: MachineType) => string;
-  hour: (h: number) => string;
-  slot: (h: number) => string;
-  list: (xs: string[]) => string;
-}
-
-export function makeTx(lang: Lang, clubs: Club[], districts: DemoContextValue['districts']): Tx {
-  const t = (k: string, v?: Record<string, string | number>) => translate(lang, `insights.${k}`, v);
-  const nf = new Map<number, Intl.NumberFormat>();
-  const num = (n: number, dp?: number) => {
-    const k = dp ?? -1;
-    let f = nf.get(k);
-    if (!f) { f = new Intl.NumberFormat(LOCALE[lang], dp == null ? { maximumFractionDigits: 1 } : { minimumFractionDigits: dp, maximumFractionDigits: dp }); nf.set(k, f); }
-    return f.format(n);
-  };
-  const sar = (v: number) => {
-    if (v < 10_000) return lang === 'ar' ? `${num(Math.round(v))} ر.س` : `SAR ${num(Math.round(v))}`;
-    if (v < 1_000_000) return lang === 'ar' ? `${num(v / 1000, 1)} ألف ر.س` : `SAR ${num(v / 1000, 1)}k`;
-    return lang === 'ar' ? `${num(v / 1e6, 2)} مليون ر.س` : `SAR ${num(v / 1e6, 2)}m`;
-  };
-  const dById = new Map(districts.map((d) => [d.id, d]));
-  const gym = (id: string) => {
-    const c = clubs.find((x) => x.id === id);
-    const d = c ? dById.get(c.district) : undefined;
-    return d ? (lang === 'ar' ? d.nameAr : d.nameEn) : id;
-  };
-  const hf = new Intl.DateTimeFormat(LOCALE[lang], { hour: 'numeric', hour12: true, timeZone: 'UTC' });
-  const hour = (h: number) => {
-    const s = hf.format(new Date(Date.UTC(2000, 0, 1, ((h % 24) + 24) % 24)));
-    return lang === 'en' ? s.replace(/\b(am|pm)\b/gi, (m) => m.toUpperCase()) : s;
-  };
-  return {
-    lang, t, num, sar, gym, hour,
-    types: (type, n) => (lang === 'ar' ? t(`type.${type}.many`) : t(`type.${type}.${n === 1 ? 'one' : 'many'}`)),
-    typeLabel: (type) => t(`type.${type}.label`),
-    slot: (h) => t('text.slot', { a: hour(h), b: hour(h + 2) }),
-    list: (xs) => xs.join(t('text.listSep')),
-  };
-}
+export { makeTx, describe, brief } from './describe';
+export type { Tx, Described } from './describe';
 
 export function useTx(): Tx {
   const { lang } = useI18n();
   const { clubs, districts } = useDemo();
   return useMemo(() => makeTx(lang, clubs, districts), [lang, clubs, districts]);
-}
-
-export interface Described { action: string; why: string[]; impact: string[] }
-
-/** Plain-language action, reasons (the numbers) and expected impact of a recommendation. */
-export function describe(i: Insight, x: Tx): Described {
-  const { t, num, sar, gym } = x;
-  if (i.move) {
-    const m = i.move;
-    return {
-      action: t('text.moveAction', { n: num(m.n), types: x.types(i.type!, m.n), from: gym(m.from), to: gym(m.to) }),
-      why: [
-        t('text.moveWhyTo', { gym: gym(m.to), util: num(m.toUtil), s: num(m.toSessionsDay), units: num(m.toUnits), peak: num(Math.round(m.toPeakFull)) }),
-        t('text.moveWhyFrom', { gym: gym(m.from), util: num(m.fromUtil), s: num(m.fromSessionsDay), units: num(m.fromUnits) }),
-      ],
-      impact: [
-        t('text.moveImpactUse', { to: gym(m.to), a: num(m.toUtil), b: num(m.toAfter), from: gym(m.from), c: num(m.fromUtil), d: num(m.fromAfter) }),
-        t('text.moveImpactSar', { n: num(m.n), sar: sar(m.avoidedSar), cost: sar(m.moveCostSar) }),
-      ],
-    };
-  }
-  if (i.buy) {
-    const b = i.buy;
-    const list = x.list(b.perGym.map((g) => t('text.gymN', { gym: gym(g.clubId), n: num(g.n) })));
-    return {
-      action: t('text.buyAction', { n: num(b.total), types: x.types(i.type!, b.total), list }),
-      why: [
-        t('text.buyWhy', { k: num(b.highGyms), m: num(b.ofGyms), peak: num(Math.round(Math.max(...b.perGym.map((g) => g.peakFull)))) }),
-        t('text.buyWhyNoSpare', { types: x.types(i.type!, 2) }),
-      ],
-      impact: [
-        t('text.buyImpactUse', { list: x.list(b.perGym.map((g) => t('text.fromTo', { gym: gym(g.clubId), a: num(g.util), b: num(g.after) }))) }),
-        t('text.buyImpactSar', { sar: sar(b.costSar), price: sar(b.unitPrice) }),
-      ],
-    };
-  }
-  if (i.retire) {
-    const r = i.retire;
-    const list = x.list(r.perGym.map((g) => t('text.gymN', { gym: gym(g.clubId), n: num(g.n) })));
-    return {
-      action: t('text.retireAction', { n: num(r.total), units: num(r.units), types: x.types(i.type!, r.units), list }),
-      why: [
-        t('text.retireWhy', { util: num(r.networkUtil) }),
-        t('text.retireWhyPeak', { a: num(i.weeksHeld), b: num(i.weeksOf) }),
-      ],
-      impact: [t('text.retireImpactSar'), t('text.retireImpactKeep')],
-    };
-  }
-  if (i.service) {
-    const s = i.service;
-    const nm = (m: { nameEn: string; nameAr: string }) => (x.lang === 'ar' ? m.nameAr : m.nameEn);
-    const shown = s.machines.slice(0, 3).map(nm);
-    const names = x.list(s.machines.length > 3 ? [...shown, t('text.more', { n: num(s.machines.length - 3) })] : shown);
-    return {
-      action: s.machines.length === 1 ? t('text.serviceActionOne', { names, gym: gym(s.clubId) }) : t('text.serviceAction', { n: num(s.machines.length), gym: gym(s.clubId), names }),
-      why: s.machines.slice(0, 2).map((m) => t('text.serviceWhy', { name: nm(m), h: num(m.hours), i: num(m.interval) })),
-      impact: [t('text.serviceImpact'), t('text.serviceImpactTime')],
-    };
-  }
-  if (i.energy) {
-    const e = i.energy;
-    const why = [
-      t('text.energyWhy', { gym: gym(e.clubId), kpv: num(e.kwhPerVisit, 2), gap: num(e.gapPct), best: gym(e.bestClubId), bpv: num(e.bestKwhPerVisit, 2) }),
-      t('text.energyWhyAc', { h: num(e.afterHoursAcH) }),
-    ];
-    if (e.emptyZoneH > 0) why.push(t('text.energyWhyStudio', { h: num(e.emptyZoneH) }));
-    return {
-      action: t('text.energyAction', { gym: gym(e.clubId) }),
-      why,
-      impact: [t('text.energyImpact', { kwh: num(e.wasteKwhMonth), sar: sar(e.wasteSarMonth) })],
-    };
-  }
-  const c = i.capacity!;
-  return {
-    action: c.classes === 1
-      ? t('text.capacityActionOne', { gym: gym(c.clubId), slot: x.hour(c.slotH), quiet: x.hour(c.quietH) })
-      : t('text.capacityAction', { n: num(c.classes), gym: gym(c.clubId), slot: x.hour(c.slotH), quiet: x.hour(c.quietH) }),
-    why: [
-      t('text.capacityWhy', { d: num(c.days), of: num(c.ofDays) }),
-      t('text.capacityWhySlots', { slot: x.slot(c.slotH), p: num(c.peakPct), quiet: x.slot(c.quietH), q: num(c.quietPct) }),
-    ],
-    impact: [t('text.capacityImpact', { a: num(c.afterPct) })],
-  };
 }
 
 export const KIND_ICON: Record<InsightKind, LucideIcon> = {
@@ -206,6 +78,65 @@ export function InsightCard({ i, plan, onPlan, onDismiss, onViewPlan, highlight,
   );
 }
 
+/** Recommendation as a compact row (type, brief, key number, confidence); opens to the full details. */
+export function InsightRow({ i, plan, open, onToggle, onPlan, onDismiss, onViewPlan, highlight }: {
+  i: Insight; plan: Plan; open: boolean; onToggle: () => void; onPlan: (i: Insight) => void; onDismiss: (i: Insight) => void; onViewPlan: () => void; highlight?: boolean;
+}) {
+  const { t } = useI18n();
+  const x = useTx();
+  const d = describe(i, x);
+  const b = brief(i, x);
+  const p = plan.planned(i.id);
+  const uid = useId();
+  const panelId = `${uid}-panel`;
+  return (
+    <li className={`in-row ${open ? 'is-open' : ''} ${highlight ? 'is-hl' : ''}`} id={`rec-${i.id.replace(/[^a-z0-9-]/gi, '_')}`} data-kind={i.kind}>
+      <button type="button" className="in-row__head" aria-expanded={open} aria-controls={panelId} onClick={onToggle}>
+        <KindChip kind={i.kind} />
+        <span className="in-row__brief">{b.text}</span>
+        <span className="in-row__key num">{b.key}</span>
+        <span className="in-row__meta">
+          {p && <span className="in-row__planned" title={t('insights.recs.planned')}><Check aria-hidden /><span className="visually-hidden">{t('insights.recs.planned')}</span></span>}
+          <span className={`in-conf in-conf--${i.confidence}`} title={t(`insights.recs.conf.${i.confidence}`)}>
+            <span className="in-conf__dot" aria-hidden />
+            <span className="visually-hidden">{t(`insights.recs.conf.${i.confidence}`)}</span>
+          </span>
+          <ChevronDown aria-hidden className="in-row__chev" />
+        </span>
+      </button>
+      <div className="in-row__panel" id={panelId} role="region" aria-label={b.text}>
+        <div className="in-row__inner">
+          <div className="in-row__body">
+            <p className="in-row__action">{d.action}</p>
+            <dl className="in-card__facts">
+              <dt>{t('insights.recs.why')}</dt>
+              <dd><ul>{d.why.map((w, k) => <li key={k}>{w}</li>)}</ul></dd>
+              <dt>{t('insights.recs.impact')}</dt>
+              <dd><ul className="in-card__impact">{d.impact.map((w, k) => <li key={k}>{w}</li>)}</ul></dd>
+            </dl>
+            <div className="in-card__foot">
+              <Confidence i={i} />
+              <span className="in-row__btns">
+                {p ? (
+                  <>
+                    <span className="in-planned"><Check aria-hidden />{t('insights.recs.planned')} · {t(`insights.plan.st.${p.status}`)}</span>
+                    <button type="button" className="btn btn--sm btn--ghost" onClick={onViewPlan}>{t('insights.recs.viewPlan')}</button>
+                  </>
+                ) : (
+                  <>
+                    <button type="button" className="btn btn--sm in-plan-btn" onClick={() => onPlan(i)}><ClipboardList aria-hidden />{t('insights.recs.plan')}</button>
+                    <button type="button" className="btn btn--sm btn--ghost" onClick={() => onDismiss(i)}><X aria-hidden />{t('insights.recs.dismiss')}</button>
+                  </>
+                )}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </li>
+  );
+}
+
 /** Adds a recommendation to the plan with its text in both languages. */
 export function usePlanAdd(plan: Plan) {
   const data = useDemo();
@@ -247,8 +178,20 @@ export function RecommendedActions({ list, scopeIds, isAll, plan, highlightId, o
   list: Insight[]; scopeIds: string[]; isAll: boolean; plan: Plan; highlightId: string | null; onViewPlan: () => void;
 }) {
   const { t, fmtNumber } = useI18n();
-  const [which, setWhich] = useState<'in' | 'all'>('in');
-  const [showAll, setShowAll] = useState(false);
+  const deep = highlightId ? list.find((i) => i.id === highlightId) : undefined;
+  const [which, setWhich] = useState<'in' | 'all'>(() => (deep && !isAll && !deep.clubIds.some((id) => scopeIds.includes(id)) ? 'all' : 'in'));
+  const [showAll, setShowAll] = useState(() => !!deep && list.filter((i) => !plan.isDismissed(i.id)).indexOf(deep) >= 6);
+  const [openId, setOpenId] = useState<string | null>(deep ? deep.id : null);
+  const listRef = useRef<HTMLUListElement>(null);
+  // deep link ?action=<id>: open that one and bring it into view (once)
+  useEffect(() => {
+    if (!deep) return;
+    setOpenId(deep.id);
+    const id = window.setTimeout(() => {
+      document.getElementById(`rec-${deep.id.replace(/[^a-z0-9-]/gi, '_')}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 80);
+    return () => window.clearTimeout(id);
+  }, [deep]);
   const [showDismissed, setShowDismissed] = useState(false);
   const [dismissing, setDismissing] = useState<Insight | null>(null);
   const addToPlan = usePlanAdd(plan);
@@ -271,12 +214,13 @@ export function RecommendedActions({ list, scopeIds, isAll, plan, highlightId, o
       {visible.length === 0
         ? <EmptyState title={t('insights.recs.none')} body={t('insights.recs.noneBody')} compact />
         : (
-          <div className="in-grid">
+          <ul className="in-rows" ref={listRef}>
             {shown.map((i) => (
-              <InsightCard key={i.id} i={i} plan={plan} highlight={highlightId === i.id} onViewPlan={onViewPlan}
+              <InsightRow key={i.id} i={i} plan={plan} highlight={highlightId === i.id} onViewPlan={onViewPlan}
+                open={openId === i.id} onToggle={() => setOpenId((o) => (o === i.id ? null : i.id))}
                 onPlan={addToPlan} onDismiss={setDismissing} />
             ))}
-          </div>
+          </ul>
         )}
       <div className="in-recs__more">
         {visible.length > 6 && (

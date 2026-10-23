@@ -27,29 +27,39 @@ await page.evaluate(() => localStorage.removeItem('opt.data.v1')); await page.re
 
 let firstAction = '';
 await step('recommended actions: move, buy, retire, service and energy all listed', async () => {
-  const cards = page.locator('.in-recs .in-card');
+  const cards = page.locator('.in-recs .in-row');
   const kinds = new Set(await cards.evaluateAll((els) => els.map((e) => e.dataset.kind)));
   for (const k of ['move', 'buy', 'retire', 'service', 'energy']) if (!kinds.has(k)) throw new Error(`kinds ${[...kinds]}`);
-  results.push(`  -> ${await cards.count()} cards: ${(await cards.locator('.in-card__action').allInnerTexts()).map((x) => x.trim()).join(' | ')}`);
-  firstAction = (await cards.first().locator('.in-card__action').innerText()).trim();
+  results.push(`  -> ${await cards.count()} rows: ${(await cards.locator('.in-row__brief').allInnerTexts()).map((x) => x.trim()).join(' | ')}`);
+  firstAction = (await cards.first().locator('.in-row__action').textContent()).trim();
   results.push(`  -> first: ${firstAction}`);
 });
 await step('Show all lists every recommendation (when more than 6)', async () => {
   const more = page.getByRole('button', { name: /Show all/ });
   if (!(await more.count())) { results.push('  -> 6 or fewer, no Show all'); return; }
   await more.click();
-  const n = await page.locator('.in-recs .in-card').count();
+  const n = await page.locator('.in-recs .in-row').count();
   if (n <= 6) throw new Error(`only ${n}`);
   results.push(`  -> ${n} recommendations`);
   await page.getByRole('button', { name: 'Show fewer' }).click();
 });
+await step('Rows are collapsed; Enter opens one (aria-expanded), opening another closes it', async () => {
+  const heads = page.locator('.in-recs .in-row__head');
+  if ((await heads.evaluateAll((els) => els.filter((e) => e.getAttribute('aria-expanded') === 'true').length)) !== 0) throw new Error('a row starts open');
+  await heads.nth(1).focus(); await page.keyboard.press('Enter'); await page.waitForTimeout(350);
+  if ((await heads.nth(1).getAttribute('aria-expanded')) !== 'true') throw new Error('Enter did not open');
+  await heads.nth(2).click(); await page.waitForTimeout(350);
+  if ((await heads.nth(1).getAttribute('aria-expanded')) !== 'false') throw new Error('first did not close');
+  await heads.nth(2).click(); await page.waitForTimeout(350);
+});
 await step('Plan the first recommendation -> it shows in the Action plan', async () => {
-  await page.locator('.in-recs .in-card').first().getByRole('button', { name: 'Plan it' }).click();
+  await page.locator('.in-recs .in-row__head').first().click(); await page.waitForTimeout(350);
+  await page.locator('.in-recs .in-row').first().getByRole('button', { name: 'Plan it' }).click();
   await page.waitForTimeout(300);
   const row = page.locator('.in-plan__row').first();
   const txt = (await row.locator('.in-plan__action').innerText()).trim();
   if (txt !== firstAction) throw new Error(`plan has "${txt}"`);
-  if (!(await page.locator('.in-recs .in-card').first().getByText('In action plan').isVisible())) throw new Error('card not marked planned');
+  if (!(await page.locator('.in-recs .in-row').first().locator('.in-planned').isVisible())) throw new Error('row not marked planned');
 });
 await step('Action plan status Planned -> In progress persists after reload', async () => {
   await page.locator('.in-plan__row select').first().selectOption('progress');
@@ -59,13 +69,14 @@ await step('Action plan status Planned -> In progress persists after reload', as
   await page.locator('.in-plan').screenshot({ path: `${shots}/action-plan.png` });
 });
 await step('Dismiss with a reason removes the card and lists it under Dismissed', async () => {
-  const card = page.locator('.in-recs .in-card').nth(1);
-  const action = (await card.locator('.in-card__action').innerText()).trim();
+  const card = page.locator('.in-recs .in-row').nth(1);
+  await card.locator('.in-row__head').click(); await page.waitForTimeout(350);
+  const action = (await card.locator('.in-row__action').innerText()).trim();
   await card.getByRole('button', { name: 'Dismiss' }).click();
   const dlg = page.getByRole('dialog'); await dlg.waitFor();
   await dlg.getByRole('radio', { name: 'Not practical' }).click();
   await dlg.getByRole('button', { name: 'Dismiss' }).click(); await page.waitForTimeout(300);
-  const left = await page.locator('.in-recs .in-card__action').allInnerTexts();
+  const left = await page.locator('.in-recs .in-row__action').evaluateAll((els) => els.map((e) => e.textContent));
   if (left.some((x) => x.trim() === action)) throw new Error('still listed');
   await page.getByRole('button', { name: /Dismissed \(1\)/ }).click();
   if (!(await page.getByText('Dismissed: Not practical').isVisible())) throw new Error('reason missing');

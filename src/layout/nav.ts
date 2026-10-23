@@ -1,6 +1,6 @@
 import {
   Activity, AirVent, BarChart3, Bot, Building2, Camera, Cctv, Cpu, Dumbbell, FileBarChart, Gauge, Grid3x3, LayoutDashboard,
-  Library, Lightbulb, ListVideo, PlugZap, Radar, ScanEye, Settings, Settings2, SlidersHorizontal, Store, type LucideIcon,
+  Library, Lightbulb, ListVideo, MessageCircle, PlugZap, Radar, ScanEye, Settings, Settings2, SlidersHorizontal, Store, type LucideIcon,
 } from 'lucide-react';
 
 /**
@@ -20,6 +20,7 @@ export interface PageDef {
 
 export const CHAIN_PAGES: PageDef[] = [
   { id: 'overview', key: 'overview', folder: 'Overview', group: 'chain', icon: LayoutDashboard },
+  { id: 'assistant', key: 'assistant', folder: 'Assistant', group: 'chain', icon: MessageCircle },
   { id: 'branches', key: 'branches', folder: 'Branches', group: 'chain', icon: Store },
 ];
 

@@ -174,7 +174,7 @@ function ChainOverview() {
       )}
 
       {ready && (<>
-      <RecommendedActions list={insights} scopeIds={scopeIds} isAll={isAll} plan={plan} highlightId={null} onViewPlan={viewPlan} />
+      <RecommendedActions list={insights} scopeIds={scopeIds} isAll={isAll} plan={plan} highlightId={params.get('action')} onViewPlan={viewPlan} />
 
       <div ref={planRef} className="ov-anchor"><ActionPlan plan={plan} /></div>
 

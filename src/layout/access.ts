@@ -7,6 +7,7 @@ import { useAuth } from './auth';
   One place for what each role may open. Shell (sidebar), routes (guard) and in-page links all read it.
   COO: every page, the Kingdom map and Settings.
   Facility Manager (fm): one gym (OPTIMO Al Malqa (Men)), a short menu and more building control.
+  Ask OPTIMO (assistant) is open to both; for the Facility Manager it answers about his gym only.
 */
 
 /** The only gym a Facility Manager sees. */
@@ -15,7 +16,7 @@ export const FM_SCOPE: Scope = { level: 'club', clubId: FM_CLUB_ID };
 
 /** Page ids (route path without the slash) open to the Facility Manager. Everything else is COO only. */
 const FM_PAGES = new Set([
-  'overview',
+  'overview', 'assistant',
   'bms-overview', 'hvac', 'lights', 'ai-agents', 'control', 'bms-settings',
   'live-floor', 'machines', 'reports',
 ]);

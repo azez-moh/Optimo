@@ -16,6 +16,7 @@ const en = {
     collapse: 'Collapse group',
     expand: 'Expand group',
     overview: 'Overview',
+    assistant: 'Ask OPTIMO',
     branches: 'Branches',
     settings: 'Settings',
     bmsOverview: 'BMS Overview',
@@ -39,6 +40,7 @@ const en = {
     map: 'Kingdom map',
     about: {
       overview: 'The network or the selected gym at a glance.',
+      assistant: 'Questions about the gyms, answered from the live data.',
       branches: 'Every gym in the network and how each is doing, live.',
       settings: 'Account and system-wide settings.',
       bmsOverview: 'This building in three dimensions.',
