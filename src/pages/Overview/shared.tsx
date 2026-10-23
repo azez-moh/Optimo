@@ -5,7 +5,7 @@ import { Badge } from '../../components';
 import { useI18n, LOCALE } from '../../i18n';
 import { useScope } from '../../layout/filters';
 import { scopeLabel } from '../../layout/scopeLabel';
-import { useDemo, type Brand, type Club, type ClubLive } from '../../data';
+import { useDemo, type Club, type ClubLive } from '../../data';
 import './overview.css';
 
 /** "6 PM" / "6 م" for an hour of the day. */
@@ -68,11 +68,6 @@ export function AsAtLine() {
       {scope.level !== 'club' && (<><span aria-hidden>·</span><span>{i18n.fmtClubs(clubs.length)}</span></>)}
     </p>
   );
-}
-
-export function BrandTag({ brand }: { brand: Brand }) {
-  const { t } = useI18n();
-  return <span className={`ov-brand ov-brand--${brand}`}>{t(`brand.${brand}`)}</span>;
 }
 
 export function ClubStatus({ status }: { status: ClubLive['status'] }) {

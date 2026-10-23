@@ -100,11 +100,6 @@ const en = {
   },
   region: {
     riyadh: 'Riyadh',
-    makkah: 'Makkah',
-  },
-  brand: {
-    optimo: 'OPTIMO',
-    bfit: 'B_FIT',
   },
   gender: {
     men: 'Men',

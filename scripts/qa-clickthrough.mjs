@@ -21,7 +21,7 @@ await step('sign in as COO lands on map', async () => {
 await step('map: All branches row opens overview', async () => {
   await page.locator('.mapall').click(); await page.waitForTimeout(800);
   if (!(await hash()).includes('/overview')) throw new Error(`at ${await hash()}`);
-  await page.locator('.ov-asat', { hasText: '6 gyms' }).waitFor({ timeout: 4000 });
+  await page.locator('.ov-asat', { hasText: '2 gyms' }).waitFor({ timeout: 4000 });
 });
 await step('map: Riyadh -> district -> fact card -> Open gym', async () => {
   await page.goto(`${base}#/map`); await page.waitForTimeout(800);

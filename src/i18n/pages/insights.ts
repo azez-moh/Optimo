@@ -117,7 +117,7 @@ export const en = {
   },
   cmp: {
     title: 'Gym comparison',
-    info: 'All 6 gyms side by side. Machine use and sessions over the last 4 complete weeks (same sessions as the Usage Report); energy per visit and kWh per m² over the same 4 weeks at {tariff} per kWh; people, alarms and machines out of service are live. Best and worst are marked where higher or lower is clearly better. Click a column to sort.',
+    info: 'Every gym side by side. Machine use and sessions over the last 4 complete weeks (same sessions as the Usage Report); energy per visit and kWh per m² over the same 4 weeks at {tariff} per kWh; people, alarms and machines out of service are live. Best and worst are marked where higher or lower is clearly better. Click a column to sort.',
     gym: 'Gym',
     people: 'People in',
     peopleInfo: 'People inside, live, and share of the gym capacity.',
@@ -178,7 +178,7 @@ export const en = {
   },
   thisGym: {
     title: 'This gym',
-    info: 'Where this gym stands among the 6 gyms on the comparison measures, and its open recommendations. The comparison below always shows every gym.',
+    info: 'Where this gym stands among the gyms on the comparison measures, and its open recommendations. The comparison below always shows every gym.',
     rank: 'Rank {r} of {n}',
     machine: 'Machine use',
     energy: 'Energy per visit',
@@ -306,7 +306,7 @@ export const ar: typeof en = {
   },
   cmp: {
     title: 'مقارنة الصالات الرياضية',
-    info: 'الصالات الرياضية الست جنبًا إلى جنب. استخدام الأجهزة والجلسات خلال آخر 4 أسابيع مكتملة (الجلسات نفسها في تقرير الاستخدام)، والطاقة لكل زيارة ولكل متر مربع خلال الأسابيع الأربعة نفسها بتعرفة {tariff} لكل كيلوواط ساعة، أما الحضور والتنبيهات والأجهزة خارج الخدمة فمباشرة. يظهر الأفضل والأسوأ حيث يكون الاتجاه واضحًا. اضغط على العمود للترتيب.',
+    info: 'كل الصالات الرياضية جنبًا إلى جنب. استخدام الأجهزة والجلسات خلال آخر 4 أسابيع مكتملة (الجلسات نفسها في تقرير الاستخدام)، والطاقة لكل زيارة ولكل متر مربع خلال الأسابيع الأربعة نفسها بتعرفة {tariff} لكل كيلوواط ساعة، أما الحضور والتنبيهات والأجهزة خارج الخدمة فمباشرة. يظهر الأفضل والأسوأ حيث يكون الاتجاه واضحًا. اضغط على العمود للترتيب.',
     gym: 'الصالة الرياضية',
     people: 'الحضور',
     peopleInfo: 'عدد الموجودين مباشرة ونسبتهم من سعة الصالة الرياضية.',
@@ -367,7 +367,7 @@ export const ar: typeof en = {
   },
   thisGym: {
     title: 'هذه الصالة الرياضية',
-    info: 'موقع هذه الصالة الرياضية بين الصالات الست في مقاييس المقارنة، وتوصياتها المفتوحة. المقارنة أدناه تعرض كل الصالات الرياضية دائمًا.',
+    info: 'موقع هذه الصالة الرياضية بين الصالات الرياضية في مقاييس المقارنة، وتوصياتها المفتوحة. المقارنة أدناه تعرض كل الصالات الرياضية دائمًا.',
     rank: 'المرتبة {r} من {n}',
     machine: 'استخدام الأجهزة',
     energy: 'الطاقة لكل زيارة',

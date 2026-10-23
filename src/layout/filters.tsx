@@ -14,7 +14,7 @@ export const ROLES: Role[] = ['coo', 'fm'];
 
 /** Fixed scope of the Facility Manager (also in src/layout/access.ts). */
 const FM_LOCK: Scope = { level: 'club', clubId: LIVE_CLUB_ID };
-export const REGIONS: RegionId[] = ['riyadh', 'makkah'];
+export const REGIONS: RegionId[] = ['riyadh'];
 
 const SCOPE_KEY = 'opt.scope';
 const ROLE_KEY = 'opt.role';

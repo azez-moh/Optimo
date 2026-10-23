@@ -113,7 +113,8 @@
 
 @media (max-width: 640px) {
   .topbar { gap: var(--sp-2); padding-inline: var(--sp-2) var(--sp-2); }
-  .topbar__brand .optimo-logo { height: 16px !important; }
+  .topbar__brand .optimo-logo--word { height: 16px !important; }
+  .topbar__brand .optimo-logo--badge { height: 38px !important; width: 38px !important; }
   .scope-pill { max-width: none; flex: 1 1 auto; padding-inline: 8px; gap: 6px; }
   .scope-pill .live-dot, .scope-pill__chev { display: none; }
   .lang-btn__full { display: none; }

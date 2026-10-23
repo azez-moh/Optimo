@@ -6,21 +6,21 @@ import { useI18n } from '../../i18n';
 import { useScope } from '../../layout/filters';
 import { useDemo, type Level } from '../../data';
 import { clubRows, type ClubRow } from '../Overview/metrics';
-import { AsAtLine, BrandTag, ClubStatus, STATUS_RANK, useFmtHour, useFmtMwh } from '../Overview/shared';
+import { AsAtLine, ClubStatus, STATUS_RANK, useFmtHour, useFmtMwh } from '../Overview/shared';
 import './branches.css';
 
-type Filter = 'all' | 'optimo' | 'bfit' | 'attention';
+type Filter = 'all' | 'attention';
 type Sort = 'status' | 'name' | 'people' | 'full' | 'machines' | 'energy' | 'alerts';
 const SORTS: Sort[] = ['status', 'name', 'people', 'full', 'machines', 'energy', 'alerts'];
-const FILTERS: Filter[] = ['all', 'optimo', 'bfit', 'attention'];
+const FILTERS: Filter[] = ['all', 'attention'];
 
 export default function BranchesPage() {
   const i18n = useI18n();
   const { t, pick, fmtNumber, fmtClubs } = i18n;
   const data = useDemo();
-  const { scope, clubs } = useScope();
+  const { scope, clubs, districts } = useScope();
   const [params, setParams] = useSearchParams();
-  const filter: Filter = FILTERS.includes(params.get('brand') as Filter) ? (params.get('brand') as Filter) : 'all';
+  const filter: Filter = FILTERS.includes(params.get('filter') as Filter) ? (params.get('filter') as Filter) : 'all';
   const sort: Sort = SORTS.includes(params.get('sort') as Sort) ? (params.get('sort') as Sort) : 'status';
   const focus = params.get('club');
 
@@ -35,14 +35,12 @@ export default function BranchesPage() {
   const peopleIn = rows.reduce((a, r) => a + r.peopleIn, 0);
   const alerts = rows.flatMap((r) => r.alerts);
   const nCrit = alerts.filter((a) => a.level === 'critical').length;
-  const nOpt = rows.filter((r) => r.club.brand === 'optimo').length;
-  const nBfit = rows.length - nOpt;
   const nAttn = rows.filter((r) => r.live?.status === 'critical').length;
   const affected = rows.filter((r) => r.alerts.length).length;
 
   const name = (r: ClubRow) => pick(r.club.nameEn, r.club.nameAr);
   const visible = rows
-    .filter((r) => filter === 'all' || (filter === 'attention' ? r.live?.status === 'critical' : r.club.brand === filter))
+    .filter((r) => filter === 'all' || r.live?.status === 'critical')
     .sort((a, b) => {
       const byName = name(a).localeCompare(name(b));
       switch (sort) {
@@ -73,7 +71,7 @@ export default function BranchesPage() {
 
       <div className="grid-kpi ov-kpis">
         <KpiTile icon={Store} label={t('branches.kpi.clubs')} info={t('branches.kpi.clubsInfo')} value={fmtNumber(rows.length)}
-          hint={`${t('brand.optimo')} ${fmtNumber(nOpt)} · ${t('brand.bfit')} ${fmtNumber(nBfit)}`} />
+          hint={[...new Set(clubs.map((c) => { const d = districts.find((x) => x.id === c.district); return d ? pick(d.cityEn, d.cityAr) : ''; }))].filter(Boolean).join(' · ')} />
         <KpiTile icon={Users} live label={t('branches.kpi.people')} info={t('branches.kpi.peopleInfo')} value={fmtNumber(peopleIn)}
           unit={t('branches.kpi.of', { cap: fmtNumber(cap) })} hint={t('branches.kpi.full', { pct: fmtNumber(cap ? Math.round((peopleIn / cap) * 100) : 0) })} />
         <KpiTile icon={ListChecks} label={t('branches.kpi.open')} info={t('branches.kpi.openInfo')} value={fmtNumber(alerts.length)}
@@ -85,11 +83,9 @@ export default function BranchesPage() {
       </div>
 
       <div className="br-toolbar">
-        <ChipGroup ariaLabel={t('branches.filter.label')} value={filter} onChange={(v) => setParam('brand', v === 'all' ? null : v)} scroll
+        <ChipGroup ariaLabel={t('branches.filter.label')} value={filter} onChange={(v) => setParam('filter', v === 'all' ? null : v)} scroll
           options={[
             { value: 'all', label: t('branches.filter.all'), count: rows.length },
-            { value: 'optimo', label: t('brand.optimo'), count: nOpt, disabled: !nOpt },
-            { value: 'bfit', label: t('brand.bfit'), count: nBfit, disabled: !nBfit },
             { value: 'attention', label: t('branches.filter.attention'), count: nAttn },
           ]} />
         <Select label={t('branches.sort.label')} icon={ArrowDownUp} value={sort} onChange={(v) => setParam('sort', v === 'status' ? null : v)}
@@ -132,7 +128,6 @@ function ClubCard({ row, current, focused }: { row: ClubRow; current: boolean; f
         <ClubStatus status={status} />
       </header>
       <div className="br-card__tags">
-        <BrandTag brand={c.brand} />
         <span className="br-tag">{t(`gender.${c.gender}`)}</span>
         <span className="br-card__city">{district ? `${pick(district.nameEn, district.nameAr)}, ${pick(district.cityEn, district.cityAr)}` : ''}</span>
         {row.live && !row.live.isOpen && <span className="br-tag br-tag--muted">{t('branches.card.closed')}</span>}

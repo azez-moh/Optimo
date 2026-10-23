@@ -1,18 +1,13 @@
 import type { Club, District, OpeningHours } from './types';
 
 /*
-  The real Armah network: 3 OPTIMO clubs (verified pins, /home/claude/ref/optimo-branches.json) and
-  9 B_FIT clubs placed at the centroid of their named neighbourhood (approximate, exactPin = false).
+  The OPTIMO network: 2 men's gyms in Riyadh (verified pins, /home/claude/ref/optimo-branches.json).
   Floor areas other than Al Malqa Men (3,700 m², published) and every operational figure are generated.
 */
 
 export const DISTRICTS: District[] = [
   { id: 'malqa', region: 'riyadh', cityEn: 'Riyadh', cityAr: 'الرياض', nameEn: 'Al Malqa', nameAr: 'الملقا', lat: 24.7963, lng: 46.5881 },
   { id: 'nakheel', region: 'riyadh', cityEn: 'Riyadh', cityAr: 'الرياض', nameEn: 'An Nakheel', nameAr: 'النخيل', lat: 24.7426, lng: 46.6452 },
-  { id: 'yasmin', region: 'riyadh', cityEn: 'Riyadh', cityAr: 'الرياض', nameEn: 'Al Yasmin', nameAr: 'الياسمين', lat: 24.8268, lng: 46.6433 },
-  { id: 'nada', region: 'riyadh', cityEn: 'Riyadh', cityAr: 'الرياض', nameEn: 'An Nada', nameAr: 'الندى', lat: 24.8031, lng: 46.7005 },
-  { id: 'rayyan', region: 'riyadh', cityEn: 'Riyadh', cityAr: 'الرياض', nameEn: 'Ar Rayyan', nameAr: 'الريان', lat: 24.7071, lng: 46.7853 },
-  { id: 'hira', region: 'makkah', cityEn: 'Jeddah', cityAr: 'جدة', nameEn: 'Hira', nameAr: 'حراء', lat: 21.5654, lng: 39.1682 },
 ];
 
 const OPTIMO_HOURS: OpeningHours = { open: 6, close: 25, labelEn: 'Daily 06:00 to 01:00', labelAr: 'يوميًا من 06:00 إلى 01:00' };
@@ -20,59 +15,41 @@ const OPTIMO_W_HOURS: OpeningHours = {
   open: 6, close: 23, sat: { open: 13, close: 22 },
   labelEn: 'Sun to Fri 06:00 to 23:00, Sat 13:00 to 22:00', labelAr: 'الأحد إلى الجمعة 06:00 إلى 23:00، السبت 13:00 إلى 22:00',
 };
-const BFIT_HOURS: OpeningHours = { open: 6, close: 24, labelEn: 'Daily 06:00 to 00:00', labelAr: 'يوميًا من 06:00 إلى 00:00' };
-const BFIT_W_HOURS: OpeningHours = { open: 7, close: 23, labelEn: 'Daily 07:00 to 23:00', labelAr: 'يوميًا من 07:00 إلى 23:00' };
 
 interface Seed {
-  id: string; code: string; brand: Club['brand']; district: string; gender: Club['gender'];
+  id: string; code: string; district: string; gender: Club['gender'];
   lat?: number; lng?: number; areaM2: number; capacity: number; addressEn: string; addressAr: string;
   openedEn: string; openedAr: string; live?: boolean;
 }
 
 const SEEDS: Seed[] = [
-  { id: 'optimo-malqa-men', code: 'OPT-MLQ-M', brand: 'optimo', district: 'malqa', gender: 'men', lat: 24.795832, lng: 46.586712, areaM2: 3700, capacity: 160,
+  { id: 'optimo-malqa-men', code: 'OPT-MLQ-M', district: 'malqa', gender: 'men', lat: 24.795832, lng: 46.586712, areaM2: 3700, capacity: 160,
     addressEn: 'Anas Ibn Malik Rd, Al Malqa, Riyadh 13522', addressAr: 'طريق أنس بن مالك، الملقا، الرياض 13522', openedEn: 'Nov 2022', openedAr: 'نوفمبر 2022', live: true },
-  { id: 'optimo-nakheel-men', code: 'OPT-NKH-M', brand: 'optimo', district: 'nakheel', gender: 'men', lat: 24.742592, lng: 46.645165, areaM2: 3400, capacity: 140,
+  { id: 'optimo-nakheel-men', code: 'OPT-NKH-M', district: 'nakheel', gender: 'men', lat: 24.742592, lng: 46.645165, areaM2: 3400, capacity: 140,
     addressEn: 'Al Takhassousi St 6775, An Nakheel, Riyadh 12381', addressAr: 'شارع التخصصي 6775، النخيل، الرياض 12381', openedEn: '2023', openedAr: '2023' },
-  { id: 'bfit-rayyan-men', code: 'BFT-RYN-M', brand: 'bfit', district: 'rayyan', gender: 'men', areaM2: 2400, capacity: 120,
-    addressEn: 'Ar Rayyan, Riyadh', addressAr: 'الريان، الرياض', openedEn: '2020', openedAr: '2020' },
-  { id: 'bfit-yasmin-men', code: 'BFT-YSM-M', brand: 'bfit', district: 'yasmin', gender: 'men', areaM2: 2600, capacity: 130,
-    addressEn: 'Al Yasmin, Riyadh', addressAr: 'الياسمين، الرياض', openedEn: '2021', openedAr: '2021' },
-  { id: 'bfit-nada-men', code: 'BFT-NDA-M', brand: 'bfit', district: 'nada', gender: 'men', areaM2: 2300, capacity: 115,
-    addressEn: 'An Nada, Riyadh', addressAr: 'الندى، الرياض', openedEn: '2022', openedAr: '2022' },
-  { id: 'bfit-hira-men', code: 'BFT-HRA-M', brand: 'bfit', district: 'hira', gender: 'men', areaM2: 2500, capacity: 125,
-    addressEn: 'Hira St, Jeddah', addressAr: 'شارع حراء، جدة', openedEn: '2021', openedAr: '2021' },
 ];
-
-/** Pins of two clubs in one district are spread about 200 m apart so both markers stay clickable. */
-const SPREAD: Record<string, [number, number]> = {
-};
 
 const DISTRICT_BY_ID = Object.fromEntries(DISTRICTS.map((d) => [d.id, d]));
 
 export function buildClubs(): Club[] {
   return SEEDS.map((s) => {
     const d = DISTRICT_BY_ID[s.district];
-    const brandEn = s.brand === 'optimo' ? 'OPTIMO' : 'B_FIT';
-    const brandAr = s.brand === 'optimo' ? 'أوبتيمو' : 'بي فت';
     const gEn = s.gender === 'men' ? 'Men' : 'Women';
     const gAr = s.gender === 'men' ? 'رجال' : 'نساء';
-    const off = SPREAD[s.id] ?? [0, 0];
-    const hours = s.brand === 'optimo' ? (s.gender === 'women' ? OPTIMO_W_HOURS : OPTIMO_HOURS) : (s.gender === 'women' ? BFIT_W_HOURS : BFIT_HOURS);
+    const hours = s.gender === 'women' ? OPTIMO_W_HOURS : OPTIMO_HOURS;
     const scale = s.areaM2 / 3700;
     return {
       id: s.id,
       code: s.code,
-      brand: s.brand,
-      nameEn: `${brandEn} ${d.nameEn} (${gEn})`,
-      nameAr: `${brandAr} ${d.nameAr} (${gAr})`,
+      nameEn: `OPTIMO ${d.nameEn} (${gEn})`,
+      nameAr: `أوبتيمو ${d.nameAr} (${gAr})`,
       shortEn: `${d.nameEn} ${gEn}`,
       shortAr: `${d.nameAr} ${gAr}`,
       region: d.region,
       district: d.id,
       gender: s.gender,
-      lat: s.lat ?? d.lat + off[0],
-      lng: s.lng ?? d.lng + off[1],
+      lat: s.lat ?? d.lat,
+      lng: s.lng ?? d.lng,
       exactPin: s.lat != null,
       addressEn: s.addressEn,
       addressAr: s.addressAr,

@@ -135,7 +135,6 @@ function BranchesAlt({ page }: { page: MorePage }) {
   const district = (id: string) => data.districts.find((d) => d.id === id);
   const cols: Column<ClubRow>[] = [
     { key: 'club', header: t('settings.col.club'), value: (r) => pick(r.club.nameEn, r.club.nameAr), render: (r) => pick(r.club.nameEn, r.club.nameAr) },
-    { key: 'brand', header: t('settings.col.brand'), value: (r) => r.club.brand, render: (r) => <Badge tone={r.club.brand === 'optimo' ? 'accent' : 'neutral'}>{t(`brand.${r.club.brand}`)}</Badge> },
     { key: 'city', header: t('settings.col.city'), hideOnMobile: true, value: (r) => { const d = district(r.club.district); return d ? pick(d.cityEn, d.cityAr) : ''; } },
     { key: 'gender', header: t('settings.col.gender'), hideOnMobile: true, value: (r) => t(`gender.${r.club.gender}`) },
     { key: 'hours', header: t('settings.col.hours'), hideOnMobile: true, sortable: false, render: (r) => <span className="mp-text num">{pick(r.club.hours.labelEn, r.club.hours.labelAr)}</span> },

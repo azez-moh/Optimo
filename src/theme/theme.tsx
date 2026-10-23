@@ -1,5 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { chartTokens, type ChartTokens, type ThemeName } from './chartTokens';
+import badgeSvg from '../assets/logo-optimo-badge.svg?raw';
 
 const THEME_KEY = 'opt.theme';
 
@@ -12,8 +13,16 @@ function readTheme(): ThemeName {
   return 'dark';
 }
 
+const BADGE_ICON = `data:image/svg+xml,${encodeURIComponent(badgeSvg)}`;
+let darkIcon: string | null = null;
+
 function applyTheme(t: ThemeName) {
   document.documentElement.setAttribute('data-theme', t);
+  // favicon follows the logo: the brown circle badge in the light theme, the original mark in the dark theme
+  const link = document.querySelector<HTMLLinkElement>('link[rel="icon"]');
+  if (!link) return;
+  if (darkIcon == null) darkIcon = link.getAttribute('href');
+  link.setAttribute('href', t === 'light' ? BADGE_ICON : darkIcon ?? '');
 }
 
 interface ThemeCtx {

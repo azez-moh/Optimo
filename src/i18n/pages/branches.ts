@@ -3,7 +3,7 @@ export const en = {
   title: 'Branches',
   kpi: {
     clubs: 'Gyms',
-    clubsInfo: 'Gyms in the current scope, by brand.',
+    clubsInfo: 'OPTIMO gyms in the current scope, with their city.',
     people: 'People in',
     peopleInfo: 'People inside the gyms, summed across gyms in scope, against their combined capacity.',
     of: 'of {cap}',
@@ -55,7 +55,7 @@ export const ar: typeof en = {
   title: 'الفروع',
   kpi: {
     clubs: 'الصالات الرياضية',
-    clubsInfo: 'الصالات الرياضية ضمن النطاق الحالي، حسب العلامة التجارية.',
+    clubsInfo: 'صالات أوبتيمو الرياضية ضمن النطاق الحالي مع مدينتها.',
     people: 'الحضور',
     peopleInfo: 'عدد الموجودين داخل الصالات الرياضية، مجموعًا لكل الصالات الرياضية ضمن النطاق، مقابل سعتها الإجمالية.',
     of: 'من {cap}',

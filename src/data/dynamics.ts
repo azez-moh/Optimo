@@ -4,7 +4,7 @@ import type {
 import { LIVE_CLUB_ID } from './clubs';
 import { chance, clamp, int, lognormal, normal, pick, rngFor, uniform, weightedPick } from './rng';
 import { addDays, dowOf, localParts, msAt } from './time';
-import { demandTrend, VISIT_FACTOR } from './fleet';
+import { VISIT_FACTOR } from './fleet';
 
 /*
   Time-dependent generators. Every function is pure and seeded by (id, date, stream), so a given
@@ -97,7 +97,7 @@ export function machineSessions(machine: Machine, club: Club, date: string): Ses
   const hit = sessionCache.get(key);
   if (hit) return hit;
   const r = rngFor(machine.id, date, 'sessions');
-  const n = machine.enabled ? Math.max(0, Math.round(machine.baseSessions * demandTrend(machine.clubId, machine.type, date) * dowFactor(date) * lognormal(r, 1, 0.14))) : 0;
+  const n = machine.enabled ? Math.max(0, Math.round(machine.baseSessions * dowFactor(date) * lognormal(r, 1, 0.14))) : 0;
   const hours = Array.from({ length: 24 }, (_, h) => h);
   const weights = hours.map((h) => busyWeight(club, date, h));
   const starts: number[] = [];
@@ -143,7 +143,7 @@ export function machineLiveAt(machine: Machine, club: Club, ms: number): Machine
 export interface EnergyHour { hour: number; kwh: number; baselineKwh: number }
 const energyCache = new Map<string, EnergyHour[]>();
 
-/** 0 in January, 1 in July (outside temperature driver). Jeddah adds humidity load. */
+/** 0 in January, 1 in July (outside temperature driver). */
 function summerness(date: string): number {
   const m = Number(date.slice(5, 7)) - 1;
   return (1 - Math.cos(((m + 0.5) / 12) * 2 * Math.PI - 0.55)) / 2;
@@ -152,7 +152,7 @@ function summerness(date: string): number {
 /** Share of energy avoided by the agents on a day (vs the same weekday before they were switched on). */
 export function savingShare(club: Club, date: string): number {
   const r = rngFor(club.id, date, 'saving');
-  return club.brand === 'optimo' ? uniform(r, 0.085, 0.15) : uniform(r, 0.06, 0.11);
+  return uniform(r, 0.085, 0.15);
 }
 
 /** Hourly energy of a club on a date: metered kWh and the baseline it is compared against. */
@@ -161,7 +161,7 @@ export function energyHours(club: Club, date: string): EnergyHour[] {
   const hit = energyCache.get(key);
   if (hit) return hit;
   const r = rngFor(club.id, date, 'energy');
-  const s = summerness(date) + (club.region === 'makkah' ? 0.12 : 0);
+  const s = summerness(date);
   const save = savingShare(club, date);
   const out: EnergyHour[] = [];
   for (let h = 0; h < 24; h++) {

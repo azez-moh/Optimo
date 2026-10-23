@@ -7,7 +7,7 @@ import { useDemo, totals } from '../../data';
 import { REGIONS, useScope } from '../../layout/filters';
 import { LangToggle, RoleLabel, SignOutButton, ThemeToggle } from '../../layout/Shell';
 import type { Club, RegionId } from '../../data/types';
-import { MapView, brandSplit } from './MapView';
+import { MapView } from './MapView';
 import { ClubCard } from './ClubCard';
 import { dumbbellSvg, gymFrontSvg, gymIsoSvg } from './markers';
 import { clubsOfSelection, districtPlaces, levelOf, regionPlaces, scopeOfSelection, selectionFromScope, type Selection } from './geo';
@@ -42,10 +42,6 @@ function useIsWide(min: number) {
 /** Small marker artwork in list rows (static SVG strings, no user content). */
 function ListIcon({ html }: { html: string }) {
   return <span className="maplist__icon" aria-hidden dangerouslySetInnerHTML={{ __html: html }} />;
-}
-
-function BrandTag({ brand }: { brand: Club['brand'] }) {
-  return <span className={`maptag${brand === 'optimo' ? ' maptag--accent' : ''}`}>{brand === 'optimo' ? 'OPTIMO' : 'B_FIT'}</span>;
 }
 
 function MapHeader() {
@@ -112,7 +108,6 @@ export default function MapPage() {
     const crit = live.criticalAlerts;
     return {
       clubs: cs.length,
-      optimo: cs.filter((c) => c.brand === 'optimo').length,
       people: live.peopleIn,
       capacity: cs.filter(isConnected).reduce((n, c) => n + c.capacity, 0),
       pct: live.occupancyPct,
@@ -197,10 +192,10 @@ export default function MapPage() {
       return (
         <li key={r.id}>
           <button type="button" className="maplist__row" onClick={() => goRegion(r.id)}>
-            <ListIcon html={gymIsoSvg(34, s.optimo > 0, 'maplist__svg')} />
+            <ListIcon html={gymIsoSvg(34, true, 'maplist__svg')} />
             <span className="maplist__main">
               <span className="maplist__name">{t(`region.${r.id}`)}</span>
-              <span className="maplist__sub">{r.cityEn.toLowerCase() !== r.id ? `${pick(r.cityEn, r.cityAr)} · ` : ''}{brandSplit(t, s.optimo, s.clubs - s.optimo)} · {itemsText(s.open)}</span>
+              <span className="maplist__sub">{r.cityEn.toLowerCase() !== r.id ? `${pick(r.cityEn, r.cityAr)} · ` : ''}{fmtClubs(s.clubs)} · {itemsText(s.open)}</span>
             </span>
             <span className="maplist__count num">{fmtNumber(s.clubs)}</span>
             <Sep className="maplist__chev" aria-hidden />
@@ -213,13 +208,12 @@ export default function MapPage() {
       const s = sum(d.clubs);
       const genders = new Set(d.clubs.map((c) => c.gender));
       const g = genders.size > 1 ? t('map.menAndWomen') : t(`gender.${d.clubs[0].gender}`);
-      const brand = d.clubs.some((c) => c.brand === 'optimo') ? 'optimo' : 'bfit';
       return (
         <li key={d.id}>
           <button type="button" className="maplist__row" onClick={() => goDistrict(d.id)}>
-            <ListIcon html={dumbbellSvg(28, brand === 'optimo', 'maplist__svg')} />
+            <ListIcon html={dumbbellSvg(28, true, 'maplist__svg')} />
             <span className="maplist__main">
-              <span className="maplist__name">{pick(d.district.nameEn, d.district.nameAr)} <BrandTag brand={brand} /></span>
+              <span className="maplist__name">{pick(d.district.nameEn, d.district.nameAr)}</span>
               <span className="maplist__sub">{g} · {itemsText(s.open)}</span>
             </span>
             <span className="maplist__count num">{fmtNumber(s.clubs)}</span>
@@ -237,11 +231,10 @@ export default function MapPage() {
         <li key={c.id} className="maplist__li">
           <button type="button" className={`maplist__row maplist__row--club${c.id === sel.clubId ? ' is-active' : ''}`} onClick={() => openClub(c.id)}
             title={on ? t('map.openClubHint') : t('map.notConnected')} aria-label={on ? t('map.openClub', { name }) : `${name}. ${t('map.notConnected')}`}>
-            <ListIcon html={gymFrontSvg(28, c.brand === 'optimo', on, 'maplist__svg')} />
+            <ListIcon html={gymFrontSvg(28, true, on, 'maplist__svg')} />
             <span className="maplist__main">
               <span className="maplist__name">{name}</span>
               <span className="maplist__sub">
-                <BrandTag brand={c.brand} />
                 <span className="maptag maptag--plain">{t(`gender.${c.gender}`)}</span>
                 {on ? <span>{itemsText(live?.openAlerts ?? 0)}</span> : <span className="maplist__pending">{t('map.notConnected')}</span>}
               </span>
@@ -312,7 +305,7 @@ export default function MapPage() {
 
           <section className="mapkpis" aria-label={title}>
             <KpiTile label={t('map.kpi.clubs')} icon={Store} value={fmtNumber(k.clubs)} info={t('map.kpi.info.clubs')}
-              hint={brandSplit(t, k.optimo, k.clubs - k.optimo)} />
+              hint={[...new Set(inView.map((c) => t(`region.${c.region}`)))].join(' · ')} />
             <KpiTile live label={t('map.kpi.people')} icon={Users} value={fmtNumber(k.people)} unit={t('map.kpi.ofCapacity', { n: fmtNumber(k.capacity) })}
               info={t('map.kpi.info.people') + excludedNote} hint={t('map.kpi.full', { pct: fmtNumber(k.pct) })} />
             <KpiTile className={k.open > 0 ? 'mapkpi--alert' : ''} label={t('map.kpi.openItems')} icon={ShieldAlert} value={fmtNumber(k.open)}
@@ -324,8 +317,7 @@ export default function MapPage() {
             <MapView clubs={clubs} districts={districts} sel={sel} onRegion={goRegion} onDistrict={goDistrict} onClub={openClub}
               isConnected={isConnected} compact={!notCompact} />
             <div className="maplegend" aria-label={t('map.legend.label')}>
-              <span className="maplegend__item"><span aria-hidden dangerouslySetInnerHTML={{ __html: gymFrontSvg(16, true, true, 'maplegend__svg') }} />OPTIMO</span>
-              <span className="maplegend__item"><span aria-hidden dangerouslySetInnerHTML={{ __html: gymFrontSvg(16, false, true, 'maplegend__svg') }} />B_FIT</span>
+              <span className="maplegend__item"><span aria-hidden dangerouslySetInnerHTML={{ __html: gymFrontSvg(16, true, true, 'maplegend__svg') }} />{t('map.legend.gym')}</span>
               <span className="maplegend__hint">{t('map.legend.wheel')}</span>
             </div>
           </div>

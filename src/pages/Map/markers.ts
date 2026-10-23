@@ -1,7 +1,7 @@
 /**
  * Map marker artwork as inline SVG strings (no external images): an isometric gym building for regions,
- * a dumbbell tile for districts and a gym-front pin for clubs. OPTIMO uses the brand yellow on ink;
- * B_FIT uses a neutral light grey on ink. Every icon anchors at the bottom centre of its SVG.
+ * a dumbbell tile for districts and a gym-front pin for clubs. OPTIMO uses the brand yellow on ink
+ * (accent = false gives a neutral grey variant). Every icon anchors at the bottom centre of its SVG.
  */
 
 const Y = '#FCEA10';

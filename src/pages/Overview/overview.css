@@ -6,8 +6,6 @@
 :root[lang='ar'] .ov-card-title { font-family: var(--font-body); font-weight: 700; font-size: var(--fs-lg); }
 
 /* brand tag */
-.ov-brand { display: inline-flex; align-items: center; height: 20px; padding: 0 6px; font-size: 11px; line-height: 1; white-space: nowrap; border: 1px solid var(--border-strong); color: var(--text-muted); flex-shrink: 0; }
-.ov-brand--optimo { background: var(--primary); border-color: var(--primary); color: var(--primary-contrast); }
 
 /* KPI accents */
 .ov-kpis .kpi { min-height: 150px; }

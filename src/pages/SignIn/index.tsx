@@ -101,7 +101,7 @@ export default function SignInPage() {
       <main className="signin__main">
         <section className="signin__hero">
           <div className="signin__brand">
-            <OptimoLogo height={48} className="signin__logo" />
+            <OptimoLogo height={48} badge={112} className="signin__logo" />
             <span className="signin__eyebrow">{t('signin.eyebrow')}</span>
           </div>
           <p className="signin__claim">

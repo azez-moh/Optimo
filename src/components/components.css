@@ -247,6 +247,10 @@
 /* ---------- Brand ---------- */
 .optimo-logo { display: inline-flex; align-items: center; color: var(--logo-fill); flex-shrink: 0; }
 .optimo-logo .brand__svg { height: 100%; width: auto; }
+.optimo-logo-wrap { display: inline-flex; align-items: center; flex-shrink: 0; }
+.optimo-logo--badge .brand__svg { width: 100%; height: 100%; }
+:root[data-theme='light'] .optimo-logo--word { display: none; }
+:root:not([data-theme='light']) .optimo-logo--badge { display: none; }
 .brand { display: inline-flex; align-items: center; gap: 12px; color: var(--text); text-decoration: none; flex-shrink: 0; min-width: 0; }
 .brand:hover { text-decoration: none; }
 .brand__powered { font-size: 10px; letter-spacing: var(--label-tracking); text-transform: uppercase; color: var(--text-faint); white-space: nowrap; padding-inline-start: 12px; border-inline-start: 1px solid var(--border); line-height: 1.2; }

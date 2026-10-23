@@ -7,7 +7,7 @@ import { useI18n } from '../../i18n';
 import { useChartTokens } from '../../theme/theme';
 import { useDemo, addDays, busiestHour, dateRange } from '../../data';
 import { slotFullPct, SLOT_HOURS, mean, type ClubRow, type Period } from './metrics';
-import { BrandTag, HBarList, useFmtHour } from './shared';
+import { HBarList, useFmtHour } from './shared';
 import { peopleInAt, peopleTodayAt } from '../../data/dynamics';
 
 /** Business insights (CV-03, CV-04, CV-05). */
@@ -57,7 +57,7 @@ export function BusinessSection({ rows, period }: { rows: ClubRow[]; period: Per
       </div>
       <div className="ov-grid-2">
         <Card title={<span className="ov-card-title">{period === 'week' ? t('overview.business.heatTitleWeek') : t('overview.business.heatTitle')}</span>} info={t('overview.business.heatInfo')}>
-          <BusyHeat rows={heat.map((h) => ({ id: h.club.id, name: pick(h.club.nameEn, h.club.nameAr), brand: h.club.brand, values: h.values }))}
+          <BusyHeat rows={heat.map((h) => ({ id: h.club.id, name: pick(h.club.nameEn, h.club.nameAr), values: h.values }))}
             cols={SLOT_HOURS.map(fmtHour)} onRow={showCard}
             ariaLabel={t('overview.business.heatAria', { club: best.club, hour: fmtHour(best.h) })} />
         </Card>
@@ -66,7 +66,6 @@ export function BusinessSection({ rows, period }: { rows: ClubRow[]; period: Per
             items={usage.map((r, i) => ({
               key: r.club.id,
               label: <span className="ov-hbars__name">{pick(r.club.nameEn, r.club.nameAr)}</span>,
-              tag: <BrandTag brand={r.club.brand} />,
               value: r.machinePct,
               display: `${fmtNumber(r.machinePct)}%`,
               highlight: i === 0,
@@ -82,7 +81,7 @@ export function BusinessSection({ rows, period }: { rows: ClubRow[]; period: Per
 
 /** Busy heatmap: club rows by two-hour slot, sequential yellow ramp, tooltip "Club · 6 PM · 92% of capacity". */
 function BusyHeat({ rows, cols, onRow, ariaLabel }: {
-  rows: { id: string; name: string; brand: 'optimo' | 'bfit'; values: number[] }[]; cols: string[]; onRow: (id: string) => void; ariaLabel: string;
+  rows: { id: string; name: string; values: number[] }[]; cols: string[]; onRow: (id: string) => void; ariaLabel: string;
 }) {
   const ct = useChartTokens();
   const { t, fmtNumber } = useI18n();

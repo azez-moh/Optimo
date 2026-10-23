@@ -14,14 +14,6 @@ const TILE_URL = {
 };
 const ATTRIBUTION = 'Tiles © Esri';
 
-/** "3 OPTIMO · 6 B_FIT", leaving out a brand with no clubs. */
-export function brandSplit(t: (k: string, v?: Record<string, string | number>) => string, optimo: number, bfit: number): string {
-  const parts: string[] = [];
-  if (optimo) parts.push(`${optimo} ${t('brand.optimo')}`);
-  if (bfit) parts.push(`${bfit} ${t('brand.bfit')}`);
-  return parts.join(' · ');
-}
-
 const esc = (s: string) => s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]!));
 
 type Kind = 'region' | 'district' | 'club';
@@ -232,24 +224,22 @@ export function MapView({ clubs, districts, sel, onRegion, onDistrict, onClub, i
   const level = levelOf(sel);
 
   const regionItems = useMemo<PlaceItem[]>(() => regionPlaces(clubs, districts).map((r) => {
-    const opt = r.clubs.filter((c) => c.brand === 'optimo').length;
     const name = t(`region.${r.id}`);
     return {
-      key: r.id, lat: r.lat, lng: r.lng, accent: opt > 0,
+      key: r.id, lat: r.lat, lng: r.lng, accent: true,
       label: `${name} · ${fmtClubs(r.clubs.length)}`,
-      sub: compact ? '' : `${r.cityEn.toLowerCase() !== r.id ? `${pick(r.cityEn, r.cityAr)} · ` : ''}${brandSplit(t, opt, r.clubs.length - opt)}`,
+      sub: compact || r.cityEn.toLowerCase() === r.id ? '' : pick(r.cityEn, r.cityAr),
       title: `${name}, ${fmtClubs(r.clubs.length)}`,
       onClick: () => onRegion(r.id),
     };
   }), [clubs, districts, t, pick, fmtClubs, compact, onRegion]);
 
   const districtItems = useMemo<PlaceItem[]>(() => (sel.region ? districtPlaces(clubs, districts, sel.region) : []).map((d) => {
-    const opt = d.clubs.some((c) => c.brand === 'optimo');
     const name = pick(d.district.nameEn, d.district.nameAr);
     return {
-      key: d.id, lat: d.lat, lng: d.lng, accent: opt, count: d.clubs.length,
+      key: d.id, lat: d.lat, lng: d.lng, accent: true, count: d.clubs.length,
       label: name,
-      sub: compact ? '' : `${fmtClubs(d.clubs.length)} · ${opt ? t('brand.optimo') : t('brand.bfit')}`,
+      sub: compact ? '' : fmtClubs(d.clubs.length),
       title: `${name}, ${fmtClubs(d.clubs.length)}`,
       onClick: () => onDistrict(d.id),
     };
@@ -260,9 +250,8 @@ export function MapView({ clubs, districts, sel, onRegion, onDistrict, onClub, i
     const name = pick(c.nameEn, c.nameAr);
     const on = isConnected(c);
     return {
-      key: c.id, lat: c.lat, lng: c.lng, accent: c.brand === 'optimo', selected: c.id === sel.clubId, connected: on,
+      key: c.id, lat: c.lat, lng: c.lng, accent: true, selected: c.id === sel.clubId, connected: on,
       label: t(`gender.${c.gender}`),
-      tag: c.brand === 'optimo' ? 'OPTIMO' : 'B_FIT',
       sub: compact ? '' : on ? pick(c.hours.labelEn, c.hours.labelAr) : t('map.notConnected'),
       title: `${name}. ${t('map.openClubHint')}`,
       onClick: () => onClub(c.id),
@@ -276,7 +265,6 @@ export function MapView({ clubs, districts, sel, onRegion, onDistrict, onClub, i
       <div dir={dir} className="mapv__tipbody">
         <strong>{pick(c.nameEn, c.nameAr)}</strong>
         <dl className="mapv__tiprows">
-          <div><dt>{t('map.card.brand')}</dt><dd>{t(`brand.${c.brand}`)}</dd></div>
           <div><dt>{t('map.card.gender')}</dt><dd>{t(`gender.${c.gender}`)}</dd></div>
           <div><dt>{t('map.card.hours')}</dt><dd>{pick(c.hours.labelEn, c.hours.labelAr)}</dd></div>
         </dl>

@@ -46,7 +46,6 @@ export const ClubCard = forwardRef<HTMLElement, { club: Club; connected: boolean
     }, [onClose]);
 
     const clubRows: [string, ReactNode][] = [
-      [t('map.card.brand'), t(`brand.${c.brand}`)],
       [t('map.card.gender'), t(`gender.${c.gender}`)],
       [t('map.card.address'), pick(c.addressEn, c.addressAr) || na],
       [t('map.card.district'), district ? pick(district.nameEn, district.nameAr) : na],
@@ -81,7 +80,6 @@ export const ClubCard = forwardRef<HTMLElement, { club: Club; connected: boolean
           <div className="mapcard__titles">
             <h2 className="mapcard__name">{pick(c.nameEn, c.nameAr)}</h2>
             <div className="mapcard__tags">
-              <span className={`maptag${c.brand === 'optimo' ? ' maptag--accent' : ''}`}>{c.brand === 'optimo' ? 'OPTIMO' : 'B_FIT'}</span>
               <span className="maptag maptag--plain">{t(`gender.${c.gender}`)}</span>
             </div>
           </div>

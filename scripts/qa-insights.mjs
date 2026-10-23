@@ -26,16 +26,18 @@ await page.goto(`${base}?now=${now}#/overview`); await page.waitForTimeout(2500)
 await page.evaluate(() => localStorage.removeItem('opt.data.v1')); await page.reload(); await page.waitForTimeout(2500);
 
 let firstAction = '';
-await step('recommended actions: 6 cards, every kind in the top 6', async () => {
+await step('recommended actions: move, buy, retire, service and energy all listed', async () => {
   const cards = page.locator('.in-recs .in-card');
-  if ((await cards.count()) !== 6) throw new Error(`cards ${await cards.count()}`);
   const kinds = new Set(await cards.evaluateAll((els) => els.map((e) => e.dataset.kind)));
-  if (kinds.size < 6) throw new Error(`kinds ${[...kinds]}`);
+  for (const k of ['move', 'buy', 'retire', 'service', 'energy']) if (!kinds.has(k)) throw new Error(`kinds ${[...kinds]}`);
+  results.push(`  -> ${await cards.count()} cards: ${(await cards.locator('.in-card__action').allInnerTexts()).map((x) => x.trim()).join(' | ')}`);
   firstAction = (await cards.first().locator('.in-card__action').innerText()).trim();
   results.push(`  -> first: ${firstAction}`);
 });
-await step('Show all lists every recommendation', async () => {
-  await page.getByRole('button', { name: /Show all/ }).click();
+await step('Show all lists every recommendation (when more than 6)', async () => {
+  const more = page.getByRole('button', { name: /Show all/ });
+  if (!(await more.count())) { results.push('  -> 6 or fewer, no Show all'); return; }
+  await more.click();
   const n = await page.locator('.in-recs .in-card').count();
   if (n <= 6) throw new Error(`only ${n}`);
   results.push(`  -> ${n} recommendations`);
@@ -69,60 +71,61 @@ await step('Dismiss with a reason removes the card and lists it under Dismissed'
   if (!(await page.getByText('Dismissed: Not practical').isVisible())) throw new Error('reason missing');
   await page.getByRole('button', { name: 'Restore' }).click();
 });
-await step('Gym comparison lists all 6 gyms plus the network average, sortable', async () => {
+await step('Gym comparison lists both gyms plus the network average, sortable', async () => {
   const rows = await page.locator('.cmp__table tbody tr').count();
-  if (rows !== 6) throw new Error(`rows ${rows}`);
+  if (rows !== 2) throw new Error(`rows ${rows}`);
   await page.getByRole('button', { name: /Sort by Machine use/ }).click();
   const first = await page.locator('.cmp__table tbody tr').first().locator('.cmp__gymname').innerText();
-  if (!/Hira/.test(first)) throw new Error(`top by machine use: ${first}`);
+  if (!/An Nakheel/.test(first)) throw new Error(`top by machine use: ${first}`);
   if (!(await page.locator('.cmp__table tfoot').getByText('Network average').isVisible())) throw new Error('no average');
 });
-await step('Matrix cell (rowers at Hira) opens its recommendation', async () => {
-  await page.locator('.mx__cell.has-rec[aria-label^="Rowers at Hira"]').click();
+await step('Matrix cell (rowers at An Nakheel) opens its recommendation', async () => {
+  await page.locator('.mx__cell.has-rec[aria-label^="Rowers at An Nakheel"]').click();
   const dlg = page.getByRole('dialog'); await dlg.waitFor();
   const a = await dlg.locator('.in-card__action').first().innerText();
-  if (!/rowers .* to Hira/i.test(a)) throw new Error(a);
+  if (!/rowers? .* to .*An Nakheel/i.test(a)) throw new Error(a);
   results.push(`  -> ${a}`);
   await page.keyboard.press('Escape');
 });
-await step('Compare two gyms: Hira vs Al Yasmin, difference column consistent', async () => {
+await step('Compare two gyms: defaults to Al Malqa vs An Nakheel, difference column consistent', async () => {
   await page.getByRole('button', { name: 'Compare two gyms' }).click();
   const dlg = page.getByRole('dialog'); await dlg.waitFor();
-  await dlg.getByLabel('First gym').selectOption('bfit-hira-men');
-  await dlg.getByLabel('Second gym').selectOption('bfit-yasmin-men');
+  if (!(await hash()).includes('compare=optimo-malqa-men,optimo-nakheel-men')) throw new Error(`default ${await hash()}`);
+  await dlg.getByLabel('First gym').selectOption('optimo-nakheel-men');
+  await dlg.getByLabel('Second gym').selectOption('optimo-malqa-men');
   await page.waitForTimeout(300);
-  if (!(await hash()).includes('compare=bfit-hira-men,bfit-yasmin-men')) throw new Error(await hash());
+  if (!(await hash()).includes('compare=optimo-nakheel-men,optimo-malqa-men')) throw new Error(await hash());
   const row = dlg.locator('tr[data-key="machine"]');
   const [a, b, d] = await row.locator('td').allInnerTexts();
   const diff = num(d.split('(')[0]);
   if (Math.abs(num(a) - num(b) - diff) > 0.11) throw new Error(`${a} - ${b} != ${d}`);
-  if (!(await row.locator('.two__diff--good').count())) throw new Error('Hira higher use not marked better');
+  if (!(await row.locator('.two__diff--good').count())) throw new Error('An Nakheel higher use not marked better');
   const e = await dlg.locator('tr[data-key="energy"] .two__diff').getAttribute('class');
   results.push(`  -> machine use ${a} vs ${b}: ${d.replace(/\s+/g, ' ')}; energy diff class ${e}`);
   const recs = await dlg.locator('.two__recs li').count();
   if (!recs) throw new Error('no recommendations listed');
-  await dlg.screenshot({ path: `${shots}/compare-hira-yasmin.png` });
+  await dlg.screenshot({ path: `${shots}/compare-nakheel-malqa.png` });
   await page.keyboard.press('Escape'); await page.waitForTimeout(200);
   if ((await hash()).includes('compare=')) throw new Error('compare param kept after close');
 });
 await step('Row Compare button preselects that gym', async () => {
-  await page.locator('.cmp__table tbody tr', { hasText: 'An Nada' }).getByRole('button', { name: /Compare/ }).click();
+  await page.locator('.cmp__table tbody tr', { hasText: 'An Nakheel' }).getByRole('button', { name: /Compare/ }).click();
   const dlg = page.getByRole('dialog'); await dlg.waitFor();
-  if ((await dlg.getByLabel('First gym').inputValue()) !== 'bfit-nada-men') throw new Error('not preselected');
+  if ((await dlg.getByLabel('First gym').inputValue()) !== 'optimo-nakheel-men') throw new Error('not preselected');
   await page.keyboard.press('Escape');
 });
-await step('Deep link ?compare=optimo-nakheel-men,bfit-rayyan-men opens the drawer', async () => {
-  await page.goto(`${base}?now=${now}&r=dl#/overview?compare=optimo-nakheel-men,bfit-rayyan-men`); await page.waitForTimeout(2500);
+await step('Deep link ?compare=optimo-nakheel-men,optimo-malqa-men opens the drawer', async () => {
+  await page.goto(`${base}?now=${now}&r=dl#/overview?compare=optimo-nakheel-men,optimo-malqa-men`); await page.waitForTimeout(2500);
   const dlg = page.getByRole('dialog'); await dlg.waitFor({ timeout: 3000 });
   if ((await dlg.getByLabel('First gym').inputValue()) !== 'optimo-nakheel-men') throw new Error('first');
-  if ((await dlg.getByLabel('Second gym').inputValue()) !== 'bfit-rayyan-men') throw new Error('second');
+  if ((await dlg.getByLabel('Second gym').inputValue()) !== 'optimo-malqa-men') throw new Error('second');
 });
-await step('Single-gym scope: comparison still shows 6 gyms, scope row highlighted, This gym summary', async () => {
-  await page.evaluate(() => localStorage.setItem('opt.scope', '{"level":"club","clubId":"bfit-yasmin-men"}'));
+await step('Single-gym scope: comparison still shows both gyms, scope row highlighted, This gym summary', async () => {
+  await page.evaluate(() => localStorage.setItem('opt.scope', '{"level":"club","clubId":"optimo-nakheel-men"}'));
   await page.goto(`${base}?now=${now}&r=club#/overview`); await page.waitForTimeout(2500);
-  if ((await page.locator('.cmp__table tbody tr').count()) !== 6) throw new Error('not 6');
+  if ((await page.locator('.cmp__table tbody tr').count()) !== 2) throw new Error('not 2');
   const hl = await page.locator('.cmp__table tbody tr.is-scope .cmp__gymname').innerText();
-  if (!/Al Yasmin/.test(hl)) throw new Error(hl);
+  if (!/An Nakheel/.test(hl)) throw new Error(hl);
   if (!(await page.locator('.tg').isVisible())) throw new Error('no This gym');
 });
 

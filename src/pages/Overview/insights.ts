@@ -152,13 +152,10 @@ export function gymStats(d: Data, club: Club, w: Window): GymStats {
 
 // ---------- rules ----------
 
-function sameCity(a: Club, b: Club) { return a.region === b.region; }
-
 function moveInsights(d: Data, w4: Map<string, Map<MachineType, TypeUsage>>, weeks: Map<string, Map<MachineType, TypeUsage>>[]): Insight[] {
   const out: Insight[] = [];
   const types = new Set<MachineType>();
   for (const m of w4.values()) for (const t of m.keys()) types.add(t);
-  const clubById = new Map(d.clubs.map((c) => [c.id, c]));
   for (const type of types) {
     const rows = d.clubs.map((c) => ({ c, u: w4.get(c.id)?.get(type) })).filter((x) => x.u);
     const highs = rows.filter((x) => isHigh(x.u)).sort((a, b) => b.u!.utilPct - a.u!.utilPct);
@@ -177,7 +174,7 @@ function moveInsights(d: Data, w4: Map<string, Map<MachineType, TypeUsage>>, wee
       let held = 0;
       for (const wk of weeks) if (isHigh(wk.get(hi.c.id)?.get(type)) && (wk.get(src.c.id)?.get(type)?.utilPct ?? 100) < LOW_PCT) held++;
       const days = 28;
-      const cost = n * (sameCity(src.c, clubById.get(hi.c.id)!) ? MOVE_COST_SAR.sameCity : MOVE_COST_SAR.otherCity);
+      const cost = n * MOVE_COST_SAR;
       const avoided = n * PRICE_SAR[type];
       out.push({
         id: `move:${type}:${src.c.id}:${hi.c.id}`, kind: 'move', clubIds: [src.c.id, hi.c.id], type,
@@ -202,7 +199,7 @@ function buyInsights(d: Data, w4: Map<string, Map<MachineType, TypeUsage>>, week
   for (const type of types) {
     const rows = d.clubs.map((c) => ({ c, u: w4.get(c.id)?.get(type) })).filter((x) => x.u);
     const highs = rows.filter((x) => x.u!.utilPct > HIGH_PCT && x.u!.peakFullPct > PEAK_FULL_PCT);
-    if (rows.length < 3 || highs.length * 2 <= rows.length) continue;
+    if (rows.length < 2 || highs.length * 2 <= rows.length) continue;
     if (rows.some((x) => isLow(x.u))) continue; // a low-use gym exists: moving comes first
     const perGym = highs.map((x) => {
       const n = Math.max(1, Math.ceil((x.u!.units * x.u!.utilPct) / TARGET_PCT - x.u!.units));

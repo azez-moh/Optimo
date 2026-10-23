@@ -138,7 +138,6 @@ export const en = {
   },
   col: {
     club: 'Gym',
-    brand: 'Brand',
     city: 'City',
     district: 'District',
     gender: 'Members',
@@ -385,7 +384,6 @@ export const ar: typeof en = {
   },
   col: {
     club: 'الصالة الرياضية',
-    brand: 'العلامة',
     city: 'المدينة',
     district: 'الحي',
     gender: 'الأعضاء',

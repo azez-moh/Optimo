@@ -101,11 +101,6 @@ const ar: Dict = {
   },
   region: {
     riyadh: 'الرياض',
-    makkah: 'مكة المكرمة',
-  },
-  brand: {
-    optimo: 'أوبتيمو',
-    bfit: 'بي فت',
   },
   gender: {
     men: 'رجال',

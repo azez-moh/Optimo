@@ -40,7 +40,7 @@ export const MORE_PAGES: MorePage[] = [
   { slug: 'branches-fb', group: 'business', kind: 'view', relatedPage: 'branches',
     nameEn: 'Branches (alternative layout)', nameAr: 'الفروع (تخطيط بديل)',
     titleEn: 'Branches (alternative layout)', titleAr: 'الفروع (تخطيط بديل)',
-    descEn: 'Every gym with its brand, city, hours and live status.', descAr: 'كل صالة رياضية مع علامتها ومدينتها وساعات عملها وحالتها المباشرة.' },
+    descEn: 'Every gym with its city, hours and live status.', descAr: 'كل صالة رياضية مع مدينتها وساعات عملها وحالتها المباشرة.' },
   { slug: 'conductor-building', group: 'business', kind: 'view', relatedPage: 'bms-overview',
     nameEn: 'Conductor: building overview', nameAr: 'المايسترو: نظرة عامة على المبنى',
     titleEn: 'Building overview', titleAr: 'نظرة عامة على المبنى',

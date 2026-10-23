@@ -7,7 +7,7 @@ import { useDemo, TARIFF_SAR_PER_KWH, type Club, type MachineType } from '../../
 import { FAMILIES } from '../../data/fleet';
 import type { ClubRow } from './metrics';
 import { HIGH_PCT, LOW_PCT, type GymStats, type Insight } from './insights';
-import { BrandTag, ClubStatus } from './shared';
+import { ClubStatus } from './shared';
 import { describe, KindChip, useTx } from './Insights';
 import './insights.css';
 
@@ -123,7 +123,6 @@ export function GymComparison({ gyms, scopeIds, isAll, onCompare }: {
                       <span className="cmp__gymname">{name}</span>
                     </button>
                     <span className="cmp__gymtags">
-                      <BrandTag brand={g.club.brand} />
                       {inScope && <span className="ov-mark ov-mark--hi">{t('insights.cmp.inScope')}</span>}
                     </span>
                   </th>
@@ -378,7 +377,7 @@ export function ThisGym({ g, gyms, recs, onCompare }: { g: GymCmp; gyms: GymCmp[
         <div className="tg__id">
           <span className="label">{t('insights.thisGym.title')} <InfoTip text={t('insights.thisGym.info')} /></span>
           <span className="tg__name">{pick(g.club.nameEn, g.club.nameAr)}</span>
-          <span className="tg__tags"><BrandTag brand={g.club.brand} /><ClubStatus status={g.row.live?.status ?? 'ok'} /></span>
+          <span className="tg__tags"><ClubStatus status={g.row.live?.status ?? 'ok'} /></span>
         </div>
         <dl className="tg__stats">
           {items.map((it) => (

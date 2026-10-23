@@ -4,7 +4,7 @@ import type { MachineType } from './types';
   Fleet assumptions for the generated data and the COO recommendations (src/pages/Overview/insights.ts).
   Everything here is a documented demo assumption, not a measured value:
   - DEMAND: target share of open time in use (4-week average) per gym and machine type. It drives the
-    generated sessions of every gym except OPTIMO Al Malqa (Men), whose machines keep the Build 8.7 snapshot.
+    generated sessions of OPTIMO An Nakheel (Men); OPTIMO Al Malqa (Men) keeps the Build 8.7 snapshot.
   - VISIT_FACTOR: daily visits per gym as a multiple of the network norm (3.2 x capacity).
   - PRICE_SAR: purchase price of one new commercial unit, Saudi market, incl. VAT and delivery (rounded).
   - SERVICE_INTERVAL_H: preventive service interval in hours of use (manufacturer-style schedules, rounded).
@@ -12,10 +12,7 @@ import type { MachineType } from './types';
 
 /** Gyms that must carry at least `min` units of a type (keeps the demand profile meaningful). */
 export const REQUIRED_TYPES: Record<string, Partial<Record<MachineType, number>>> = {
-  'bfit-yasmin-men': { rower: 3 },
-  'bfit-hira-men': { rower: 3, 'indoor-bike': 4 },
-  'bfit-nada-men': { 'flat-bench': 1 },
-  'optimo-nakheel-men': { 'indoor-bike': 6 },
+  'optimo-nakheel-men': { 'indoor-bike': 6, rower: 3, 'recumbent-bike': 2 },
 };
 
 /** Typical share of open time in use per type, before the gym profile. */
@@ -26,31 +23,23 @@ const TYPE_DEFAULT: Partial<Record<MachineType, number>> = {
 };
 
 /**
- * Gym profile (overrides of TYPE_DEFAULT). Hira (Jeddah) is crowded and rows and cycles a lot; Al Yasmin and
- * An Nakheel hardly use rowers or bikes; An Nada is strength-heavy; slat treadmills are short everywhere.
+ * Gym profile (overrides of TYPE_DEFAULT) for OPTIMO An Nakheel (Men). Against Al Malqa (live snapshot) it gives:
+ * rowers busy at An Nakheel and idle at Al Malqa (move), recumbent bikes busy at both (buy), indoor bikes idle at
+ * both (retire). Ellipticals sit above 15% at An Nakheel so they are not a second retire.
  */
 const PROFILE: Record<string, Partial<Record<MachineType, number>>> = {
-  'optimo-nakheel-men': { 'indoor-bike': 0.035, rower: 0.05, 'slat-treadmill': 0.56 },
-  'bfit-rayyan-men': { rower: 0.07, 'flat-bench': 0.06, 'slat-treadmill': 0.54, elliptical: 0.05 },
-  'bfit-yasmin-men': { rower: 0.035, 'indoor-bike': 0.08, 'slat-treadmill': 0.33, elliptical: 0.05 },
-  'bfit-nada-men': { 'flat-bench': 0.62, treadmill: 0.16, elliptical: 0.04, 'slat-treadmill': 0.52 },
-  'bfit-hira-men': { rower: 0.6, 'indoor-bike': 0.55, treadmill: 0.24, 'slat-treadmill': 0.6, elliptical: 0.07, 'flat-bench': 0.07 },
+  'optimo-nakheel-men': { 'indoor-bike': 0.035, rower: 0.5, 'recumbent-bike': 0.55, elliptical: 0.17, 'slat-treadmill': 0.56 },
 };
+
+/**
+ * Session length override for the live gym, minutes. The Build 8.7 snapshot logs recumbent bike sessions of about
+ * 2.5 minutes (camera hand-offs); real rides run longer, so use time is taken at 14 minutes per session.
+ * Session counts (550 a day) stay as in the snapshot; overall machine use stays within 12 to 15%.
+ */
+export const LIVE_SESSION_MIN: Partial<Record<MachineType, number>> = { 'recumbent-bike': 14 };
 
 export function demandShare(clubId: string, type: MachineType): number {
   return PROFILE[clubId]?.[type] ?? TYPE_DEFAULT[type] ?? 0.1;
-}
-
-/**
- * Demand that grew over the last weeks (a newer pattern, so lower confidence): multiplier by date.
- * Hira indoor bikes ramp from 0.6 to 1.0 between 27 Aug and 8 Oct 2026, then stay at 1.0.
- */
-export function demandTrend(clubId: string, type: MachineType, date: string): number {
-  if (clubId === 'bfit-hira-men' && type === 'indoor-bike') {
-    const days = (Date.parse(`${date}T12:00:00Z`) - Date.parse('2026-08-27T12:00:00Z')) / 86_400_000;
-    return Math.max(0.6, Math.min(1, 0.6 + 0.4 * (days / 42)));
-  }
-  return 1;
 }
 
 /** Typical session length in minutes per type (gyms other than the live one). */
@@ -60,8 +49,8 @@ export const SESSION_MIN: Record<MachineType, number> = {
   'preacher-curl': 6, 'standing-preacher': 6,
 };
 
-/** Daily visits multiple per gym (1 = 3.2 x capacity). Hira runs close to full in the evening. */
-export const VISIT_FACTOR: Record<string, number> = { 'bfit-hira-men': 2.1, 'bfit-nada-men': 1.15 };
+/** Daily visits multiple per gym (1 = 3.2 x capacity). An Nakheel draws fewer visits for its floor area. */
+export const VISIT_FACTOR: Record<string, number> = { 'optimo-nakheel-men': 0.85 };
 
 /** Purchase price of one new unit, SAR (assumption, rounded). */
 export const PRICE_SAR: Record<MachineType, number> = {
@@ -73,8 +62,8 @@ export const PRICE_SAR: Record<MachineType, number> = {
 /** Resale value of a used unit as a share of the new price (assumption). */
 export const RESALE_SHARE = 0.35;
 
-/** Cost to move one unit between gyms, SAR (assumption): within Riyadh, or Riyadh to Jeddah. */
-export const MOVE_COST_SAR = { sameCity: 600, otherCity: 2_400 };
+/** Cost to move one unit between the two Riyadh gyms, SAR (assumption). */
+export const MOVE_COST_SAR = 600;
 
 /** Preventive service interval in hours of use (assumption). */
 export const SERVICE_INTERVAL_H: Record<MachineType, number> = {

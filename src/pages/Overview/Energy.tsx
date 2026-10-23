@@ -4,7 +4,7 @@ import { Card, InfoTip, KpiTile, Sparkline } from '../../components';
 import { useI18n } from '../../i18n';
 import { useDemo, ENERGY_SPLIT, TARIFF_SAR_PER_KWH } from '../../data';
 import { dailySavingsSar, mean, ytdSavingsSar, type ClubRow } from './metrics';
-import { BrandTag, CountUp, HBarList, useFmtMwh, useFmtSarCompact } from './shared';
+import { CountUp, HBarList, useFmtMwh, useFmtSarCompact } from './shared';
 
 /** Energy consumption (CV-06, CV-07, CV-08) with the SAR savings highlight. */
 export function EnergySection({ rows }: { rows: ClubRow[] }) {
@@ -87,7 +87,7 @@ export function EnergySection({ rows }: { rows: ClubRow[] }) {
             items={byMonth.map((r, i) => ({
               key: r.club.id,
               label: <span className="ov-hbars__name">{pick(r.club.nameEn, r.club.nameAr)}</span>,
-              tag: i === 0 && byMonth.length > 1 ? <span className="ov-mark ov-mark--warn">{t('overview.ranking.highest')}</span> : <BrandTag brand={r.club.brand} />,
+              tag: i === 0 && byMonth.length > 1 ? <span className="ov-mark ov-mark--warn">{t('overview.ranking.highest')}</span> : undefined,
               value: r.energyMonthKwh,
               display: mwh.full(r.energyMonthKwh),
               highlight: i === 0,

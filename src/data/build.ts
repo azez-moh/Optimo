@@ -5,10 +5,10 @@ import { buildClubs, DISTRICTS, LIVE_CLUB_ID } from './clubs';
 import { MALQA_PLACEMENTS } from './floorData';
 import { buildLibrary } from './library';
 import { clamp, int, rngFor, uniform } from './rng';
-import { demandShare, REQUIRED_TYPES, SERVICE_INTERVAL_H, SESSION_MIN } from './fleet';
+import { demandShare, LIVE_SESSION_MIN, REQUIRED_TYPES, SERVICE_INTERVAL_H, SESSION_MIN } from './fleet';
 
 /*
-  Static inventory of the 6 gyms. Al Malqa Men follows the Build 8.7 snapshot exactly
+  Static inventory of the 2 gyms. Al Malqa Men follows the Build 8.7 snapshot exactly
   (40 machines, 16 cameras, 64 zones). The other clubs reuse the same floor template, scaled to their size.
 */
 
@@ -87,7 +87,7 @@ function clubMachines(club: Club): { machines: Machine[]; cameras: Camera[]; zon
   let placements = MALQA_PLACEMENTS;
   let camKeys = MALQA_CAMERAS.map((c) => c.key);
   if (!live) {
-    const target = clamp(Math.round(40 * scale * (club.brand === 'bfit' ? 0.9 : 1)), 16, 38);
+    const target = clamp(Math.round(40 * scale), 16, 38);
     // keep a mix: rank every placement by a seeded score, keep the best `target`
     // required types (fleet.ts) first, in template order, then the best seeded scores
     const need = { ...(REQUIRED_TYPES[club.id] ?? {}) } as Record<string, number>;
@@ -141,7 +141,7 @@ function clubMachines(club: Club): { machines: Machine[]; cameras: Camera[]; zon
     }
     // Live gym: Build 8.7 snapshot. Other gyms: the demand profile in fleet.ts (share of open time in use).
     const openMinDay = (club.hours.close - club.hours.open) * 60;
-    const avg = live ? (p.todaySessions > 0 ? Math.max(3, p.todayUsedMin / p.todaySessions) : 6) : SESSION_MIN[p.type];
+    const avg = live ? (LIVE_SESSION_MIN[p.type] ?? (p.todaySessions > 0 ? Math.max(3, p.todayUsedMin / p.todaySessions) : 6)) : SESSION_MIN[p.type];
     const sessions = live ? Math.max(2, p.todaySessions)
       : Math.max(1, Math.round((demandShare(club.id, p.type) * openMinDay * uniform(r, 0.85, 1.15)) / avg));
     // hours of use since the last preventive service (from the service log sync); about 1 in 9 is past due
@@ -197,7 +197,7 @@ function clubBms(club: Club) {
 function clubIntegrations(club: Club, acCount: number): Integration[] {
   const r = rngFor(club.id, 'integrations');
   const net = 20 + DISTRICTS.findIndex((d) => d.id === club.district);
-  const bacnetCount = club.id === LIVE_CLUB_ID ? 3 : club.brand === 'optimo' ? 2 : 1;
+  const bacnetCount = club.id === LIVE_CLUB_ID ? 3 : 2;
   const out: Integration[] = [{
     id: `${club.id}:ha`, clubId: club.id, kind: 'home-assistant', nameEn: 'Home Assistant', nameAr: 'Home Assistant',
     gateway: `10.${net}.1.10`, covers: 0, coversOf: 0, subscriptions: 0, running: true, uptimeH: Math.round(uniform(r, 20, 400) * 10) / 10,

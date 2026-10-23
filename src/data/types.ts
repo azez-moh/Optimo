@@ -5,8 +5,7 @@
   Bilingual text fields come in pairs (xxxEn / xxxAr); render them with i18n pick(en, ar).
 */
 
-export type Brand = 'optimo' | 'bfit';
-export type RegionId = 'riyadh' | 'makkah';
+export type RegionId = 'riyadh';
 export type Gender = 'men' | 'women';
 export type Level = 'critical' | 'warning' | 'info';
 /** Signed-in role: COO (every gym) or Facility Manager (one gym, building operations). */
@@ -44,7 +43,6 @@ export interface OpeningHours {
 export interface Club {
   id: string;
   code: string;
-  brand: Brand;
   nameEn: string;
   nameAr: string;
   shortEn: string;

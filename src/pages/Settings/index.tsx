@@ -7,7 +7,7 @@ import { useTheme } from '../../theme/theme';
 import { useDemo, focusClub } from '../../data';
 import { useScope, REGIONS } from '../../layout/filters';
 import { scopeLabel } from '../../layout/scopeLabel';
-import type { Scope } from '../../data/types';
+import type { RegionId, Scope } from '../../data/types';
 import { MORE_GROUPS, MORE_PAGES, morePageBySlug, type MorePage } from './morePages';
 import { MoreView } from './MoreViews';
 import './settings.css';
@@ -50,7 +50,7 @@ function AppearanceCard() {
 const encodeScope = (s: Scope) => (s.level === 'all' ? 'all' : s.level === 'region' ? `region:${s.region}` : s.level === 'district' ? `district:${s.district}` : `club:${s.clubId}`);
 function decodeScope(v: string): Scope {
   const [k, id] = v.split(':');
-  if (k === 'region') return { level: 'region', region: id as 'riyadh' | 'makkah' };
+  if (k === 'region') return { level: 'region', region: id as RegionId };
   if (k === 'district') return { level: 'district', district: id };
   if (k === 'club') return { level: 'club', clubId: id };
   return { level: 'all' };
