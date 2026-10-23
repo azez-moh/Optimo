@@ -1,15 +1,18 @@
-import { useEffect, useMemo, useRef } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { Activity, Bell, Building2, Gauge, Leaf, Users, Zap } from 'lucide-react';
 import { KpiTile, PageHeader, Segmented, Tabs, type TabDef } from '../../components';
 import { useI18n } from '../../i18n';
 import { useScope } from '../../layout/filters';
 import { useAccess } from '../../layout/access';
 import { scopeLabel } from '../../layout/scopeLabel';
-import { useDemo, TARIFF_SAR_PER_KWH } from '../../data';
+import { useDemo, TARIFF_SAR_PER_KWH, LIVE_CLUB_ID, type MachineType } from '../../data';
 import { clubRows, machineBaseline, mean, peopleLastWeek, PERIODS, type Period } from './metrics';
 import { AsAtLine, CountUp, useFmtMwh, useFmtSarCompact } from './shared';
-import { ClubRanking, METRICS, type Metric } from './Ranking';
+import { buildInsights, gymStats, insightsForCell, windows, type GymStats } from './insights';
+import { usePlan } from './plan';
+import { ActionPlan, RecDrawer, RecommendedActions, useTx } from './Insights';
+import { CompareDrawer, EquipmentMatrix, GymComparison, ThisGym, useGymCmp } from './Compare';
 import { BusinessSection } from './Business';
 import { EnergySection } from './Energy';
 import { BmsSection } from './Bms';
@@ -28,14 +31,12 @@ function ChainOverview() {
   const i18n = useI18n();
   const { t, fmtNumber } = i18n;
   const data = useDemo();
-  const { scope, clubs } = useScope();
+  const { scope, clubs, allClubs } = useScope();
   const [params, setParams] = useSearchParams();
-  const navigate = useNavigate();
   const mwh = useFmtMwh();
   const sarC = useFmtSarCompact();
 
   const period: Period = PERIODS.includes(params.get('p') as Period) ? (params.get('p') as Period) : 'now';
-  const metric: Metric = METRICS.includes(params.get('metric') as Metric) ? (params.get('metric') as Metric) : 'people';
   const section: Section = SECTIONS.includes(params.get('section') as Section) ? (params.get('section') as Section) : 'business';
 
   const setParam = (k: string, v: string | null) => {
@@ -51,6 +52,43 @@ function ChainOverview() {
   };
 
   const rows = useMemo(() => clubRows(data, clubs, period), [data, clubs, period]);
+
+  // ---------- comparison across all gyms and recommended actions (complete days, stable through the day) ----------
+  const allRows = useMemo(() => clubRows(data, allClubs, 'now'), [data, allClubs]);
+  const { date } = data.live;
+  /* eslint-disable react-hooks/exhaustive-deps */
+  // the 8-week analysis takes about a second the first time each day: paint the page first, then fill it in
+  const [ready, setReady] = useState(false);
+  useEffect(() => { const id = window.setTimeout(() => setReady(true), 30); return () => window.clearTimeout(id); }, []);
+  const insights = useMemo(() => (ready ? buildInsights(data) : []), [ready, date, data.machines, data.clubs, data.areas, data.acUnits, data.lights]);
+  const stats = useMemo(() => {
+    if (!ready) return new Map<string, GymStats>();
+    const w4 = windows(date).w4;
+    return new Map<string, GymStats>(data.clubs.map((c) => [c.id, gymStats(data, c, w4)]));
+  }, [ready, date, data.machines, data.clubs]);
+  /* eslint-enable react-hooks/exhaustive-deps */
+  const gyms = useGymCmp(allRows, stats);
+  const plan = usePlan(data);
+  const x = useTx();
+  const isAll = scope.level === 'all';
+  const scopeIds = clubs.map((c) => c.id);
+  const scopeGym = scope.level === 'club' ? gyms.find((g) => g.club.id === scope.clubId) : undefined;
+
+  // compare two gyms, deep-linkable as ?compare=<gymA>,<gymB>
+  const cmpParam = params.get('compare');
+  const cmpIds = cmpParam ? cmpParam.split(',').filter((id) => data.clubs.some((c) => c.id === id)) : [];
+  const openCompare = (pre?: string) => {
+    const ids = data.clubs.map((c) => c.id);
+    const a = pre ?? scopeGym?.club.id ?? LIVE_CLUB_ID;
+    let b = scopeGym && scopeGym.club.id !== a ? scopeGym.club.id : ids[(ids.indexOf(a) + 1) % ids.length];
+    if (b === a) b = ids[(ids.indexOf(a) + 1) % ids.length];
+    setParam('compare', `${a},${b}`);
+  };
+
+  // matrix cell -> its recommendations
+  const [cell, setCell] = useState<{ type: MachineType; clubId: string } | null>(null);
+  const planRef = useRef<HTMLDivElement>(null);
+  const viewPlan = useCallback(() => planRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), []);
 
   // ---------- 4 summary KPIs ----------
   const cap = clubs.reduce((a, c) => a + c.capacity, 0);
@@ -128,8 +166,30 @@ function ChainOverview() {
           hint={<span className={nCrit ? 'ov-crit-text' : ''}>{t('overview.kpi.alertsSplit', { c: fmtNumber(nCrit), w: fmtNumber(nWarn), i: fmtNumber(nInfo) })}</span>} />
       </div>
 
-      <ClubRanking rows={rows} metric={metric} period={period} onMetric={(m) => setParam('metric', m === 'people' ? null : m)}
-        onShowCard={(id) => navigate(`/branches?club=${encodeURIComponent(id)}`)} />
+      {!ready && <div className="card card--pad-md in-loading" role="status"><span className="live-dot" aria-hidden />{t('insights.recs.loading')}</div>}
+
+      {ready && scopeGym && (
+        <ThisGym g={scopeGym} gyms={gyms} recs={insights.filter((i) => i.clubIds.includes(scopeGym.club.id) && !plan.isDismissed(i.id)).length}
+          onCompare={() => openCompare(scopeGym.club.id)} />
+      )}
+
+      {ready && (<>
+      <RecommendedActions list={insights} scopeIds={scopeIds} isAll={isAll} plan={plan} highlightId={null} onViewPlan={viewPlan} />
+
+      <div ref={planRef} className="ov-anchor"><ActionPlan plan={plan} /></div>
+
+      <GymComparison gyms={gyms} scopeIds={scopeIds} isAll={isAll} onCompare={openCompare} />
+
+      <EquipmentMatrix gyms={gyms} insights={insights.filter((i) => !plan.isDismissed(i.id))} scopeIds={scopeIds} isAll={isAll}
+        onCell={(type, clubId) => setCell({ type, clubId })} />
+
+      <RecDrawer open={!!cell} onClose={() => setCell(null)} plan={plan} onViewPlan={viewPlan}
+        title={cell ? x.t('matrix.pickTitle', { type: x.typeLabel(cell.type), gym: x.gym(cell.clubId) }) : ''}
+        items={cell ? insightsForCell(insights, cell.type, cell.clubId).filter((i) => !plan.isDismissed(i.id)) : []} />
+
+      <CompareDrawer open={cmpIds.length === 2} a={cmpIds[0] ?? ''} b={cmpIds[1] ?? ''} gyms={gyms} insights={insights.filter((i) => !plan.isDismissed(i.id))}
+        onChange={(a, b) => setParam('compare', `${a},${b}`)} onClose={() => setParam('compare', null)} />
+      </>)}
 
       <div ref={detailsRef} className="ov-details">
         <Tabs ariaLabel={t('overview.sections.label')} tabs={tabs} value={section} onChange={(s) => setParam('section', s)} />

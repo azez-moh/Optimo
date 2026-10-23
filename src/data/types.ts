@@ -116,6 +116,8 @@ export interface Machine {
   baseSessions: number;
   avgSessionMin: number;
   enabled: boolean;
+  /** Hours of use since the last preventive service (service log; see SERVICE_INTERVAL_H in fleet.ts). */
+  hoursSinceService: number;
 }
 
 export interface MachineLive {

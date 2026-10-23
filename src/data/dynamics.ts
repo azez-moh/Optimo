@@ -4,6 +4,7 @@ import type {
 import { LIVE_CLUB_ID } from './clubs';
 import { chance, clamp, int, lognormal, normal, pick, rngFor, uniform, weightedPick } from './rng';
 import { addDays, dowOf, localParts, msAt } from './time';
+import { demandTrend, VISIT_FACTOR } from './fleet';
 
 /*
   Time-dependent generators. Every function is pure and seeded by (id, date, stream), so a given
@@ -50,13 +51,13 @@ export function dowFactor(date: string): number {
 const AVG_STAY_MIN = 90;
 const visitCache = new Map<string, number[]>();
 
-/** Arrivals per hour for a club on a date (24 values). Daily visits are about 3.2 x capacity. */
+/** Arrivals per hour for a club on a date (24 values). Daily visits are about 3.2 x capacity (x VISIT_FACTOR in fleet.ts). */
 export function arrivalsByHour(club: Club, date: string): number[] {
   const key = `${club.id}|${date}`;
   const hit = visitCache.get(key);
   if (hit) return hit;
   const r = rngFor(club.id, date, 'visits');
-  const daily = club.capacity * 3.2 * dowFactor(date) * lognormal(r, 1, 0.08);
+  const daily = club.capacity * 3.2 * (VISIT_FACTOR[club.id] ?? 1) * dowFactor(date) * lognormal(r, 1, 0.08);
   const w = Array.from({ length: 24 }, (_, h) => busyWeight(club, date, h));
   const sum = w.reduce((a, b) => a + b, 0) || 1;
   const out = w.map((x) => (x > 0 ? Math.max(0, (daily * x) / sum * lognormal(r, 1, 0.12)) : 0));
@@ -96,7 +97,7 @@ export function machineSessions(machine: Machine, club: Club, date: string): Ses
   const hit = sessionCache.get(key);
   if (hit) return hit;
   const r = rngFor(machine.id, date, 'sessions');
-  const n = machine.enabled ? Math.max(0, Math.round(machine.baseSessions * dowFactor(date) * lognormal(r, 1, 0.14))) : 0;
+  const n = machine.enabled ? Math.max(0, Math.round(machine.baseSessions * demandTrend(machine.clubId, machine.type, date) * dowFactor(date) * lognormal(r, 1, 0.14))) : 0;
   const hours = Array.from({ length: 24 }, (_, h) => h);
   const weights = hours.map((h) => busyWeight(club, date, h));
   const starts: number[] = [];

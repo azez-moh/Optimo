@@ -5,9 +5,10 @@ import { buildClubs, DISTRICTS, LIVE_CLUB_ID } from './clubs';
 import { MALQA_PLACEMENTS } from './floorData';
 import { buildLibrary } from './library';
 import { clamp, int, rngFor, uniform } from './rng';
+import { demandShare, REQUIRED_TYPES, SERVICE_INTERVAL_H, SESSION_MIN } from './fleet';
 
 /*
-  Static inventory of the 12 clubs. Al Malqa Men follows the Build 8.7 snapshot exactly
+  Static inventory of the 6 gyms. Al Malqa Men follows the Build 8.7 snapshot exactly
   (40 machines, 16 cameras, 64 zones). The other clubs reuse the same floor template, scaled to their size.
 */
 
@@ -88,8 +89,14 @@ function clubMachines(club: Club): { machines: Machine[]; cameras: Camera[]; zon
   if (!live) {
     const target = clamp(Math.round(40 * scale * (club.brand === 'bfit' ? 0.9 : 1)), 16, 38);
     // keep a mix: rank every placement by a seeded score, keep the best `target`
+    // required types (fleet.ts) first, in template order, then the best seeded scores
+    const need = { ...(REQUIRED_TYPES[club.id] ?? {}) } as Record<string, number>;
     placements = [...MALQA_PLACEMENTS]
-      .map((p) => ({ p, s: r() + (p.type === 'treadmill' ? 0.25 : 0) }))
+      .map((p) => {
+        const base = r() + (p.type === 'treadmill' ? 0.25 : 0);
+        if ((need[p.type] ?? 0) > 0) { need[p.type]--; return { p, s: 10 + base }; }
+        return { p, s: base };
+      })
       .sort((a, b) => b.s - a.s)
       .slice(0, target)
       .map((x) => x.p);
@@ -132,12 +139,19 @@ function clubMachines(club: Club): { machines: Machine[]; cameras: Camera[]; zon
         motionThreshold: int(r, 1, 3), activateSec: int(r, 2, 5), releaseSec: 15, watching: true, polygon: [],
       });
     }
-    const avg = p.todaySessions > 0 ? Math.max(3, p.todayUsedMin / p.todaySessions) : 6;
-    const sessions = live ? Math.max(2, p.todaySessions) : Math.max(2, Math.round(p.todaySessions * (club.capacity / 160) * uniform(r, 0.75, 1.2)));
+    // Live gym: Build 8.7 snapshot. Other gyms: the demand profile in fleet.ts (share of open time in use).
+    const openMinDay = (club.hours.close - club.hours.open) * 60;
+    const avg = live ? (p.todaySessions > 0 ? Math.max(3, p.todayUsedMin / p.todaySessions) : 6) : SESSION_MIN[p.type];
+    const sessions = live ? Math.max(2, p.todaySessions)
+      : Math.max(1, Math.round((demandShare(club.id, p.type) * openMinDay * uniform(r, 0.85, 1.15)) / avg));
+    // hours of use since the last preventive service (from the service log sync); about 1 in 9 is past due
+    const rs = rngFor(club.id, p.id, 'service');
+    const interval = SERVICE_INTERVAL_H[p.type];
+    const hoursSinceService = Math.round(interval * (rs() < 0.11 ? uniform(rs, 1.03, 1.3) : uniform(rs, 0.08, 0.93)));
     machines.push({
       id, clubId: club.id, type: p.type, num: p.num, nameEn: p.nameEn, nameAr: p.nameAr,
       x: p.x, z: p.z, rot: p.rot, cameraId: camFor(p.camera), zoneIds, rule: p.rule,
-      baseSessions: sessions, avgSessionMin: Math.round(avg * 10) / 10, enabled: true,
+      baseSessions: sessions, avgSessionMin: Math.round(avg * 10) / 10, enabled: true, hoursSinceService,
     });
   }
   // polygons laid out per camera frame

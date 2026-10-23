@@ -235,6 +235,83 @@ export function peakHours(d: D, clubId: string, from: string, to: string, types?
   return out.map((x) => Math.round(x * 10) / 10);
 }
 
+// ---------- usage by machine type (complete days; the recommendations and the gym comparison) ----------
+
+export interface TypeUsage {
+  type: MachineType;
+  /** Units in service. */
+  units: number;
+  sessions: number;
+  usedMin: number;
+  openMin: number;
+  /** Share of open time in use, percent (same measure as the Usage Report). */
+  utilPct: number;
+  /** Share of evening peak minutes (5 PM to 9 PM) with every unit of the type in use, percent. */
+  peakFullPct: number;
+  /** Hours of use in the window, all units. */
+  usedHours: number;
+}
+
+/** Evening peak window used for "full at peak" (minutes from midnight). */
+export const PEAK_FROM_MIN = 17 * 60;
+export const PEAK_TO_MIN = 21 * 60;
+
+const openMinCache = new Map<string, number>();
+function openMinCached(club: Club, date: string): number {
+  const k = `${club.id}|${date}`;
+  let v = openMinCache.get(k);
+  if (v === undefined) { v = openMinutes(club, date); openMinCache.set(k, v); }
+  return v;
+}
+
+const typeUsageCache = new Map<string, TypeUsage[]>();
+
+/**
+ * Usage by machine type for one gym over [from, to] (inclusive, complete days only: pass dates before today).
+ * Uses the same sessions as the Usage Report, so the numbers agree with it for the same dates.
+ */
+export function typeUsage(d: Pick<D, 'machines'>, club: Club, from: string, to: string): TypeUsage[] {
+  const ms = d.machines.filter((m) => m.clubId === club.id && m.enabled);
+  const key = `${club.id}|${from}|${to}|${ms.map((m) => `${m.id}:${m.baseSessions}`).join(',')}`;
+  const hit = typeUsageCache.get(key);
+  if (hit) return hit;
+  const dates = dateRange(from, to);
+  const byType = new Map<MachineType, Machine[]>();
+  for (const m of ms) byType.set(m.type, [...(byType.get(m.type) ?? []), m]);
+  const span = PEAK_TO_MIN - PEAK_FROM_MIN;
+  const out: TypeUsage[] = [];
+  for (const [type, list] of byType) {
+    let sessions = 0, usedMin = 0, openMin = 0, peakFull = 0, peakOpen = 0;
+    for (const date of dates) {
+      const om = openMinCached(club, date);
+      openMin += om * list.length;
+      const busy = new Int16Array(span);
+      for (const m of list) {
+        for (const s of machineSessions(m, club, date)) {
+          sessions++;
+          usedMin += s.end - s.start;
+          const a = Math.max(PEAK_FROM_MIN, Math.floor(s.start));
+          const b = Math.min(PEAK_TO_MIN, Math.ceil(s.end));
+          for (let t = a; t < b; t++) busy[t - PEAK_FROM_MIN]++;
+        }
+      }
+      if (isOpenAt(club, date, PEAK_FROM_MIN)) {
+        peakOpen += span;
+        for (let i = 0; i < span; i++) if (busy[i] >= list.length) peakFull++;
+      }
+    }
+    out.push({
+      type, units: list.length, sessions, usedMin: Math.round(usedMin), openMin,
+      utilPct: openMin ? Math.round((usedMin / openMin) * 1000) / 10 : 0,
+      peakFullPct: peakOpen ? Math.round((peakFull / peakOpen) * 1000) / 10 : 0,
+      usedHours: Math.round(usedMin / 60),
+    });
+  }
+  out.sort((a, b) => a.type.localeCompare(b.type));
+  typeUsageCache.set(key, out);
+  return out;
+}
+
 // ---------- busy heatmap and people ----------
 
 /** Arrivals by club and hour for one date (heatmap rows). */
