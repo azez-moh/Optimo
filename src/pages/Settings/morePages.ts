@@ -36,7 +36,7 @@ export const MORE_PAGES: MorePage[] = [
   { slug: 'overview-fb', group: 'business', kind: 'view', relatedPage: 'overview',
     nameEn: 'Overview (alternative layout)', nameAr: 'نظرة عامة (تخطيط بديل)',
     titleEn: 'Overview (alternative layout)', titleAr: 'نظرة عامة (تخطيط بديل)',
-    descEn: 'The network at a glance, laid out gym by gym.', descAr: 'الشبكة في لمحة، مرتبة صالة رياضية تلو الأخرى.' },
+    descEn: 'The network at a glance, laid out per gym.', descAr: 'الشبكة في لمحة، مرتبة صالة رياضية تلو الأخرى.' },
   { slug: 'branches-fb', group: 'business', kind: 'view', relatedPage: 'branches',
     nameEn: 'Branches (alternative layout)', nameAr: 'الفروع (تخطيط بديل)',
     titleEn: 'Branches (alternative layout)', titleAr: 'الفروع (تخطيط بديل)',
