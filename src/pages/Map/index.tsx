@@ -313,7 +313,7 @@ export default function MapPage() {
           <section className="mapkpis" aria-label={title}>
             <KpiTile label={t('map.kpi.clubs')} icon={Store} value={fmtNumber(k.clubs)} info={t('map.kpi.info.clubs')}
               hint={brandSplit(t, k.optimo, k.clubs - k.optimo)} />
-            <KpiTile label={t('map.kpi.people')} icon={Users} value={fmtNumber(k.people)} unit={t('map.kpi.ofCapacity', { n: fmtNumber(k.capacity) })}
+            <KpiTile live label={t('map.kpi.people')} icon={Users} value={fmtNumber(k.people)} unit={t('map.kpi.ofCapacity', { n: fmtNumber(k.capacity) })}
               info={t('map.kpi.info.people') + excludedNote} hint={t('map.kpi.full', { pct: fmtNumber(k.pct) })} />
             <KpiTile className={k.open > 0 ? 'mapkpi--alert' : ''} label={t('map.kpi.openItems')} icon={ShieldAlert} value={fmtNumber(k.open)}
               info={t('map.kpi.info.openItems') + excludedNote}

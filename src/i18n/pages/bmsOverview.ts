@@ -63,13 +63,13 @@ export const en = {
   },
   info: {
     running: 'Counts the air-conditioning units that report they are on, out of every unit mapped in this building.',
-    lit: 'Fittings currently lit, out of every fitting on the mapped lighting switches.',
-    presence: 'People estimated in each area now, from the AI Vision count of people in the gym.',
+    lit: 'Fittings lit, out of every fitting on the mapped lighting switches.',
+    presence: 'People estimated in each area, from the AI Vision count of people in the gym.',
     zones: 'Every area of the building with the worst state of its air-conditioning units and its average reading.',
   },
   col: {
     unit: 'Unit', on: 'On', modeFan: 'Mode and fan', setpoint: 'Setpoint', reading: 'Reading',
-    switch: 'Switch', lit: 'Lit', area: 'Area', floor: 'Floor', peopleNow: 'People now', presence: 'Presence',
+    switch: 'Switch', lit: 'Lit', area: 'Area', floor: 'Floor', peopleNow: 'People', presence: 'Presence',
     zone: 'Zone', status: 'State', size: 'Size', temperature: 'Temperature',
   },
   mode: { cool: 'Cool', fan: 'Fan', auto: 'Auto' },
@@ -151,13 +151,13 @@ export const ar: typeof en = {
   },
   info: {
     running: 'عدد وحدات التكييف التي تبلغ أنها تعمل من بين جميع الوحدات المربوطة في هذا المبنى.',
-    lit: 'وحدات الإنارة المضاءة الآن من بين جميع الوحدات على مفاتيح الإضاءة المربوطة.',
-    presence: 'العدد التقديري للأشخاص في كل منطقة الآن، من عدّ الرؤية الذكية للأشخاص في الصالة الرياضية.',
+    lit: 'وحدات الإنارة المضاءة من بين جميع الوحدات على مفاتيح الإضاءة المربوطة.',
+    presence: 'العدد التقديري للأشخاص في كل منطقة، من عدّ الرؤية الذكية للأشخاص في الصالة الرياضية.',
     zones: 'جميع مناطق المبنى مع أسوأ حالة لوحدات التكييف فيها ومتوسط قراءتها.',
   },
   col: {
     unit: 'الوحدة', on: 'تشغيل', modeFan: 'الوضع والمروحة', setpoint: 'درجة الضبط', reading: 'القراءة',
-    switch: 'المفتاح', lit: 'المضاءة', area: 'المنطقة', floor: 'الطابق', peopleNow: 'الأشخاص الآن', presence: 'الحضور',
+    switch: 'المفتاح', lit: 'المضاءة', area: 'المنطقة', floor: 'الطابق', peopleNow: 'الأشخاص', presence: 'الحضور',
     zone: 'المنطقة', status: 'الحالة', size: 'المساحة', temperature: 'الحرارة',
   },
   mode: { cool: 'تبريد', fan: 'مروحة', auto: 'تلقائي' },

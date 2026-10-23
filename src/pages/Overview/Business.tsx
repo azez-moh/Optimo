@@ -47,11 +47,11 @@ export function BusinessSection({ rows, period }: { rows: ClubRow[]; period: Per
   return (
     <div className="stack-lg">
       <div className="grid-kpi">
-        <KpiTile icon={Users} label={t('overview.business.peopleNow')} info={t('overview.business.peopleNowInfo')} value={fmtNumber(peopleNow)}
+        <KpiTile icon={Users} live={period === 'now'} label={t('overview.business.peopleNow')} info={t('overview.business.peopleNowInfo')} value={fmtNumber(peopleNow)}
           delta={{ value: typicalNow ? ((peopleNow - typicalNow) / typicalNow) * 100 : 0, label: t('overview.business.vsTypical', { day: dayName }) }} />
         <KpiTile icon={UserCheck} label={t('overview.business.peopleToday')} info={t('overview.business.peopleTodayInfo')} value={fmtNumber(peopleToday)}
           delta={{ value: typicalToday ? ((peopleToday - typicalToday) / typicalToday) * 100 : 0, label: t('overview.business.vsTypical', { day: dayName }) }} />
-        <KpiTile icon={Gauge} label={t('overview.business.avgUsage')} info={t('overview.business.avgUsageInfo')} value={fmtNumber(avgUsage)} unit="%" />
+        <KpiTile icon={Gauge} live={period === 'now'} label={t('overview.business.avgUsage')} info={t('overview.business.avgUsageInfo')} value={fmtNumber(avgUsage)} unit="%" />
         <KpiTile icon={CalendarClock} label={t('overview.business.busiest')} info={t('overview.business.busiestInfo')}
           value={<span className="ov-slot">{fmtHour(slotStart)} – {fmtHour(slotStart + 2)}</span>} hint={t('overview.business.busiestSub')} />
       </div>
@@ -61,7 +61,7 @@ export function BusinessSection({ rows, period }: { rows: ClubRow[]; period: Per
             cols={SLOT_HOURS.map(fmtHour)} onRow={showCard}
             ariaLabel={t('overview.business.heatAria', { club: best.club, hour: fmtHour(best.h) })} />
         </Card>
-        <Card title={<span className="ov-card-title">{usageTitle}</span>} info={t('overview.business.usageInfo')}>
+        <Card live={period === 'now'} title={<span className="ov-card-title">{usageTitle}</span>} info={t('overview.business.usageInfo')}>
           <HBarList ariaLabel={t('overview.business.usageAria')} max={100}
             items={usage.map((r, i) => ({
               key: r.club.id,

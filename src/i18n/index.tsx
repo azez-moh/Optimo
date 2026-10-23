@@ -23,7 +23,7 @@ function flatten(obj: Tree, prefix = '', out: Flat = {}): Flat {
   Page dictionaries: every file src/i18n/pages/<page>.ts is merged automatically.
   The file must export { en: {...}, ar: {...} } (as default export, or as named exports `en` and `ar`,
   or as any named export object holding both). Keys are namespaced by the file name:
-    src/i18n/pages/liveFloor.ts  { en: { kpi: { inUse: 'In use now' } } }  ->  t('liveFloor.kpi.inUse')
+    src/i18n/pages/liveFloor.ts  { en: { kpi: { inUse: 'In use' } } }  ->  t('liveFloor.kpi.inUse')
 */
 type PageModule = Record<string, unknown>;
 const pageModules = import.meta.glob<PageModule>('./pages/*.ts', { eager: true });

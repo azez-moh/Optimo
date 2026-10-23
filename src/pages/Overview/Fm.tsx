@@ -127,7 +127,7 @@ export function FmOverview() {
               {nAck > 0 && <span className="faint">{t('fm.kpi.alarmsAck', { n: fmtNumber(nAck) })}</span>}
             </span>
           )} />
-        <KpiTile icon={ThermometerSun} label={t('fm.kpi.comfort')} info={t('fm.kpi.comfortInfo')} to="/hvac"
+        <KpiTile icon={ThermometerSun} live label={t('fm.kpi.comfort')} info={t('fm.kpi.comfortInfo')} to="/hvac"
           className={outZones.length ? 'fm-kpi-warn' : ''}
           value={fmtNumber(outZones.length)} unit={t('fm.kpi.comfortOf', { n: fmtNumber(ctl.zones.length) })}
           hint={worst ? <span className="txt-warning">{t('fm.kpi.comfortWorst', { zone: pick(worst.area.nameEn, worst.area.nameAr), temp: deg(worst.maxReading) })}</span> : t('fm.kpi.comfortAll')} />
@@ -144,7 +144,7 @@ export function FmOverview() {
       </div>
 
       {/* ---------- building controls ---------- */}
-      <Card title={<span className="ov-card-title">{t('fm.controls.title')}</span>} info={t('fm.controls.info')} pad="md" className="fm-controls">
+      <Card live title={<span className="ov-card-title">{t('fm.controls.title')}</span>} info={t('fm.controls.info')} pad="md" className="fm-controls">
         <div className="fm-quick">
           <div className="fm-block fm-block--mode">
             <span className="fm-block__label">{t('fm.controls.mode')}<InfoTip text={t('fm.controls.modeInfo')} /></span>

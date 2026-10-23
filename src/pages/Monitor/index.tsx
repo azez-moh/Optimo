@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { ChevronDown, Pencil, Plus } from 'lucide-react';
-import { Badge, Button, EmptyState, InfoTip, PageHeader, Select, StatusBadge, Toggle } from '../../components';
+import { Badge, Button, EmptyState, InfoTip, LiveTag, PageHeader, Select, StatusBadge, Toggle } from '../../components';
 import { useI18n } from '../../i18n';
 import { CameraFrame } from '../Cameras/vision/CameraFrame';
 import { StreamAddress } from '../Cameras/vision/StreamAddress';
@@ -87,7 +87,7 @@ export default function MonitorPage() {
         </div>
 
         <aside className="mon__side" aria-label={t('monitor.machinesOn')}>
-          <h2 className="mon__side-title label">{t('monitor.machinesOn')}<InfoTip text={t('monitor.machinesOnInfo')} /></h2>
+          <h2 className="mon__side-title label">{t('monitor.machinesOn')}<LiveTag /><InfoTip text={t('monitor.machinesOnInfo')} /></h2>
           {groups.length === 0 && <EmptyState compact title={t('monitor.noMachines')} body={t('monitor.noMachinesBody')} />}
           {groups.map(({ machine: m, zones }) => {
             const mm = m!;

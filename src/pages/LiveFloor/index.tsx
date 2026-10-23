@@ -403,7 +403,7 @@ export default function LiveFloorPage() {
       {header}
 
       <div className="grid-kpi">
-        <KpiTile label={t('liveFloor.kpi.inUse')} value={fmtNumber(kpi.inUse)} icon={Users} info={t('liveFloor.kpi.inUseInfo')}
+        <KpiTile live label={t('liveFloor.kpi.inUse')} value={fmtNumber(kpi.inUse)} icon={Users} info={t('liveFloor.kpi.inUseInfo')}
           hint={t('liveFloor.kpi.inUseOf', { n: fmtNumber(kpi.total) })} />
         <KpiTile label={t('liveFloor.kpi.sessions')} value={fmtNumber(kpi.sessions)} info={t('liveFloor.kpi.sessionsInfo')} />
         <KpiTile label={t('liveFloor.kpi.used')} value={fmtDuration(kpi.used * 60)} info={t('liveFloor.kpi.usedInfo')} />

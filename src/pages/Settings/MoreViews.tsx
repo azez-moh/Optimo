@@ -98,8 +98,8 @@ function NetworkKpis() {
   const tot = totals(data, clubs);
   return (
     <Kpis>
-      <KpiTile label={t('settings.kpi.peopleIn')} value={fmtNumber(tot.peopleIn)} info={t('settings.kpi.peopleInInfo')} hint={t('settings.kpi.ofCapacity', { n: fmtNumber(tot.capacity) })} />
-      <KpiTile label={t('settings.kpi.machineUse')} value={fmtPercent(tot.machineUsagePct)} info={t('settings.kpi.machineUseInfo')} hint={t('settings.kpi.ofMachines', { n: fmtNumber(tot.machines) })} />
+      <KpiTile live label={t('settings.kpi.peopleIn')} value={fmtNumber(tot.peopleIn)} info={t('settings.kpi.peopleInInfo')} hint={t('settings.kpi.ofCapacity', { n: fmtNumber(tot.capacity) })} />
+      <KpiTile live label={t('settings.kpi.machineUse')} value={fmtPercent(tot.machineUsagePct)} info={t('settings.kpi.machineUseInfo')} hint={t('settings.kpi.ofMachines', { n: fmtNumber(tot.machines) })} />
       <KpiTile label={t('settings.kpi.energy')} value={fmtNumber(Math.round(tot.energyTodayKwh))} unit={t('common.kwh')} info={t('settings.kpi.energyInfo')} hint={t('settings.kpi.vsBaseline', { v: fmtEnergy(tot.baselineTodayKwh) })} />
       <KpiTile label={t('settings.kpi.alerts')} value={fmtNumber(tot.openAlerts)} info={t('settings.kpi.alertsInfo')} hint={t('settings.kpi.critical', { n: fmtNumber(tot.criticalAlerts) })} />
     </Kpis>
@@ -146,7 +146,7 @@ function BranchesAlt({ page }: { page: MorePage }) {
       <Purpose page={page} />
       <Kpis three>
         <KpiTile label={t('settings.kpi.clubs')} value={fmtNumber(rows.length)} info={t('settings.kpi.clubsInfo')} />
-        <KpiTile label={t('settings.kpi.openNow')} value={fmtNumber(lives.filter((l) => l!.isOpen).length)} info={t('settings.kpi.openNowInfo')} />
+        <KpiTile live label={t('settings.kpi.openNow')} value={fmtNumber(lives.filter((l) => l!.isOpen).length)} info={t('settings.kpi.openNowInfo')} />
         <KpiTile label={t('settings.kpi.attention')} value={fmtNumber(lives.filter((l) => l!.status !== 'ok').length)} info={t('settings.kpi.attentionInfo')} />
       </Kpis>
       <Card title={t('settings.lists.clubs')} pad="none">
@@ -171,9 +171,9 @@ function ConductorBuilding({ page }: { page: MorePage }) {
     <>
       <Purpose page={page} club={club} />
       <Kpis>
-        <KpiTile label={t('settings.kpi.peopleIn')} value={fmtNumber(l?.peopleIn ?? 0)} info={t('settings.kpi.peopleInInfo')} hint={t('settings.kpi.ofCapacity', { n: fmtNumber(club.capacity) })} />
+        <KpiTile live label={t('settings.kpi.peopleIn')} value={fmtNumber(l?.peopleIn ?? 0)} info={t('settings.kpi.peopleInInfo')} hint={t('settings.kpi.ofCapacity', { n: fmtNumber(club.capacity) })} />
         <KpiTile label={t('settings.kpi.energy')} value={fmtNumber(Math.round(l?.energyTodayKwh ?? 0))} unit={t('common.kwh')} info={t('settings.kpi.energyInfo')} hint={t('settings.kpi.vsBaseline', { v: fmtEnergy(l?.baselineTodayKwh ?? 0) })} />
-        <KpiTile label={t('settings.kpi.comfort')} value={fmtPercent(l?.comfortPct ?? 0)} info={t('settings.kpi.comfortInfo')} />
+        <KpiTile live label={t('settings.kpi.comfort')} value={fmtPercent(l?.comfortPct ?? 0)} info={t('settings.kpi.comfortInfo')} />
         <KpiTile label={t('settings.kpi.alerts')} value={fmtNumber(alerts.length)} info={t('settings.kpi.alertsInfo')} hint={t('settings.kpi.critical', { n: fmtNumber(alerts.filter((a) => a.level === 'critical').length) })} />
       </Kpis>
       <Card title={t('settings.lists.alerts')} pad="none">
@@ -195,7 +195,7 @@ function ConductorEnergy({ page }: { page: MorePage }) {
       <Purpose page={page} club={club} />
       <Kpis>
         <KpiTile label={t('settings.kpi.energy')} value={fmtNumber(Math.round(l?.energyTodayKwh ?? 0))} unit={t('common.kwh')} info={t('settings.kpi.energyInfo')} hint={t('settings.kpi.vsBaseline', { v: fmtEnergy(l?.baselineTodayKwh ?? 0) })} />
-        <KpiTile label={t('settings.kpi.powerNow')} value={fmtNumber(l?.powerKw ?? 0)} unit={t('settings.val.kw')} info={t('settings.kpi.powerNowInfo')} />
+        <KpiTile live label={t('settings.kpi.powerNow')} value={fmtNumber(l?.powerKw ?? 0)} unit={t('settings.val.kw')} info={t('settings.kpi.powerNowInfo')} />
         <KpiTile label={t('settings.kpi.savedToday')} value={fmtCurrency(saved * TARIFF_SAR_PER_KWH)} info={t('settings.kpi.savedTodayInfo', { t: fmtNumber(TARIFF_SAR_PER_KWH, 2) })} hint={fmtEnergy(saved)} />
         <KpiTile label={t('settings.kpi.savedMonth')} value={fmtCurrency(sav.month.savedSar)} info={t('settings.kpi.savedMonthInfo')} hint={fmtEnergy(sav.month.savedKwh)} />
       </Kpis>
@@ -232,9 +232,9 @@ function ConductorSpaces({ page }: { page: MorePage }) {
     <>
       <Purpose page={page} club={club} />
       <Kpis three>
-        <KpiTile label={t('settings.kpi.peopleIn')} value={fmtNumber(l?.peopleIn ?? 0)} info={t('settings.kpi.peopleInInfo')} hint={t('settings.kpi.ofCapacity', { n: fmtNumber(club.capacity) })} />
-        <KpiTile label={t('settings.kpi.comfort')} value={fmtPercent(l?.comfortPct ?? 0)} info={t('settings.kpi.comfortInfo')} />
-        <KpiTile label={t('settings.kpi.acOn')} value={`${fmtNumber(ac.filter((u) => u.live?.on).length)} / ${fmtNumber(ac.length)}`} info={t('settings.kpi.acOnInfo')} />
+        <KpiTile live label={t('settings.kpi.peopleIn')} value={fmtNumber(l?.peopleIn ?? 0)} info={t('settings.kpi.peopleInInfo')} hint={t('settings.kpi.ofCapacity', { n: fmtNumber(club.capacity) })} />
+        <KpiTile live label={t('settings.kpi.comfort')} value={fmtPercent(l?.comfortPct ?? 0)} info={t('settings.kpi.comfortInfo')} />
+        <KpiTile live label={t('settings.kpi.acOn')} value={`${fmtNumber(ac.filter((u) => u.live?.on).length)} / ${fmtNumber(ac.length)}`} info={t('settings.kpi.acOnInfo')} />
       </Kpis>
       <Card title={t('settings.lists.areas')} pad="none">
         <DataTable rows={rows} columns={cols} rowKey={(r) => r.area.id} initialSort={{ key: 'people', dir: 'desc' }} />
@@ -277,7 +277,7 @@ function ConductorSystems({ page }: { page: MorePage }) {
     <>
       <Purpose page={page} club={club} />
       <Kpis three>
-        <KpiTile label={t('settings.kpi.connectors')} value={`${fmtNumber(ints.filter((i) => i.running).length)} / ${fmtNumber(ints.length)}`} info={t('settings.kpi.connectorsInfo')} />
+        <KpiTile live label={t('settings.kpi.connectors')} value={`${fmtNumber(ints.filter((i) => i.running).length)} / ${fmtNumber(ints.length)}`} info={t('settings.kpi.connectorsInfo')} />
         <KpiTile label={t('settings.kpi.agentsConnected')} value={`${fmtNumber(agents.filter((a) => a.state?.connected).length)} / ${fmtNumber(agents.length)}`} info={t('settings.kpi.agentsConnectedInfo')} />
         <KpiTile label={t('settings.kpi.controlMode')} value={fmtNumber(agents.filter((a) => a.state?.connected && a.state.mode === 'control').length)} info={t('settings.kpi.controlModeInfo')} />
       </Kpis>
@@ -335,7 +335,7 @@ function ConductorReports({ page }: { page: MorePage }) {
     <>
       <Purpose page={page} club={club} />
       <Kpis three>
-        <KpiTile label={t('settings.kpi.machineUse')} value={`${fmtNumber(sum((r) => r.inUse))} / ${fmtNumber(sum((r) => r.machines))}`} info={t('settings.kpi.machineUseInfo')} />
+        <KpiTile live label={t('settings.kpi.machineUse')} value={`${fmtNumber(sum((r) => r.inUse))} / ${fmtNumber(sum((r) => r.machines))}`} info={t('settings.kpi.machineUseInfo')} />
         <KpiTile label={t('settings.kpi.sessions')} value={fmtNumber(sum((r) => r.sessionsToday))} info={t('settings.kpi.sessionsInfo')} />
         <KpiTile label={t('settings.kpi.usedTime')} value={fmtDuration(sum((r) => r.usedMinToday) * 60)} info={t('settings.kpi.usedTimeInfo')} />
       </Kpis>
@@ -460,7 +460,7 @@ function MachineData({ page }: { page: MorePage }) {
     <>
       <Purpose page={page} club={club} />
       <Kpis three>
-        <KpiTile label={t('settings.kpi.live')} value={fmtNumber(count('live'))} info={t('settings.kpi.liveInfo')} />
+        <KpiTile live label={t('settings.kpi.live')} value={fmtNumber(count('live'))} info={t('settings.kpi.liveInfo')} />
         <KpiTile label={t('settings.kpi.simulated')} value={fmtNumber(count('simulated'))} info={t('settings.kpi.simulatedInfo')} />
         <KpiTile label={t('settings.kpi.noSource')} value={fmtNumber(count('noSource'))} info={t('settings.kpi.noSourceInfo')} />
       </Kpis>
@@ -485,9 +485,9 @@ function LiveDataView({ page }: { page: MorePage }) {
     <>
       <Purpose page={page} club={club} />
       <Kpis three>
-        <KpiTile label={t('settings.kpi.reporting')} value={`${fmtNumber(rows.filter((r) => r.readingEn).length)} / ${fmtNumber(rows.length)}`} info={t('settings.kpi.reportingInfo')} />
-        <KpiTile label={t('settings.kpi.acOn')} value={`${fmtNumber(ac.filter((u) => u.live?.on).length)} / ${fmtNumber(ac.length)}`} info={t('settings.kpi.acOnInfo')} />
-        <KpiTile label={t('settings.kpi.lightsOn')} value={`${fmtNumber(lights.filter((l) => l.live?.on).length)} / ${fmtNumber(lights.length)}`} info={t('settings.kpi.lightsOnInfo')} />
+        <KpiTile live label={t('settings.kpi.reporting')} value={`${fmtNumber(rows.filter((r) => r.readingEn).length)} / ${fmtNumber(rows.length)}`} info={t('settings.kpi.reportingInfo')} />
+        <KpiTile live label={t('settings.kpi.acOn')} value={`${fmtNumber(ac.filter((u) => u.live?.on).length)} / ${fmtNumber(ac.length)}`} info={t('settings.kpi.acOnInfo')} />
+        <KpiTile live label={t('settings.kpi.lightsOn')} value={`${fmtNumber(lights.filter((l) => l.live?.on).length)} / ${fmtNumber(lights.length)}`} info={t('settings.kpi.lightsOnInfo')} />
       </Kpis>
       <Card title={t('settings.lists.readings')} pad="none">
         <DataTable rows={rows} columns={cols} rowKey={(r) => r.id} />
@@ -518,7 +518,7 @@ function AcCoverage({ page }: { page: MorePage }) {
       <Purpose page={page} club={club} />
       <Kpis three>
         <KpiTile label={t('settings.kpi.coverage')} value={fmtPercent(addressable ? (read / addressable) * 100 : 0, 1)} info={t('settings.kpi.coverageInfo')} />
-        <KpiTile label={t('settings.kpi.unitsRead')} value={fmtNumber(read)} info={t('settings.kpi.unitsReadInfo')} hint={t('settings.val.units', { n: fmtNumber(read), m: fmtNumber(addressable) })} />
+        <KpiTile live label={t('settings.kpi.unitsRead')} value={fmtNumber(read)} info={t('settings.kpi.unitsReadInfo')} hint={t('settings.val.units', { n: fmtNumber(read), m: fmtNumber(addressable) })} />
         <KpiTile label={t('settings.kpi.areasServed')} value={`${fmtNumber(areas.filter((a) => a.units > 0).length)} / ${fmtNumber(areas.length)}`} info={t('settings.kpi.areasServedInfo')} />
       </Kpis>
       <Card title={t('settings.lists.areas')} pad="none">
@@ -552,7 +552,7 @@ function DeviceHistory({ page }: { page: MorePage }) {
       <Kpis three>
         <KpiTile label={t('settings.kpi.sessions')} value={fmtNumber(rows.length)} info={t('settings.kpi.sessionsInfo')} />
         <KpiTile label={t('settings.kpi.usedTime')} value={fmtDuration(used * 60)} info={t('settings.kpi.usedTimeInfo')} />
-        <KpiTile label={t('settings.kpi.machineUse')} value={fmtNumber(rows.filter((r) => r.ongoing).length)} info={t('settings.kpi.machineUseInfo')} />
+        <KpiTile live label={t('settings.kpi.machineUse')} value={fmtNumber(rows.filter((r) => r.ongoing).length)} info={t('settings.kpi.machineUseInfo')} />
       </Kpis>
       <Card title={t('settings.lists.sessions')} pad="none">
         <DataTable rows={rows} columns={cols} rowKey={(r) => r.id} initialSort={{ key: 'start', dir: 'desc' }} empty={t('settings.lists.noSessions')} csvName="device-history-today" />
@@ -603,7 +603,7 @@ function Automations({ page }: { page: MorePage }) {
     <>
       <Purpose page={page} club={club} />
       <Kpis three>
-        <KpiTile label={t('settings.kpi.running')} value={`${fmtNumber(agents.filter((a) => a.state?.running).length)} / ${fmtNumber(agents.length)}`} info={t('settings.kpi.runningInfo')} />
+        <KpiTile live label={t('settings.kpi.running')} value={`${fmtNumber(agents.filter((a) => a.state?.running).length)} / ${fmtNumber(agents.length)}`} info={t('settings.kpi.runningInfo')} />
         <KpiTile label={t('settings.kpi.controlMode')} value={fmtNumber(agents.filter((a) => a.state?.connected && a.state.mode === 'control').length)} info={t('settings.kpi.controlModeInfo')} />
         <KpiTile label={t('settings.kpi.readOnly')} value={fmtNumber(agents.filter((a) => a.state?.connected && a.state.mode === 'read').length)} info={t('settings.kpi.readOnlyInfo')} />
       </Kpis>

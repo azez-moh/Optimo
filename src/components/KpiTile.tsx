@@ -4,6 +4,7 @@ import { TrendingDown, TrendingUp, Minus, type LucideIcon } from 'lucide-react';
 import { useI18n } from '../i18n';
 import { InfoTip } from './InfoTip';
 import { Sparkline } from './Sparkline';
+import { LiveTag } from './LiveTag';
 
 /**
  * Keeps a signed leading number ("−1", "+0.5", "−5.0%") in left-to-right order while any unit after it
@@ -41,12 +42,14 @@ export interface KpiTileProps {
   info: string;
   /** Small line under the value, e.g. a tariff note or target. */
   hint?: ReactNode;
+  /** Shows the green "Live" tag at the top inline-end (before the "i") for current-moment figures. */
+  live?: boolean;
   /** Makes the whole tile a link. */
   to?: string;
   className?: string;
 }
 
-export function KpiTile({ label, value, unit, icon: Icon, delta, spark, sparkSlot = 0, info, hint, to, className = '' }: KpiTileProps) {
+export function KpiTile({ label, value, unit, icon: Icon, delta, spark, sparkSlot = 0, info, hint, live, to, className = '' }: KpiTileProps) {
   const { t, fmtNumber } = useI18n();
   const navigate = useNavigate();
   let deltaNode: ReactNode = null;
@@ -78,7 +81,7 @@ export function KpiTile({ label, value, unit, icon: Icon, delta, spark, sparkSlo
           {Icon && <span className="kpi__icon"><Icon aria-hidden /></span>}
           <span>{label}</span>
         </div>
-        {info && <span className="kpi__end"><InfoTip text={info} /></span>}
+        {(info || live) && <span className="kpi__end">{live && <LiveTag />}{info && <InfoTip text={info} />}</span>}
       </div>
       <div className="kpi__value-row">
         <div className="kpi__value">

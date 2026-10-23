@@ -2,7 +2,7 @@
 // rename strings shared with Reports, Usage Report and Library Management. Keys resolve as t('machines.<key>').
 export const en = {
   title: 'Machines and Devices',
-  intro: 'Every machine, the zones that monitor it, and its state now. Expand a row for today\'s usage.',
+  intro: 'Every machine, the zones that monitor it, and its live state. Expand a row for today\'s usage.',
   count: '{n} machines',
   inUseN: '{n} in use',
   tabs: { aria: 'Machine views', byMachine: 'By machine', byType: 'By type' },
@@ -10,7 +10,7 @@ export const en = {
   typesNote: '{n} types, usage summed per type',
   col: {
     machine: 'Machine', type: 'Type', monitoredBy: 'Monitored by', logic: 'Logic', status: 'Status', sessions: 'Sessions',
-    machines: 'Machines', inUseNow: 'In use now', sessionsToday: 'Sessions today', usedToday: 'Used today', utilToday: 'Utilisation today',
+    machines: 'Machines', inUseNow: 'In use', sessionsToday: 'Sessions today', usedToday: 'Used today', utilToday: 'Utilisation today',
   },
   logic: { and: 'All enabled zones (AND)', or: 'Any enabled zone (OR)' },
   logicInfo: 'AND: the machine counts as in use only when every enabled zone sees use. OR: any one zone is enough.',
@@ -21,7 +21,7 @@ export const en = {
   expandType: 'Show the machines of type {name}',
   kpi: {
     machines: 'Machines tracked', machinesInfo: 'Enabled machines at this gym that the cameras watch.',
-    inUse: 'In use now', inUseInfo: 'Machines whose zones see use at this moment. The same number shows in Reports and on the Live Floor.',
+    inUse: 'In use', inUseInfo: 'Machines whose zones see use at this moment. The same number shows in Reports and on the Live Floor.',
     sessions: 'Sessions today', sessionsInfo: 'Separate uses counted since the gym opened today, all machines together.',
     util: 'Utilisation today', utilInfo: 'Used time divided by used plus idle time during opening hours today, all machines together.',
     ofMachines: 'of {n} machines',
@@ -78,7 +78,7 @@ export const en = {
 
 export const ar: typeof en = {
   title: 'الأجهزة والمعدات',
-  intro: 'كل جهاز والمناطق التي تراقبه وحالته الآن. افتح الصف لرؤية استخدام اليوم.',
+  intro: 'كل جهاز والمناطق التي تراقبه وحالته المباشرة. افتح الصف لرؤية استخدام اليوم.',
   count: '{n} جهازًا',
   inUseN: '{n} قيد الاستخدام',
   tabs: { aria: 'طرق عرض الأجهزة', byMachine: 'حسب الجهاز', byType: 'حسب النوع' },
@@ -86,7 +86,7 @@ export const ar: typeof en = {
   typesNote: '{n} أنواع، الاستخدام مجمع لكل نوع',
   col: {
     machine: 'الجهاز', type: 'النوع', monitoredBy: 'تراقبه', logic: 'المنطق', status: 'الحالة', sessions: 'الجلسات',
-    machines: 'الأجهزة', inUseNow: 'قيد الاستخدام الآن', sessionsToday: 'جلسات اليوم', usedToday: 'الاستخدام اليوم', utilToday: 'نسبة الاستخدام اليوم',
+    machines: 'الأجهزة', inUseNow: 'قيد الاستخدام', sessionsToday: 'جلسات اليوم', usedToday: 'الاستخدام اليوم', utilToday: 'نسبة الاستخدام اليوم',
   },
   logic: { and: 'كل المناطق المفعلة (و)', or: 'أي منطقة مفعلة (أو)' },
   logicInfo: 'و: يعد الجهاز قيد الاستخدام فقط عندما ترصد كل المناطق المفعلة استخدامًا. أو: تكفي منطقة واحدة.',
@@ -97,7 +97,7 @@ export const ar: typeof en = {
   expandType: 'عرض أجهزة نوع {name}',
   kpi: {
     machines: 'الأجهزة المرصودة', machinesInfo: 'الأجهزة المفعلة في هذه الصالة الرياضية التي تراقبها الكاميرات.',
-    inUse: 'قيد الاستخدام الآن', inUseInfo: 'الأجهزة التي ترصد مناطقها استخدامًا في هذه اللحظة. يظهر الرقم نفسه في التقارير وعلى المخطط الحي.',
+    inUse: 'قيد الاستخدام', inUseInfo: 'الأجهزة التي ترصد مناطقها استخدامًا في هذه اللحظة. يظهر الرقم نفسه في التقارير وعلى المخطط الحي.',
     sessions: 'جلسات اليوم', sessionsInfo: 'مرات الاستخدام المنفصلة منذ فتح الصالة الرياضية اليوم، لكل الأجهزة معًا.',
     util: 'نسبة الاستخدام اليوم', utilInfo: 'وقت الاستخدام مقسومًا على وقت الاستخدام والخمول خلال ساعات العمل اليوم، لكل الأجهزة معًا.',
     ofMachines: 'من {n} جهازًا',

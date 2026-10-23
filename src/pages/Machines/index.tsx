@@ -77,7 +77,7 @@ export default function MachinesPage() {
 
       <div className="grid-kpi">
         <KpiTile label={t('machines.kpi.machines')} icon={Cpu} value={fmtNumber(rows.length)} info={t('machines.kpi.machinesInfo')} hint={pick(club.nameEn, club.nameAr)} />
-        <KpiTile label={t('machines.kpi.inUse')} icon={Activity} value={fmtNumber(inUse)} info={t('machines.kpi.inUseInfo')} hint={t('machines.kpi.ofMachines', { n: fmtNumber(rows.length) })} />
+        <KpiTile live label={t('machines.kpi.inUse')} icon={Activity} value={fmtNumber(inUse)} info={t('machines.kpi.inUseInfo')} hint={t('machines.kpi.ofMachines', { n: fmtNumber(rows.length) })} />
         <KpiTile label={t('machines.kpi.sessions')} icon={Timer} value={fmtNumber(sessions)} info={t('machines.kpi.sessionsInfo')} hint={t('machines.kpi.inOpen')} />
         <KpiTile label={t('machines.kpi.util')} icon={Gauge} value={`${fmtNumber(util, 1)}%`} info={t('machines.kpi.utilInfo')} hint={fmtDuration(usedMin * 60)} />
       </div>

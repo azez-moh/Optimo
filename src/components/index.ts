@@ -4,6 +4,7 @@ export type { CardProps } from './Card';
 export { KpiTile, isolateLead } from './KpiTile';
 export type { KpiTileProps, KpiDelta } from './KpiTile';
 export { InfoTip } from './InfoTip';
+export { LiveTag } from './LiveTag';
 export { Sparkline } from './Sparkline';
 export { Badge, StatusBadge } from './Badge';
 export type { Tone, StatusKind } from './Badge';

@@ -85,9 +85,9 @@ export default function IntegrationPage() {
         actions={<Button icon={Plus} onClick={() => setAdding(true)}>{t('integration.addBtn')}</Button>} />
 
       <div className="grid-kpi">
-        <KpiTile icon={Power} label={t('integration.kpi.running')} value={fmtNumber(running)} unit={t('integration.kpi.of', { n: fmtNumber(conns.length) })} info={t('integration.kpi.runningInfo')} />
+        <KpiTile icon={Power} live label={t('integration.kpi.running')} value={fmtNumber(running)} unit={t('integration.kpi.of', { n: fmtNumber(conns.length) })} info={t('integration.kpi.runningInfo')} />
         <KpiTile icon={Waypoints} label={t('integration.kpi.covers')} value={fmtNumber(covers)} unit={t('integration.kpi.of', { n: fmtNumber(coversOf || covers) })} info={t('integration.kpi.coversInfo')} />
-        <KpiTile icon={Cable} label={t('integration.kpi.subs')} value={fmtNumber(subs)} info={t('integration.kpi.subsInfo')} />
+        <KpiTile icon={Cable} live label={t('integration.kpi.subs')} value={fmtNumber(subs)} info={t('integration.kpi.subsInfo')} />
         <KpiTile icon={Activity} label={t('integration.kpi.lastRead')} value={latestRead == null ? t('integration.never') : fmtDuration(latestRead)} info={t('integration.kpi.lastReadInfo')} />
       </div>
 

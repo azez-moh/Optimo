@@ -86,7 +86,7 @@ export default function CamerasPage() {
       <div className="vis-kpis">
         <KpiTile label={t('cameras.kpi.cameras')} value={fmtNumber(v.cameras.length)} info={t('cameras.kpi.camerasInfo')} />
         <KpiTile label={t('cameras.kpi.zones')} value={fmtNumber(v.zones.length)} info={t('cameras.kpi.zonesInfo')} />
-        <KpiTile label={t('cameras.kpi.online')} value={`${fmtNumber(online)} / ${fmtNumber(v.cameras.length)}`} info={t('cameras.kpi.onlineInfo')} />
+        <KpiTile live label={t('cameras.kpi.online')} value={`${fmtNumber(online)} / ${fmtNumber(v.cameras.length)}`} info={t('cameras.kpi.onlineInfo')} />
         <KpiTile label={t('cameras.kpi.noZones')} value={fmtNumber(empty)} info={t('cameras.kpi.noZonesInfo')} />
       </div>
 

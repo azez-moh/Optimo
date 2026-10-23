@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { AlertOctagon, ArrowDownUp, ArrowRight, Check, ListChecks, Store, Users } from 'lucide-react';
-import { ChipGroup, EmptyState, InfoTip, KpiTile, PageHeader, Select } from '../../components';
+import { ChipGroup, EmptyState, InfoTip, LiveTag, KpiTile, PageHeader, Select } from '../../components';
 import { useI18n } from '../../i18n';
 import { useScope } from '../../layout/filters';
 import { useDemo, type Level } from '../../data';
@@ -74,7 +74,7 @@ export default function BranchesPage() {
       <div className="grid-kpi ov-kpis">
         <KpiTile icon={Store} label={t('branches.kpi.clubs')} info={t('branches.kpi.clubsInfo')} value={fmtNumber(rows.length)}
           hint={`${t('brand.optimo')} ${fmtNumber(nOpt)} · ${t('brand.bfit')} ${fmtNumber(nBfit)}`} />
-        <KpiTile icon={Users} label={t('branches.kpi.people')} info={t('branches.kpi.peopleInfo')} value={fmtNumber(peopleIn)}
+        <KpiTile icon={Users} live label={t('branches.kpi.people')} info={t('branches.kpi.peopleInfo')} value={fmtNumber(peopleIn)}
           unit={t('branches.kpi.of', { cap: fmtNumber(cap) })} hint={t('branches.kpi.full', { pct: fmtNumber(cap ? Math.round((peopleIn / cap) * 100) : 0) })} />
         <KpiTile icon={ListChecks} label={t('branches.kpi.open')} info={t('branches.kpi.openInfo')} value={fmtNumber(alerts.length)}
           hint={t('branches.kpi.across', { n: fmtClubs(affected) })} />
@@ -140,7 +140,7 @@ function ClubCard({ row, current, focused }: { row: ClubRow; current: boolean; f
 
       <div className="br-card__nums">
         <div className="br-num">
-          <span className="label">{t('branches.card.inNow')}</span>
+          <span className="label br-num__label">{t('branches.card.inNow')}<LiveTag /></span>
           <span className="br-num__v num">{fmtNumber(row.peopleIn)}</span>
         </div>
         <div className="br-num">

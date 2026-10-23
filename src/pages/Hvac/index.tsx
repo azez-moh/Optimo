@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { Minus, Plus, Search } from 'lucide-react';
-import { ConfirmDialog, DataTable, Drawer, InfoTip, PageHeader, Segmented, Toggle, type Column } from '../../components';
+import { ConfirmDialog, DataTable, Drawer, InfoTip, LiveTag, PageHeader, Segmented, Toggle, type Column } from '../../components';
 import { useI18n } from '../../i18n';
 import { useScope } from '../../layout/filters';
 import { acOf, areasOf, focusClub, integrationsOf, useDemo } from '../../data';
@@ -95,7 +95,7 @@ export default function HvacPage() {
                   </button>
                 ))}
               </div>
-              <InfoTip text={t('hvac.info.status')} />
+              <span className="row" style={{ gap: 8 }}><LiveTag /><InfoTip text={t('hvac.info.status')} /></span>
             </div>
             <Segmented size="sm" ariaLabel={t('hvac.filterFloor')} value={floor} onChange={setFloor}
               options={[{ value: 'all', label: t('hvac.allFloors') }, ...floors.map((f) => ({ value: String(f.index), label: pick(f.nameEn, f.nameAr) }))]} />

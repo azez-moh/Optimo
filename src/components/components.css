@@ -272,6 +272,18 @@
 .infotip__bubble--top::after { bottom: -4px; }
 .infotip__bubble--bottom::after { top: -4px; }
 
+/* ---------- Live tag (top inline-end of a box showing current-moment figures) ---------- */
+.live-tag {
+  display: inline-flex; align-items: center; gap: 5px; flex-shrink: 0; white-space: nowrap;
+  font-family: var(--font-body); font-size: 0.6875rem; line-height: 1; letter-spacing: normal;
+  text-transform: uppercase; color: var(--success-fg);
+  padding: 3px 6px; border: 1px solid color-mix(in srgb, var(--success) 40%, transparent);
+}
+:root[lang='ar'] .live-tag { text-transform: none; font-size: var(--fs-xs); }
+.live-tag__dot { width: 6px; height: 6px; border-radius: 50%; background: var(--success); flex-shrink: 0; animation: live-pulse 2.4s ease-out infinite; }
+@media (prefers-reduced-motion: reduce) { .live-tag__dot { animation: none; } }
+.card__end { display: inline-flex; align-items: center; gap: var(--sp-2); flex-shrink: 0; align-self: center; }
+
 /* ---------- Status dot (live) ---------- */
 .live-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--success); flex-shrink: 0; animation: live-pulse 2.4s ease-out infinite; }
 @keyframes live-pulse { 0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--success) 55%, transparent); } 70% { box-shadow: 0 0 0 6px transparent; } 100% { box-shadow: 0 0 0 0 transparent; } }

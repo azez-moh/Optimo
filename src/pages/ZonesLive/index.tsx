@@ -36,10 +36,10 @@ export default function ZonesLivePage() {
       <p className="vis-lede">{t('zonesLive.lede')}</p>
 
       <div className="vis-kpis">
-        <KpiTile label={t('zonesLive.kpi.inUse')} value={fmtNumber(inUse)} info={t('zonesLive.kpi.inUseInfo')} />
-        <KpiTile label={t('zonesLive.kpi.zones')} value={fmtNumber(onlineRows.length)} info={t('zonesLive.kpi.zonesInfo')} />
-        <KpiTile label={t('zonesLive.kpi.peak')} value={fmtPercent(peak, 1)} info={t('zonesLive.kpi.peakInfo')} />
-        <KpiTile label={t('zonesLive.kpi.offline')} value={fmtNumber(offline)} info={t('zonesLive.kpi.offlineInfo')} />
+        <KpiTile live label={t('zonesLive.kpi.inUse')} value={fmtNumber(inUse)} info={t('zonesLive.kpi.inUseInfo')} />
+        <KpiTile live label={t('zonesLive.kpi.zones')} value={fmtNumber(onlineRows.length)} info={t('zonesLive.kpi.zonesInfo')} />
+        <KpiTile live label={t('zonesLive.kpi.peak')} value={fmtPercent(peak, 1)} info={t('zonesLive.kpi.peakInfo')} />
+        <KpiTile live label={t('zonesLive.kpi.offline')} value={fmtNumber(offline)} info={t('zonesLive.kpi.offlineInfo')} />
       </div>
 
       <div className="zg-list">

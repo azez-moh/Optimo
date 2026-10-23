@@ -1,7 +1,7 @@
 import { useMemo, useState, type ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowDown, ArrowLeftRight, ArrowUp, ArrowRight, Columns2 } from 'lucide-react';
-import { Card, Drawer, InfoTip, Select } from '../../components';
+import { Card, Drawer, InfoTip, LiveTag, Select } from '../../components';
 import { useI18n } from '../../i18n';
 import { useDemo, TARIFF_SAR_PER_KWH, type Club, type MachineType } from '../../data';
 import { FAMILIES } from '../../data/fleet';
@@ -104,6 +104,7 @@ export function GymComparison({ gyms, scopeIds, isAll, onCompare }: {
                       {colLabel(k)}
                       {sort.k === k && (sort.desc ? <ArrowDown aria-hidden /> : <ArrowUp aria-hidden />)}
                     </button>
+                    {k === 'people' && <LiveTag />}
                     <InfoTip text={t(`insights.cmp.${k}Info`)} />
                   </span>
                 </th>

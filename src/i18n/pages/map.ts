@@ -9,7 +9,7 @@ export const en = {
   allBranches: 'All branches',
   allOf: 'All of {name}',
   allHint: 'Open the network view for this area',
-  totals: '{clubs} · {people} people in now · {items}',
+  totals: '{clubs} · {people} people in · {items}',
   openItems: '{n} open items',
   openItemsOne: '1 open item',
   openItemsNone: 'no open items',
@@ -23,7 +23,7 @@ export const en = {
   legend: { label: 'Legend', wheel: 'Click the map to zoom with the wheel', approx: 'B_FIT pins are approximate, at the district centre.' },
   kpi: {
     clubs: 'Gyms',
-    people: 'People in now',
+    people: 'People in',
     openItems: 'Open items',
     openShort: 'Open',
     ofCapacity: 'of {n}',
@@ -33,7 +33,7 @@ export const en = {
     allClear: 'Nothing open',
     info: {
       clubs: 'Number of operating gyms in this area, both brands.',
-      people: 'People inside the gyms in this area now, from entry counts.',
+      people: 'People inside the gyms in this area, from entry counts.',
       openItems: 'Alerts not yet closed for gyms in this area, all levels.',
       excluded: 'Gyms not yet connected to Primewave are not counted.',
     },
@@ -78,7 +78,7 @@ export const ar: typeof en = {
   allBranches: 'جميع الفروع',
   allOf: 'جميع فروع {name}',
   allHint: 'افتح عرض الشبكة لهذه المنطقة',
-  totals: '{clubs} · {people} شخصًا داخل الصالات الرياضية الآن · {items}',
+  totals: '{clubs} · {people} شخصًا داخل الصالات الرياضية · {items}',
   openItems: '{n} بنود مفتوحة',
   openItemsOne: 'بند مفتوح واحد',
   openItemsNone: 'لا بنود مفتوحة',
@@ -92,7 +92,7 @@ export const ar: typeof en = {
   legend: { label: 'دليل الرموز', wheel: 'انقر على الخريطة للتكبير بعجلة الفأرة', approx: 'مواقع صالات بي فت الرياضية تقريبية في وسط الحي.' },
   kpi: {
     clubs: 'الصالات الرياضية',
-    people: 'الموجودون الآن',
+    people: 'الموجودون',
     openItems: 'البنود المفتوحة',
     openShort: 'مفتوحة',
     ofCapacity: 'من {n}',
@@ -102,7 +102,7 @@ export const ar: typeof en = {
     allClear: 'لا شيء مفتوح',
     info: {
       clubs: 'عدد الصالات الرياضية العاملة في هذه المنطقة، للعلامتين.',
-      people: 'عدد الموجودين داخل الصالات الرياضية في هذه المنطقة الآن، وفق عدّاد الدخول.',
+      people: 'عدد الموجودين داخل الصالات الرياضية في هذه المنطقة، وفق عدّاد الدخول.',
       openItems: 'التنبيهات غير المغلقة للصالات الرياضية في هذه المنطقة، بجميع المستويات.',
       excluded: 'لا تحتسب الصالات الرياضية غير المرتبطة بعد بمنصة Primewave.',
     },

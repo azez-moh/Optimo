@@ -16,7 +16,7 @@ export const en = {
   mode: 'Mode',
   fan: 'Fan',
   rated: 'Rated cooling power',
-  drawing: 'Drawing now',
+  drawing: 'Power draw',
   gap: 'Reading against setpoint',
   col: {
     appliance: 'Appliance', where: 'Where', entity: 'Linked entity', status: 'State', on: 'On',
@@ -51,7 +51,7 @@ export const ar: typeof en = {
   mode: 'الوضع',
   fan: 'المروحة',
   rated: 'قدرة التبريد المقننة',
-  drawing: 'الاستهلاك الآن',
+  drawing: 'الاستهلاك',
   gap: 'القراءة مقارنة بدرجة الضبط',
   col: {
     appliance: 'الجهاز', where: 'الموقع', entity: 'الكيان المرتبط', status: 'الحالة', on: 'تشغيل',

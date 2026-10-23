@@ -6,7 +6,7 @@ export const en = {
   loading: 'Loading the 3D floor',
   noWebgl: 'The 3D floor cannot be drawn in this browser.',
   kpi: {
-    inUse: 'In use now',
+    inUse: 'In use',
     inUseOf: 'of {n} machines',
     inUseInfo: 'Machines a person is using at this moment, from the camera zones that watch each machine. Updated every 10 seconds.',
     sessions: 'Sessions today',
@@ -187,7 +187,7 @@ export const ar: typeof en = {
   loading: 'جار تحميل الصالة ثلاثية الأبعاد',
   noWebgl: 'لا يمكن عرض الصالة ثلاثية الأبعاد في هذا المتصفح.',
   kpi: {
-    inUse: 'قيد الاستخدام الآن',
+    inUse: 'قيد الاستخدام',
     inUseOf: 'من {n} جهازًا',
     inUseInfo: 'الأجهزة التي يستخدمها شخص في هذه اللحظة، حسب مناطق الكاميرا التي تراقب كل جهاز. تتحدث كل 10 ثوانٍ.',
     sessions: 'جلسات اليوم',

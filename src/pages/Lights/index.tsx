@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { Search } from 'lucide-react';
-import { Badge, ConfirmDialog, DataTable, Drawer, InfoTip, PageHeader, Segmented, Toggle, type Column } from '../../components';
+import { Badge, ConfirmDialog, DataTable, Drawer, InfoTip, LiveTag, PageHeader, Segmented, Toggle, type Column } from '../../components';
 import { useI18n } from '../../i18n';
 import { useScope } from '../../layout/filters';
 import { areasOf, boardsOf, focusClub, lightsOf, useDemo } from '../../data';
@@ -88,7 +88,7 @@ export default function LightsPage() {
                   </button>
                 ))}
               </div>
-              <span className="apl-count num">{t('bmsOverview.fittingsLit', { n: fmtNumber(lit), of: fmtNumber(fittings) })}<InfoTip text={t('bmsOverview.info.lit')} /></span>
+              <span className="apl-count num">{t('bmsOverview.fittingsLit', { n: fmtNumber(lit), of: fmtNumber(fittings) })}<LiveTag /><InfoTip text={t('bmsOverview.info.lit')} /></span>
             </div>
             <Segmented size="sm" ariaLabel={t('hvac.filterFloor')} value={floor} onChange={setFloor}
               options={[{ value: 'all', label: t('hvac.allFloors') }, ...floors.map((f) => ({ value: String(f.index), label: pick(f.nameEn, f.nameAr) }))]} />

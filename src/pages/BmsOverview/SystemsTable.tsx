@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { Search, X } from 'lucide-react';
-import { ConfirmDialog, DataTable, InfoTip, Tabs, Toggle, type Column } from '../../components';
+import { ConfirmDialog, DataTable, InfoTip, LiveTag, Tabs, Toggle, type Column } from '../../components';
 import { useI18n } from '../../i18n';
 import { useDemo } from '../../data';
 import type { AcRow, LightRow } from '../../data/selectors';
@@ -132,7 +132,7 @@ export function SystemsTable({ zones, ac, lights, tab, onTab, selected, onClearS
           </div>
         </div>
         <div className="sys__summary">
-          <span className="sys__chip num">{summary.text}<InfoTip text={summary.info} /></span>
+          <span className="sys__chip num">{summary.text}<LiveTag /><InfoTip text={summary.info} /></span>
           {action && <button type="button" className="btn btn--link btn--sm" disabled={action.disabled} onClick={action.run}>{action.label}</button>}
         </div>
       </div>

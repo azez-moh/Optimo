@@ -8,7 +8,7 @@ export const en = {
   state: { on: 'On', dimmed: 'Dimmed', off: 'Off' },
   fittings: 'Fittings',
   load: 'Full load',
-  drawing: 'Drawing now',
+  drawing: 'Power draw',
   col: { switch: 'Switch', where: 'Floor', entity: 'Linked board', status: 'State', on: 'On', level: 'Level', lit: 'Lit' },
   emptyTitle: 'No lighting switches in this building yet',
 };
@@ -22,7 +22,7 @@ export const ar: typeof en = {
   state: { on: 'مضاءة', dimmed: 'مخفتة', off: 'مطفأة' },
   fittings: 'وحدات الإنارة',
   load: 'الحمل الكامل',
-  drawing: 'الاستهلاك الآن',
+  drawing: 'الاستهلاك',
   col: { switch: 'المفتاح', where: 'الطابق', entity: 'اللوحة المرتبطة', status: 'الحالة', on: 'تشغيل', level: 'المستوى', lit: 'المضاءة' },
   emptyTitle: 'لا توجد مفاتيح إضاءة في هذا المبنى بعد',
 };

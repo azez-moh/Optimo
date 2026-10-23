@@ -86,7 +86,7 @@ export default function CameraListPage() {
 
       <div className="vis-kpis">
         <KpiTile label={t('cameraList.kpi.cameras')} value={fmtNumber(rows.length)} info={t('cameraList.kpi.camerasInfo')} />
-        <KpiTile label={t('cameraList.kpi.online')} value={`${fmtNumber(online)} / ${fmtNumber(rows.length)}`} info={t('cameraList.kpi.onlineInfo')} />
+        <KpiTile live label={t('cameraList.kpi.online')} value={`${fmtNumber(online)} / ${fmtNumber(rows.length)}`} info={t('cameraList.kpi.onlineInfo')} />
         <KpiTile label={t('cameraList.kpi.zones')} value={fmtNumber(v.zones.length)} info={t('cameraList.kpi.zonesInfo')} />
         <KpiTile label={t('cameraList.kpi.noZones')} value={fmtNumber(empty)} info={t('cameraList.kpi.noZonesInfo')} />
       </div>

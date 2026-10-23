@@ -39,7 +39,7 @@ const en = {
     map: 'Kingdom map',
     about: {
       overview: 'The network or the selected gym at a glance.',
-      branches: 'Every gym in the network and how each is doing now.',
+      branches: 'Every gym in the network and how each is doing, live.',
       settings: 'Account and system-wide settings.',
       bmsOverview: 'This building in three dimensions.',
       hvac: 'Heating, ventilation and cooling across this building.',
@@ -53,7 +53,7 @@ const en = {
       cameras: 'A live wall of every camera.',
       cameraList: 'Add, edit and remove camera feeds.',
       zones: 'Every watched region, grouped by camera.',
-      zonesLive: 'Motion and baseline change per zone, now.',
+      zonesLive: 'Live motion and baseline change per zone.',
       reports: 'Every machine and its current detection state.',
       machineLibrary: 'The machine models the detector knows.',
       machines: 'Every machine and the zones monitoring it.',
@@ -140,6 +140,7 @@ const en = {
     kwh: 'kWh',
     today: 'Today',
     now: 'Now',
+    live: 'Live',
   },
   status: {
     ok: 'Normal',

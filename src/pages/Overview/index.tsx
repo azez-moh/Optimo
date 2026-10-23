@@ -138,12 +138,12 @@ function ChainOverview() {
       </div>
 
       <div className="grid-kpi ov-kpis">
-        <KpiTile icon={Users} label={peopleLabel} info={peopleInfo} to={linkWith('section', 'business')}
+        <KpiTile icon={Users} live={period === 'now'} label={peopleLabel} info={peopleInfo} to={linkWith('section', 'business')}
           value={fmtNumber(period === 'week' ? people.now : period === 'today' ? people.now : rows.reduce((a, r) => a + r.peopleIn, 0))}
           unit={period === 'now' ? t('overview.kpi.peopleOf', { cap: fmtNumber(cap) }) : undefined}
           delta={{ value: peopleDelta, label: peopleCmp, goodWhen: 'up' }}
           hint={period === 'now' ? t('overview.kpi.peopleFull', { pct: fmtNumber(fullPct) }) : undefined} />
-        <KpiTile icon={Gauge} label={t('overview.kpi.machine')} info={t('overview.kpi.machineInfo')} to={linkWith('section', 'business')}
+        <KpiTile icon={Gauge} live={period === 'now'} label={t('overview.kpi.machine')} info={t('overview.kpi.machineInfo')} to={linkWith('section', 'business')}
           value={fmtNumber(machineNow)} unit="%"
           delta={{ value: machineNow - machineBase, unit: 'pp', label: t('overview.kpi.vs4w') }}
           hint={period === 'now' ? t('overview.kpi.machineSub') : period === 'today' ? t('overview.kpi.machineSubToday') : t('overview.kpi.machineSubWeek')} />
