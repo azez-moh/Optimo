@@ -24,4 +24,3 @@ export { LineChart, BarChart, AreaChart } from './Charts';
 export type { Datum, SeriesDef, BaseChartProps } from './Charts';
 export { BrandMark, OptimoLogo } from './BrandMark';
 export { ComingNext } from './ComingNext';
-export { AdminOnly } from './AdminOnly';

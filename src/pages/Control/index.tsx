@@ -98,7 +98,7 @@ export default function ControlPage() {
   const canRedo = stack.redo.length > 0;
   const tabs: TabDef<TabId>[] = TABS.map((id) => ({ id, label: t(`control.tab.${id}`) }));
   const savedLine = ctl.savedAt
-    ? t('control.lastSaved', { name: ctl.savedBy || '', role: t(`role.${ctl.savedRole === 'admin' ? 'admin' : 'coo'}Short`), time: `${fmtDate(ctl.savedAt, 'short')} ${fmtTime(ctl.savedAt)}` })
+    ? t('control.lastSaved', { name: ctl.savedBy || '', role: t(`role.${ctl.savedRole === 'fm' ? 'fm' : 'coo'}Short`), time: `${fmtDate(ctl.savedAt, 'short')} ${fmtTime(ctl.savedAt)}` })
     : t('control.notSaved');
 
   return (

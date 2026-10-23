@@ -2,7 +2,7 @@ import { Fragment, useMemo, useState } from 'react';
 import { RefreshCw } from 'lucide-react';
 import { Button, Card, EmptyState, InfoTip, PageHeader } from '../../components';
 import { useI18n } from '../../i18n';
-import { useScope } from '../../layout/filters';
+import { useAccess } from '../../layout/access';
 import type { MachineRow } from '../../data';
 import { ExpandButton, StatePill, TodayPanel, useTypeLabel } from '../Machines/shared/parts';
 import { useParam, useVisionClub } from '../Machines/shared/club';
@@ -15,7 +15,7 @@ import '../Machines/shared/machines.css';
 export default function ReportsPage() {
   const { t, pick, fmtNumber, fmtTime } = useI18n();
   const { d, club, rows: liveRows } = useVisionClub();
-  const { isAdmin } = useScope();
+  const { cameras: showCameras } = useAccess();
   const typeLabel = useTypeLabel();
   // Refresh takes a snapshot so the header and all rows always change together.
   const [refreshedAt, setRefreshedAt] = useState(() => d.now.getTime());
@@ -80,7 +80,6 @@ export default function ReportsPage() {
                               <ExpandButton open={isOpen} onToggle={() => toggle(m.id)} label={t('machines.expandRow', { name })} />
                               <span className="mr-machinecell__text">
                                 <span>{name}</span>
-                                {isAdmin && <span className="mr-sub ltr">{m.id.split(':').pop()}</span>}
                               </span>
                             </span>
                           </td>
@@ -89,7 +88,9 @@ export default function ReportsPage() {
                           <td className="dt--hide-sm mr-muted-cell">{t(`machines.logic.${m.rule}`)}</td>
                           <td className="dt--hide-sm">
                             <span className="num">{m.zoneIds.length === 1 ? t('reports.zonesN1') : m.zoneIds.length === 2 ? t('reports.zonesN2') : t('reports.zonesN', { n: fmtNumber(m.zoneIds.length) })}</span>
-                            <span className="mr-sub">{camNames.map((c) => pick(c!.nameEn, c!.nameAr)).join(' · ')}</span>
+                            <span className="mr-sub">{showCameras
+                              ? camNames.map((c) => pick(c!.nameEn, c!.nameAr)).join(' · ')
+                              : (camNames.every((c) => c!.online) ? t('access.cameraOnline') : t('access.cameraOffline'))}</span>
                           </td>
                         </tr>
                         {isOpen && (

@@ -3,7 +3,7 @@ import { Cpu, Activity, Gauge, Timer, TrendingUp, TrendingDown, MinusCircle } fr
 import { Card, EmptyState, InfoTip, KpiTile, PageHeader, Tabs } from '../../components';
 import { useI18n } from '../../i18n';
 import { machinesByType, openMinutes, type MachineRow, type MachineType } from '../../data';
-import { useScope } from '../../layout/filters';
+import { useAccess } from '../../layout/access';
 import { ExpandButton, FillBar, RenameCell, StatePill, TodayPanel, useTypeLabel } from './shared/parts';
 import { useParam, useVisionClub } from './shared/club';
 import { nowMinute } from './shared/usage';
@@ -14,7 +14,7 @@ type Tab = 'machine' | 'type';
 export default function MachinesPage() {
   const { t, pick, fmtNumber, fmtDuration } = useI18n();
   const { d, club, rows } = useVisionClub();
-  const { isAdmin } = useScope();
+  const { cameras: showCameras } = useAccess();
   const typeLabel = useTypeLabel();
   const [tab, setTab] = useParam('tab', 'machine');
   const [openParam, setOpenParam] = useParam('open', '');
@@ -60,8 +60,7 @@ export default function MachinesPage() {
           return (
             <span key={id} className="mr-zone">
               <span>{t('machines.zone', { n: z.n })}</span>
-              {cam && <span className="mr-zone__cam">{pick(cam.nameEn, cam.nameAr)}</span>}
-              {isAdmin && <span className="mr-zone__code ltr">{z.code}</span>}
+              {cam && <span className="mr-zone__cam">{showCameras ? pick(cam.nameEn, cam.nameAr) : t(cam.online ? 'access.cameraOnline' : 'access.cameraOffline')}</span>}
             </span>
           );
         })}

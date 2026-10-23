@@ -3,24 +3,27 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { Globe, LogIn, Mail } from 'lucide-react';
 import { OptimoLogo } from '../../components';
 import { useI18n } from '../../i18n';
-import { HOME_AFTER_SIGNIN, useAuth, type SignInState } from '../../layout/auth';
+import { useAuth, type SignInState } from '../../layout/auth';
+import { canSeePath, homeFor } from '../../layout/access';
 import { ROLES, useScope } from '../../layout/filters';
 import { ThemeToggle } from '../../layout/Shell';
 import type { Role } from '../../data/types';
 import './signin.css';
 
 /** Prefilled address per role (BUILD-DECISIONS: email only, no password). */
-const ROLE_EMAIL: Record<Role, string> = { coo: 'coo@optimo.demo', admin: 'admin@optimo.demo' };
+const ROLE_EMAIL: Record<Role, string> = { coo: 'coo@optimo.demo', fm: 'fm@optimo.demo' };
 const PREFILLED = new Set(Object.values(ROLE_EMAIL));
 
 /**
- * After sign-in the user lands on the Kingdom map, unless a deep link was requested. Unsafe targets
- * (external, protocol-relative, the sign-in route itself) fall back to the map.
+ * After sign-in the user lands on the role's home (COO: Kingdom map, Facility Manager: his gym overview),
+ * unless a deep link was requested that the role may open. Unsafe targets (external, protocol-relative,
+ * the sign-in route itself) fall back to the home page.
  */
-function safeTarget(from: unknown): string {
-  if (typeof from !== 'string' || !from.startsWith('/') || from.startsWith('//') || from.startsWith('/signin') || from === '/') return HOME_AFTER_SIGNIN;
-  if (/[\\\s]/.test(from) || /^\/[a-z]+:/i.test(from)) return HOME_AFTER_SIGNIN;
-  return from;
+function safeTarget(from: unknown, role: Role): string {
+  const home = homeFor(role);
+  if (typeof from !== 'string' || !from.startsWith('/') || from.startsWith('//') || from.startsWith('/signin') || from === '/') return home;
+  if (/[\\\s]/.test(from) || /^\/[a-z]+:/i.test(from)) return home;
+  return canSeePath(role, from) ? from : home;
 }
 
 function RolePicker({ value, onChange }: { value: Role; onChange: (r: Role) => void }) {
@@ -61,17 +64,17 @@ function RolePicker({ value, onChange }: { value: Role; onChange: (r: Role) => v
 
 export default function SignInPage() {
   const { t, toggleLang } = useI18n();
-  const { signedIn, signIn } = useAuth();
+  const { signedIn, signIn, user } = useAuth();
   const { setRole } = useScope();
   const [role, setRoleChoice] = useState<Role>('coo');
   const navigate = useNavigate();
   const loc = useLocation();
-  const target = safeTarget((loc.state as SignInState | null)?.from);
+  const from = (loc.state as SignInState | null)?.from;
   const [email, setEmail] = useState(ROLE_EMAIL.coo);
 
   useEffect(() => {
-    if (signedIn) navigate(target, { replace: true });
-  }, [signedIn, target, navigate]);
+    if (signedIn && user) navigate(safeTarget(from, user.role), { replace: true });
+  }, [signedIn, user, from, navigate]);
 
   const pickRole = (r: Role) => {
     setRoleChoice(r);
@@ -83,7 +86,7 @@ export default function SignInPage() {
     e.preventDefault();
     setRole(role);
     signIn(email.trim() || ROLE_EMAIL[role], role);
-    navigate(target, { replace: true });
+    navigate(safeTarget(from, role), { replace: true });
   };
 
   return (

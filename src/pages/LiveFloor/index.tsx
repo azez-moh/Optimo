@@ -9,6 +9,7 @@ import {
 import { useDemo, focusClub, machinesOf, usageReport, alertsIn, FLOOR_SIZE_M, MALQA_PLACEMENTS, LIVE_CLUB_ID, addDays, hhmm } from '../../data';
 import type { Machine, MachineType } from '../../data/types';
 import { useScope } from '../../layout/filters';
+import { useAccess } from '../../layout/access';
 import { useI18n } from '../../i18n';
 import { useTheme } from '../../theme/theme';
 import { FAMILY_ORDER, MAIN_CANVAS, locationOf, hourlyUse, openingMinute, readCanvases, seqColor, stateAt, writeCanvases, type FloorCanvasDef, type Placement, type ShownState } from './model';
@@ -42,6 +43,8 @@ const shortId = (id: string) => id.split(':').pop() ?? id;
 export default function LiveFloorPage() {
   const d = useDemo();
   const { scope, setScope, clubs: scopeClubs } = useScope();
+  // Facility Manager: no camera images or names, no layout editing, no floor create or delete.
+  const { cameras: camAllowed, manage } = useAccess();
   const i18n = useI18n();
   const { t, pick, fmtNumber, fmtPercent, fmtDuration, lang } = i18n;
   const { theme, chart } = useTheme();
@@ -338,7 +341,7 @@ export default function LiveFloorPage() {
   const cam = camMachine ? camerasById.get(camMachine.cameraId) : undefined;
   const blur = d.settings.blurCameras;
   const camPopped = !!selected && camPopFor === selected.id;
-  const camShown = prefs.camera || camPopped;
+  const camShown = camAllowed && (prefs.camera || camPopped);
   const closeCam = useCallback(() => { setCamPopFor(null); if (prefs.camera) setPrefs({ camera: false }); },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [prefs.camera]);
@@ -422,7 +425,7 @@ export default function LiveFloorPage() {
               <ToggleLabel icon={Tag} label={t('liveFloor.toolbar.labels')} tip={t('liveFloor.toolbar.labelsTip')} checked={prefs.labels} onChange={(v) => setPrefs({ labels: v })} />
               <ToggleLabel icon={Box} label={t('liveFloor.toolbar.footprints')} tip={t('liveFloor.toolbar.footprintsTip')} checked={prefs.footprints} onChange={(v) => setPrefs({ footprints: v })} />
               <ToggleLabel icon={Eye} label={t('liveFloor.toolbar.preview')} tip={t('liveFloor.toolbar.previewTip')} checked={preview} onChange={setPreview} />
-              <ToggleLabel icon={CameraIcon} label={t('liveFloor.toolbar.camera')} tip={t('liveFloor.toolbar.cameraTip')} checked={prefs.camera} onChange={(v) => setPrefs({ camera: v })} />
+              {camAllowed && <ToggleLabel icon={CameraIcon} label={t('liveFloor.toolbar.camera')} tip={t('liveFloor.toolbar.cameraTip')} checked={prefs.camera} onChange={(v) => setPrefs({ camera: v })} />}
             </div>
             <div className="lf-toolbar__group lf-toolbar__end">
               <span className="lf-toolbar__label">{t('liveFloor.toolbar.colour')}</span>
@@ -495,7 +498,7 @@ export default function LiveFloorPage() {
           </div>
 
           {/* bottom bar: replay or edit */}
-          {editing ? (
+          {editing && manage ? (
             <div className="lf-bar lf-bar--edit">
               <span className="lf-bar__hint"><Move aria-hidden /> {t('liveFloor.edit.hint')}</span>
               {Object.keys(draft).length > 0 && <Badge tone="neutral">{t('liveFloor.edit.moved', { n: fmtNumber(Object.keys(draft).length) })}</Badge>}
@@ -535,6 +538,7 @@ export default function LiveFloorPage() {
               hourly={hourlyUse(selected, club, today, replayMin ?? nowMin)}
               cameraName={cam && camMachine?.id === selected.id ? pick(cam.nameEn, cam.nameAr) : (() => { const c = camerasById.get(selected.cameraId); return c ? pick(c.nameEn, c.nameAr) : ''; })()}
               cameraOnline={camerasById.get(selected.cameraId)?.online ?? false}
+              cameraHidden={!camAllowed}
               location={(() => { const p = placementOf(selected); return p ? whereLabel(p.x, p.z) : ''; })()}
               clubOpen={d.live.clubs[club.id]?.isOpen ?? false}
               onClose={() => select(null)}
@@ -545,29 +549,31 @@ export default function LiveFloorPage() {
           ) : (
             <>
               <div className="lf-panel__tabs" role="tablist" aria-label={t('liveFloor.panel.machines')}>
-                <button type="button" role="tab" aria-selected={panelTab === 'machines'} className="tab" onClick={() => setPanelTab('machines')}>
+                <button type="button" role="tab" aria-selected={panelTab === 'machines' || !manage} className="tab" onClick={() => setPanelTab('machines')}>
                   {t('liveFloor.panel.machines')}<span className="tab__count num">{placed.length}</span>
                 </button>
-                <button type="button" role="tab" aria-selected={panelTab === 'settings'} className="tab" onClick={() => setPanelTab('settings')}>
-                  <Settings2 aria-hidden />{t('liveFloor.panel.settings')}
-                </button>
+                {manage && (
+                  <button type="button" role="tab" aria-selected={panelTab === 'settings'} className="tab" onClick={() => setPanelTab('settings')}>
+                    <Settings2 aria-hidden />{t('liveFloor.panel.settings')}
+                  </button>
+                )}
               </div>
 
-              {panelTab === 'machines' ? (
+              {panelTab === 'machines' || !manage ? (
                 <div className="lf-panel__body">
                   <div className="lf-row">
                     <Select label={t('liveFloor.canvas.select')} value={canvas.id} onChange={(v) => { setCanvasId(v); setDraft({}); setEditing(false); select(null); }}
                       options={canvases.map((c) => ({ value: c.id, label: canvasLabel(c) }))} className="lf-grow" />
-                    <Button size="sm" icon={Plus} onClick={newCanvas}>{t('liveFloor.canvas.new')}</Button>
+                    {manage && <Button size="sm" icon={Plus} onClick={newCanvas}>{t('liveFloor.canvas.new')}</Button>}
                   </div>
-                  <div className="lf-row">
+                  {manage && <div className="lf-row">
                     <Select label={t('liveFloor.edit.placement')} value={toPlace} onChange={setToPlace} className="lf-grow" disabled={!unplaced.length}
                       options={unplaced.length
                         ? [{ value: '', label: t('liveFloor.edit.placement') }, ...unplaced.map((m) => ({ value: m.id, label: pick(m.nameEn, m.nameAr) }))]
                         : [{ value: '', label: t('liveFloor.edit.allPlaced') }]} />
                     <Button size="sm" onClick={addMachine} disabled={!unplaced.length}>{t('liveFloor.edit.add')}</Button>
-                  </div>
-                  {!editing && <Button icon={Move} onClick={() => setEditing(true)} className="lf-full">{t('liveFloor.edit.start')}</Button>}
+                  </div>}
+                  {!editing && manage && <Button icon={Move} onClick={() => setEditing(true)} className="lf-full">{t('liveFloor.edit.start')}</Button>}
                   <TextField label={t('liveFloor.panel.search')} hideLabel icon={Search} value={query} onChange={setQuery} placeholder={t('liveFloor.panel.search')} />
                   <p className="lf-panel__hint">{t('liveFloor.panel.clickHint')}</p>
                   <ul className="lf-list" aria-label={t('liveFloor.panel.count', { n: listed.length })}>
@@ -657,6 +663,8 @@ interface MachineCardProps {
   hourly: number[];
   cameraName: string;
   cameraOnline: boolean;
+  /** Facility Manager: show only whether the camera is online, never its name. */
+  cameraHidden?: boolean;
   location: string;
   clubOpen: boolean;
   clubAlerts: number;
@@ -665,7 +673,7 @@ interface MachineCardProps {
   onLocate: () => void;
 }
 
-function MachineCard({ m, state, typeName, today, weeks, hourly, cameraName, cameraOnline, location, clubOpen, onClose, onToggleService, onLocate }: MachineCardProps) {
+function MachineCard({ m, state, typeName, today, weeks, hourly, cameraName, cameraOnline, cameraHidden, location, clubOpen, onClose, onToggleService, onLocate }: MachineCardProps) {
   const { t, pick, fmtNumber, fmtPercent, fmtDuration } = useI18n();
   const [confirm, setConfirm] = useState(false);
   const s = state.state;
@@ -700,7 +708,9 @@ function MachineCard({ m, state, typeName, today, weeks, hourly, cameraName, cam
         )}
         <Button size="sm" variant="ghost" icon={Crosshair} onClick={onLocate} aria-label={t('liveFloor.toolbar.fit')} iconOnly />
       </div>
-      {cameraName && <p className="lf-card__cam"><CameraIcon aria-hidden />{t('liveFloor.card.camera')}: {cameraName}</p>}
+      {cameraHidden
+        ? <p className="lf-card__cam"><CameraIcon aria-hidden />{t(cameraOnline ? 'access.cameraOnline' : 'access.cameraOffline')}</p>
+        : cameraName && <p className="lf-card__cam"><CameraIcon aria-hidden />{t('liveFloor.card.camera')}: {cameraName}</p>}
 
       <h3 className="lf-card__h">{t('liveFloor.card.today')}</h3>
       <div className="lf-figs">

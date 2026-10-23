@@ -4,6 +4,7 @@ import { InfoTip, PageHeader, Tabs, type TabDef } from '../../components';
 import { useI18n } from '../../i18n';
 import { useDemo, focusClub } from '../../data';
 import { useScope } from '../../layout/filters';
+import { useAccess } from '../../layout/access';
 import { AgentsTab } from './AgentsTab';
 import { BuildingTab } from './BuildingTab';
 import { CamerasTab } from './CamerasTab';
@@ -19,9 +20,12 @@ export default function BmsSettingsPage() {
   const { scope } = useScope();
   const club = focusClub(data, scope);
   const [params, setParams] = useSearchParams();
+  // The Facility Manager has no camera access, so the camera privacy tab is not shown to him.
+  const { cameras } = useAccess();
+  const shown = cameras ? TABS : TABS.filter((x) => x !== 'cameras');
   const p = params.get('tab') as TabId | null;
-  const tab: TabId = p && TABS.includes(p) ? p : 'agents';
-  const tabs: TabDef<TabId>[] = TABS.map((id) => ({ id, label: t(`bmsSettings.tab.${id}`), icon: ICONS[id] }));
+  const tab: TabId = p && shown.includes(p) ? p : 'agents';
+  const tabs: TabDef<TabId>[] = shown.map((id) => ({ id, label: t(`bmsSettings.tab.${id}`), icon: ICONS[id] }));
   return (
     <div className="page bmss">
       <PageHeader eyebrow={pick(club.nameEn, club.nameAr)} title={<span className="bmss__title">{t('bmsSettings.title')}<InfoTip text={t('bmsSettings.intro')} /></span>} />

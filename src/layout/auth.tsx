@@ -2,11 +2,13 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { ROLES, useScope } from './filters';
+import { canSee, homeFor } from './access';
 import type { Role } from '../data/types';
 
 /**
  * Sign-in without passwords or network: the session is an email address and a role kept in sessionStorage
- * (try/catch, falls back to memory). It gates the map and dashboard routes. Roles: coo (default), admin.
+ * (try/catch, falls back to memory). It gates the map and dashboard routes. Roles: coo (default), fm (Facility Manager).
+ * What each role may open lives in src/layout/access.ts.
  */
 
 export interface AuthUser { name: string; email: string; role: Role }
@@ -22,7 +24,7 @@ export interface AuthCtx {
 export const DEFAULT_EMAIL = 'coo@optimo.demo';
 const KEY = 'opt.auth';
 
-/** First page after sign-in: the Kingdom map. */
+/** First page after sign-in for the COO: the Kingdom map (the Facility Manager lands on /overview, see homeFor). */
 export const HOME_AFTER_SIGNIN = '/map';
 
 /** Router state passed to /signin so a deep link (with a query string) can be restored after sign-in. */
@@ -31,7 +33,7 @@ export interface SignInState { from?: string }
 function nameFrom(email: string): string {
   const local = email.split('@')[0] || '';
   if (local.toLowerCase() === 'coo') return 'Chief Operating Officer';
-  if (local.toLowerCase() === 'admin') return 'Administrator';
+  if (local.toLowerCase() === 'fm') return 'Facility Manager';
   return local.split(/[._-]+/).filter(Boolean).map((w) => w[0].toUpperCase() + w.slice(1)).join(' ') || 'User';
 }
 
@@ -92,4 +94,12 @@ export function RequireAuth({ children }: { children: ReactNode }) {
     return <Navigate to="/signin" replace state={state} />;
   }
   return <><RoleSync role={user.role} />{children}</>;
+}
+
+/** Route guard by page id: a page the signed-in role may not open redirects to that role's home page. */
+export function RequirePage({ id, children }: { id: string; children: ReactNode }) {
+  const { user } = useAuth();
+  const role: Role = user?.role ?? 'coo';
+  if (!canSee(role, id)) return <Navigate to={homeFor(role)} replace />;
+  return <>{children}</>;
 }

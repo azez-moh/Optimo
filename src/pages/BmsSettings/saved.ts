@@ -19,5 +19,5 @@ export function useSavedLine(): string {
   if (!s.savedAt) return t('bmsSettings.notSaved');
   // Riyadh time, 24-hour Latin digits in both languages
   const time = new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Riyadh', hour: '2-digit', minute: '2-digit', hour12: false }).format(new Date(s.savedAt));
-  return t('bmsSettings.lastSaved', { name: s.savedBy ?? '', role: t(`role.${s.savedRole === 'admin' ? 'admin' : 'coo'}Short`), time: `${fmtDate(s.savedAt, 'short')} ${time}` });
+  return t('bmsSettings.lastSaved', { name: s.savedBy ?? '', role: t(`role.${s.savedRole === 'fm' ? 'fm' : 'coo'}Short`), time: `${fmtDate(s.savedAt, 'short')} ${time}` });
 }

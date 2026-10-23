@@ -1,5 +1,5 @@
 // QA screenshots. Usage:
-//   node scripts/shoot.mjs <label> <route>[,<route>...] [--base=http://localhost:5199/] [--variants=all|quick] [--role=coo|admin] [--scope=<json>]
+//   node scripts/shoot.mjs <label> <route>[,<route>...] [--base=http://localhost:5199/] [--variants=all|quick] [--role=coo|fm] [--scope=<json>]
 // Example: node scripts/shoot.mjs scaffold signin,overview
 // Starts `vite preview` on dist/ when --base is not given (run `npm run build` first).
 // Output: qa/<label>/<route>-<theme>-<lang>-<width>.png, plus a summary of page errors, missing i18n keys
@@ -26,7 +26,7 @@ const ALL = [
 ];
 const QUICK = [ALL[0], ALL[3], ALL[4], ALL[7]];
 const variants = flags.variants === 'quick' ? QUICK : ALL;
-const role = flags.role === 'admin' ? 'admin' : 'coo';
+const role = flags.role === 'fm' ? 'fm' : 'coo';
 const scope = flags.scope || '{"level":"all"}';
 // Fixed clock (Riyadh 18:30 on 2026-10-22) so screenshots are comparable between runs; override with --now=<ms>.
 const nowMs = flags.now || String(Date.UTC(2026, 9, 22, 15, 30));
@@ -76,7 +76,7 @@ try {
         await page.evaluate(() => { try { sessionStorage.removeItem('opt.auth'); } catch { /* ignore */ } }).catch(() => {});
       } else {
         await page.goto(`${base}?now=${nowMs}#/signin`, { waitUntil: 'load' });
-        await page.evaluate(([ro]) => sessionStorage.setItem('opt.auth', JSON.stringify({ email: `${ro}@optimo.demo`, name: ro, role: ro })), [role]);
+        await page.evaluate(([ro]) => sessionStorage.setItem('opt.auth', JSON.stringify({ email: `${ro}@optimo.demo`, role: ro })), [role]);
       }
       // a distinct query string forces a full load, so the session and storage are read fresh
       await page.goto(`${base}?now=${nowMs}&r=${encodeURIComponent(route)}#/${route}`, { waitUntil: 'load' });

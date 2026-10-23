@@ -4,6 +4,7 @@ import { Activity, Bell, Building2, Gauge, Leaf, Users, Zap } from 'lucide-react
 import { KpiTile, PageHeader, Segmented, Tabs, type TabDef } from '../../components';
 import { useI18n } from '../../i18n';
 import { useScope } from '../../layout/filters';
+import { useAccess } from '../../layout/access';
 import { scopeLabel } from '../../layout/scopeLabel';
 import { useDemo, TARIFF_SAR_PER_KWH } from '../../data';
 import { clubRows, machineBaseline, mean, peopleLastWeek, PERIODS, type Period } from './metrics';
@@ -12,11 +13,18 @@ import { ClubRanking, METRICS, type Metric } from './Ranking';
 import { BusinessSection } from './Business';
 import { EnergySection } from './Energy';
 import { BmsSection } from './Bms';
+import { FmOverview } from './Fm';
 
 type Section = 'business' | 'energy' | 'bms';
 const SECTIONS: Section[] = ['business', 'energy', 'bms'];
 
+/** One route, role-specific content: the Facility Manager gets his gym's operations page. */
 export default function OverviewPage() {
+  const { isFm } = useAccess();
+  return isFm ? <FmOverview /> : <ChainOverview />;
+}
+
+function ChainOverview() {
   const i18n = useI18n();
   const { t, fmtNumber } = i18n;
   const data = useDemo();

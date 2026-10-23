@@ -1,5 +1,5 @@
 // Generated from the Build 8.7 Live Floor snapshot (Al Malqa Men, 2026-10-22). Positions in metres.
-// x = east-west, z = depth, rotation in degrees about Y. Zone codes are kept for the Admin view only;
+// x = east-west, z = depth, rotation in degrees about Y. Zone codes are kept in data only;
 // the UI shows human names ("Treadmill 3, zone 1").
 import type { FloorPlacement, LibraryModelSeed } from './types';
 

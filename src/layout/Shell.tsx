@@ -10,6 +10,7 @@ import { BMS_PAGES, CHAIN_PAGES, SETTINGS_PAGE, VISION_PAGES, type PageDef } fro
 import { useScope } from './filters';
 import { useAuth } from './auth';
 import { scopeLabel } from './scopeLabel';
+import { useAccess } from './access';
 import './layout.css';
 
 const GROUPS_KEY = 'opt.navGroups';
@@ -68,13 +69,23 @@ export function RoleLabel() {
   );
 }
 
-/** Scope pill: current scope, click goes back to the Kingdom map to change it. */
+/** Scope pill: current scope, click goes back to the Kingdom map to change it (fixed, not clickable, for the Facility Manager). */
 function ScopePill() {
   const i18n = useI18n();
   const { scope } = useScope();
   const { clubs, districts } = useDemo();
+  const { changeScope } = useAccess();
   const navigate = useNavigate();
   const label = scopeLabel(scope, i18n, clubs, districts);
+  if (!changeScope) {
+    return (
+      <span className="scope-pill scope-pill--fixed">
+        <span className="live-dot" aria-hidden />
+        <MapPin aria-hidden className="scope-pill__icon" />
+        <span className="scope-pill__text">{label}</span>
+      </span>
+    );
+  }
   return (
     <button type="button" className="scope-pill" onClick={() => navigate('/map')} title={i18n.t('shell.scopeHint')} aria-label={`${label}. ${i18n.t('shell.scopeHint')}`}>
       <span className="live-dot" aria-hidden />
@@ -160,6 +171,10 @@ function NavGroupBlock({ id, label, pages, open, onToggle, onNavigate }: { id: s
 
 function Sidebar({ onNavigate }: { onNavigate: () => void }) {
   const { t } = useI18n();
+  const { can } = useAccess();
+  const chain = CHAIN_PAGES.filter((p) => can(p.id));
+  const bms = BMS_PAGES.filter((p) => can(p.id));
+  const vision = VISION_PAGES.filter((p) => can(p.id));
   const [groups, setGroups] = useState(readGroups);
   const toggle = (k: 'bms' | 'vision') => setGroups((g) => {
     const n = { ...g, [k]: !g[k] };
@@ -169,11 +184,11 @@ function Sidebar({ onNavigate }: { onNavigate: () => void }) {
   return (
     <nav className="sidenav" aria-label={t('nav.main')}>
       <ul className="sidenav__list">
-        {CHAIN_PAGES.map((p) => <NavItem key={p.id} p={p} onNavigate={onNavigate} />)}
-        <NavItem p={SETTINGS_PAGE} onNavigate={onNavigate} />
+        {chain.map((p) => <NavItem key={p.id} p={p} onNavigate={onNavigate} />)}
+        {can(SETTINGS_PAGE.id) && <NavItem p={SETTINGS_PAGE} onNavigate={onNavigate} />}
       </ul>
-      <NavGroupBlock id="bms" label={t('nav.groupBms')} pages={BMS_PAGES} open={groups.bms} onToggle={() => toggle('bms')} onNavigate={onNavigate} />
-      <NavGroupBlock id="vision" label={t('nav.groupVision')} pages={VISION_PAGES} open={groups.vision} onToggle={() => toggle('vision')} onNavigate={onNavigate} />
+      {bms.length > 0 && <NavGroupBlock id="bms" label={t('nav.groupBms')} pages={bms} open={groups.bms} onToggle={() => toggle('bms')} onNavigate={onNavigate} />}
+      {vision.length > 0 && <NavGroupBlock id="vision" label={t('nav.groupVision')} pages={vision} open={groups.vision} onToggle={() => toggle('vision')} onNavigate={onNavigate} />}
     </nav>
   );
 }

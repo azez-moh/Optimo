@@ -1,14 +1,19 @@
 /* eslint-disable react-refresh/only-export-components */
 import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react';
 import type { Club, District, RegionId, Role, Scope } from '../data/types';
+import { LIVE_CLUB_ID } from '../data/clubs';
 
 /**
  * Global scope (all / region / district / club), set from the Kingdom map or the scope pill, plus the
  * signed-in role. Both persist in localStorage (opt.scope, opt.role). Pages read the scope with useScope()
  * and pass it to the selectors in src/data/selectors.ts.
+ * The Facility Manager is locked to one gym: his scope is always OPTIMO Al Malqa (Men) and setScope is ignored.
  */
 
-export const ROLES: Role[] = ['coo', 'admin'];
+export const ROLES: Role[] = ['coo', 'fm'];
+
+/** Fixed scope of the Facility Manager (also in src/layout/access.ts). */
+const FM_LOCK: Scope = { level: 'club', clubId: LIVE_CLUB_ID };
 export const REGIONS: RegionId[] = ['riyadh', 'makkah'];
 
 const SCOPE_KEY = 'opt.scope';
@@ -38,7 +43,8 @@ export interface ScopeCtx {
   setScope: (s: Scope) => void;
   role: Role;
   setRole: (r: Role) => void;
-  isAdmin: boolean;
+  /** Facility Manager: one gym, limited menu. */
+  isFm: boolean;
   /** Clubs inside the current scope. */
   clubs: Club[];
   allClubs: Club[];
@@ -48,13 +54,14 @@ export interface ScopeCtx {
 const Ctx = createContext<ScopeCtx | null>(null);
 
 export function FiltersProvider({ children, clubs, districts }: { children: ReactNode; clubs: Club[]; districts: District[] }) {
-  const [scope, setScopeState] = useState<Scope>(readScope);
+  const [scopeState, setScopeState] = useState<Scope>(readScope);
   const [role, setRoleState] = useState<Role>(readRole);
 
   const setScope = useCallback((s: Scope) => {
+    if (role === 'fm') return; // locked to one gym
     setScopeState(s);
     try { localStorage.setItem(SCOPE_KEY, JSON.stringify(s)); } catch { /* ignore */ }
-  }, []);
+  }, [role]);
 
   const setRole = useCallback((r: Role) => {
     setRoleState(r);
@@ -62,12 +69,13 @@ export function FiltersProvider({ children, clubs, districts }: { children: Reac
   }, []);
 
   const value = useMemo<ScopeCtx>(() => {
+    const scope = role === 'fm' ? FM_LOCK : scopeState;
     const inScope = scope.level === 'all' ? clubs
       : scope.level === 'region' ? clubs.filter((c) => c.region === scope.region)
       : scope.level === 'district' ? clubs.filter((c) => c.district === scope.district)
       : clubs.filter((c) => c.id === scope.clubId);
-    return { scope, setScope, role, setRole, isAdmin: role === 'admin', clubs: inScope.length ? inScope : clubs, allClubs: clubs, districts };
-  }, [scope, setScope, role, setRole, clubs, districts]);
+    return { scope, setScope, role, setRole, isFm: role === 'fm', clubs: inScope.length ? inScope : clubs, allClubs: clubs, districts };
+  }, [scopeState, setScope, role, setRole, clubs, districts]);
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }

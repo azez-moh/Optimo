@@ -34,6 +34,7 @@
   transition: border-color 0.2s var(--ease);
 }
 .scope-pill:hover { border-color: var(--hairline-strong); }
+.scope-pill--fixed, .scope-pill--fixed:hover { cursor: default; border-color: var(--border-strong); }
 .scope-pill__icon { width: 14px; height: 14px; color: var(--text-muted); flex-shrink: 0; }
 .scope-pill__text { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .scope-pill__chev { width: 14px; height: 14px; color: var(--text-faint); flex-shrink: 0; }
@@ -129,5 +130,5 @@
 .shell__sidemodel { display: block; padding: 10px 16px; font-size: 13px; color: var(--text-muted); text-decoration: none; border-top: 1px solid var(--border); }
 .shell__sidemodel:hover, .shell__sidemodel:focus-visible { color: var(--text); }
 
-/* Technical zone codes are a detail for the Admin role only; the COO sees human names. */
-:root:not([data-role="admin"]) .vis-code, :root:not([data-role="admin"]) .mr-zone__code { display: none; }
+/* Technical zone codes are never shown; every role sees human names. */
+.vis-code, .mr-zone__code { display: none; }

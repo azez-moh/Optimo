@@ -9,7 +9,8 @@ export type Brand = 'optimo' | 'bfit';
 export type RegionId = 'riyadh' | 'makkah';
 export type Gender = 'men' | 'women';
 export type Level = 'critical' | 'warning' | 'info';
-export type Role = 'coo' | 'admin';
+/** Signed-in role: COO (every gym) or Facility Manager (one gym, building operations). */
+export type Role = 'coo' | 'fm';
 
 /** Global scope chosen on the Kingdom map (or the scope pill). */
 export type Scope =
@@ -137,7 +138,7 @@ export interface Camera {
   areaEn: string;
   areaAr: string;
   kind: 'fisheye' | 'nvr';
-  /** Stream address (Admin only). Never a production address. */
+  /** Stream address. Never a production address. */
   stream: string;
   fps: number;
   online: boolean;
@@ -149,7 +150,7 @@ export interface Zone {
   clubId: string;
   cameraId: string;
   machineId: string;
-  /** Internal code kept for the Admin view, e.g. Z_SBTRDML_1_Z1. */
+  /** Internal code, e.g. Z_SBTRDML_1_Z1 (kept in data, not shown in the UI). */
   code: string;
   n: number;
   mode: 'motion';
@@ -388,7 +389,7 @@ export interface DemoContextValue extends StaticData {
   live: LiveData;
   /** Merge fields into one item (e.g. patch('acLive', id, { setpoint: 23 })). */
   patch: (coll: PatchCollection, id: string, fields: Record<string, unknown>) => void;
-  /** Remove one item (destructive: confirm first, Admin only). */
+  /** Remove one item (destructive: confirm first; COO only). */
   remove: (coll: PatchCollection, id: string) => void;
   /** Add one item (it must carry a unique id). */
   add: (coll: PatchCollection, item: { id: string } & Record<string, unknown>) => void;

@@ -15,7 +15,7 @@ export const en = {
   roleLabel: 'Role',
   roles: {
     coo: { name: 'COO', other: 'الرئيس التنفيذي للعمليات', desc: 'Every gym across the Kingdom' },
-    admin: { name: 'Admin', other: 'مسؤول النظام', desc: 'Every gym, for technical setup and support' },
+    fm: { name: 'Facility Manager', other: 'مدير المرافق', desc: 'OPTIMO Al Malqa (Men): building operations' },
   },
 };
 
@@ -35,6 +35,6 @@ export const ar: typeof en = {
   roleLabel: 'الدور',
   roles: {
     coo: { name: 'الرئيس التنفيذي للعمليات', other: 'COO', desc: 'جميع الصالات الرياضية في المملكة' },
-    admin: { name: 'مسؤول النظام', other: 'Admin', desc: 'جميع الصالات الرياضية، للإعداد الفني والدعم' },
+    fm: { name: 'مدير المرافق', other: 'Facility Manager', desc: 'أوبتيمو الملقا (رجال): تشغيل المبنى' },
   },
 };
