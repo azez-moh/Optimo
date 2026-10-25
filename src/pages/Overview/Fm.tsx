@@ -10,6 +10,7 @@ import { useScope } from '../../layout/filters';
 import { AsAtLine } from './shared';
 import { sortAlerts } from './metrics';
 import { MODES, SCENES, SP_MAX, SP_MIN, useFmControls, type BuildingMode, type LogEntry, type Scene, type ZoneRow } from './fmModel';
+import { CrowdHeatmapCard } from '../Heatmap/Compact';
 import './fm.css';
 
 type Pending =
@@ -142,6 +143,8 @@ export function FmOverview() {
             ? t('fm.kpi.energySaved', { sar: fmtCurrency(tot.savedTodaySar) })
             : t('fm.kpi.energyOver', { sar: fmtCurrency(Math.round(overKwh * TARIFF_SAR_PER_KWH)) })} />
       </div>
+
+      <CrowdHeatmapCard club={club} />
 
       {/* ---------- building controls ---------- */}
       <Card live title={<span className="ov-card-title">{t('fm.controls.title')}</span>} info={t('fm.controls.info')} pad="md" className="fm-controls">

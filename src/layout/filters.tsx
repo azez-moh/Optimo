@@ -1,10 +1,10 @@
 /* eslint-disable react-refresh/only-export-components */
-import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import type { Club, District, RegionId, Role, Scope } from '../data/types';
 import { LIVE_CLUB_ID } from '../data/clubs';
 
 /**
- * Global scope (all / region / district / club), set from the Kingdom map or the scope pill, plus the
+ * Global scope (all / region / district / club), set from Branches (map or list) or the top bar back control, plus the
  * signed-in role. Both persist in localStorage (opt.scope, opt.role). Pages read the scope with useScope()
  * and pass it to the selectors in src/data/selectors.ts.
  * The Facility Manager is locked to one gym: his scope is always OPTIMO Al Malqa (Men) and setScope is ignored.
@@ -88,3 +88,16 @@ export function useScope(): ScopeCtx {
 
 /** Dunkin-compatible alias. */
 export const useFilters = useScope;
+
+/**
+ * Gym-level pages (BMS Core, AI Vision) need one gym. Opened at network scope, the scope switches to the live gym
+ * (OPTIMO Al Malqa (Men), the gym with data) before the page renders, and the top bar menu moves to gym level.
+ */
+export function RequireGym({ children, fallback = null }: { children: ReactNode; fallback?: ReactNode }) {
+  const { scope, setScope } = useScope();
+  const need = scope.level !== 'club';
+  useEffect(() => {
+    if (need) setScope({ level: 'club', clubId: LIVE_CLUB_ID });
+  }, [need, setScope]);
+  return <>{need ? fallback : children}</>;
+}

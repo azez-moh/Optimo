@@ -17,6 +17,7 @@ import { BusinessSection } from './Business';
 import { EnergySection } from './Energy';
 import { BmsSection } from './Bms';
 import { FmOverview } from './Fm';
+import { CrowdHeatmapCard } from '../Heatmap/Compact';
 
 type Section = 'business' | 'energy' | 'bms';
 const SECTIONS: Section[] = ['business', 'energy', 'bms'];
@@ -73,6 +74,8 @@ function ChainOverview() {
   const isAll = scope.level === 'all';
   const scopeIds = clubs.map((c) => c.id);
   const scopeGym = scope.level === 'club' ? gyms.find((g) => g.club.id === scope.clubId) : undefined;
+  // crowd heatmap: the gym in scope, or at network level the gym with floor data (Al Malqa Men)
+  const heatClub = clubs.find((c) => c.id === LIVE_CLUB_ID) ?? clubs[0];
 
   // compare two gyms, deep-linkable as ?compare=<gymA>,<gymB>
   const cmpParam = params.get('compare');
@@ -173,12 +176,16 @@ function ChainOverview() {
           onCompare={() => openCompare(scopeGym.club.id)} />
       )}
 
+      {scope.level === 'club' && heatClub && <CrowdHeatmapCard club={heatClub} />}
+
       {ready && (<>
       <RecommendedActions list={insights} scopeIds={scopeIds} isAll={isAll} plan={plan} highlightId={params.get('action')} onViewPlan={viewPlan} />
 
       <div ref={planRef} className="ov-anchor"><ActionPlan plan={plan} /></div>
 
       <GymComparison gyms={gyms} scopeIds={scopeIds} isAll={isAll} onCompare={openCompare} />
+
+      {scope.level !== 'club' && heatClub && <CrowdHeatmapCard club={heatClub} title={i18n.pick(heatClub.nameEn, heatClub.nameAr)} />}
 
       <EquipmentMatrix gyms={gyms} insights={insights.filter((i) => !plan.isDismissed(i.id))} scopeIds={scopeIds} isAll={isAll}
         onCell={(type, clubId) => setCell({ type, clubId })} />

@@ -1,19 +1,7 @@
-/* ---------- Kingdom map page (full page, outside the shell) ---------- */
-.mappage-root { min-height: 100vh; min-height: 100dvh; background: var(--bg); color: var(--text); display: flex; flex-direction: column; overflow-x: clip; }
-
-.maphead {
-  position: sticky; top: 0; z-index: 1100; height: var(--topbar-h);
-  display: flex; align-items: center; gap: var(--sp-4); padding-inline: var(--gutter);
-  background: var(--bg); border-block-end: 1px solid var(--border);
-}
-.maphead__brand { display: flex; align-items: center; gap: var(--sp-5); min-width: 0; }
-.maphead__caption { font-size: var(--fs-sm); color: var(--text-muted); white-space: nowrap; padding-inline-start: var(--sp-5); border-inline-start: 1px solid var(--border); }
-.maphead__actions { display: flex; align-items: center; gap: 2px; margin-inline-start: auto; }
-
-.mappage { width: 100%; max-width: var(--content-max); margin-inline: auto; padding: var(--sp-6) var(--gutter) var(--sp-10); display: flex; flex-direction: column; gap: var(--sp-3); }
-.mappage:focus { box-shadow: none; }
-.has-sheet .mappage { padding-block-end: 70vh; }
-.mappage__title { margin: 0 0 var(--sp-3); font-family: var(--font-display); font-weight: 400; font-size: var(--fs-3xl); line-height: 1.1; }
+/* ---------- Kingdom map drill-down (Branches, Map view; inside the shell) ---------- */
+.mapx { display: flex; flex-direction: column; gap: var(--sp-3); min-width: 0; }
+.mapx.has-sheet { padding-block-end: 70vh; }
+.mappage__title { margin: 0 0 var(--sp-2); font-family: var(--font-display); font-weight: 400; font-size: var(--fs-2xl); line-height: 1.15; }
 
 /* Breadcrumb + back */
 .mapnav { display: flex; align-items: center; gap: var(--sp-3); flex-wrap: wrap; min-height: 24px; font-size: var(--fs-sm); }
@@ -218,19 +206,8 @@
 @media (prefers-reduced-motion: reduce) { .mapsheet { animation: none; } }
 
 /* ---------- Narrow screens ---------- */
-@media (max-width: 900px) { .maphead__caption { display: none; } }
 @media (max-width: 640px) {
-  .maphead { gap: var(--sp-2); padding-inline: var(--sp-3) var(--sp-2); }
-  .maphead .brand__powered { display: none; }
-  .maphead .optimo-logo--word { height: 16px !important; }
-  .maphead .optimo-logo--badge { height: 38px !important; width: 38px !important; }
-  .maphead .lang-btn__full { display: none; }
-  .maphead .lang-btn__short { display: inline; }
-  .maphead .lang-btn { width: 36px; padding: 0; }
-  .maphead .lang-btn svg { display: none; }
-  .maphead .role-label { display: inline-flex; padding-inline: 4px; }
-  .mappage { padding-block-start: var(--sp-4); }
-  .mappage__title { font-size: var(--fs-2xl); }
+  .mappage__title { font-size: var(--fs-xl); }
   .mapkpis { gap: var(--sp-2); }
   .mapkpis .kpi { padding: var(--sp-3); gap: var(--sp-2); }
   .mapkpis .kpi__icon { display: none; }

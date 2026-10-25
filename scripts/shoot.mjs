@@ -1,5 +1,7 @@
 // QA screenshots. Usage:
 //   node scripts/shoot.mjs <label> <route>[,<route>...] [--base=http://localhost:5199/] [--variants=all|quick] [--role=coo|fm] [--scope=<json>]
+//     [--click=<css selector>[|<selector>...]] clicks each visible selector after load (e.g. open a top bar dropdown) before the shot
+//     [--full=false] viewport only; [--suffix=<text>] added to the file name
 // Example: node scripts/shoot.mjs scaffold signin,overview
 // Starts `vite preview` on dist/ when --base is not given (run `npm run build` first).
 // Output: qa/<label>/<route>-<theme>-<lang>-<width>.png, plus a summary of page errors, missing i18n keys
@@ -82,9 +84,15 @@ try {
       await page.goto(`${base}?now=${nowMs}&r=${encodeURIComponent(route)}#/${route}`, { waitUntil: 'load' });
       await page.evaluate(() => document.fonts.ready);
       await page.waitForTimeout(Number(flags.wait || 1500));
+      for (const sel of (flags.click ? flags.click.split('|') : [])) {
+        const el = page.locator(sel).first();
+        if (!(await el.isVisible().catch(() => false))) continue; // e.g. desktop-only control on a phone
+        await el.click();
+        await page.waitForTimeout(400);
+      }
       const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
       if (overflow > 0) errors.push(`${route}/${tag}: horizontal overflow ${overflow}px`);
-      const file = path.join(out, `${route.replace(/[/?=&]/g, '_')}-${tag}.png`);
+      const file = path.join(out, `${route.replace(/[/?=&]/g, '_')}${flags.suffix ? `-${flags.suffix}` : ''}-${tag}.png`);
       await page.screenshot({ path: file, fullPage: flags.full !== 'false' });
       console.log('shot', path.relative(root, file));
     }

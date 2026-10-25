@@ -33,14 +33,14 @@ const MALQA_CAMERAS: { key: string; en: string; ar: string; areaEn: string; area
 ];
 
 const AREA_TEMPLATE: { key: string; en: string; ar: string; floorEn: string; floorAr: string; share: number; m2: number }[] = [
-  { key: 'cardio', en: 'Cardio floor', ar: 'صالة الكارديو', floorEn: 'Ground floor', floorAr: 'الطابق الأرضي', share: 0.34, m2: 0.22 },
-  { key: 'weights', en: 'Weights area', ar: 'منطقة الأوزان', floorEn: 'Ground floor', floorAr: 'الطابق الأرضي', share: 0.3, m2: 0.2 },
-  { key: 'strength', en: 'Strength corner', ar: 'ركن القوة', floorEn: 'Ground floor', floorAr: 'الطابق الأرضي', share: 0.08, m2: 0.06 },
+  { key: 'cardio', en: 'Cardio floor', ar: 'صالة الكارديو', floorEn: 'Ground floor', floorAr: 'الطابق الأرضي', share: 0.34, m2: 0.132 },
+  { key: 'weights', en: 'Weights area', ar: 'منطقة الأوزان', floorEn: 'Ground floor', floorAr: 'الطابق الأرضي', share: 0.3, m2: 0.199 },
+  { key: 'strength', en: 'Strength corner', ar: 'ركن القوة', floorEn: 'Ground floor', floorAr: 'الطابق الأرضي', share: 0.08, m2: 0.061 },
   { key: 'studio1', en: 'Studio 1', ar: 'الاستوديو 1', floorEn: 'First floor', floorAr: 'الطابق الأول', share: 0.1, m2: 0.08 },
   { key: 'studio2', en: 'Studio 2', ar: 'الاستوديو 2', floorEn: 'First floor', floorAr: 'الطابق الأول', share: 0.06, m2: 0.06 },
-  { key: 'lockers', en: 'Changing rooms', ar: 'غرف تبديل الملابس', floorEn: 'Ground floor', floorAr: 'الطابق الأرضي', share: 0.08, m2: 0.12 },
-  { key: 'reception', en: 'Reception and lounge', ar: 'الاستقبال والاستراحة', floorEn: 'Ground floor', floorAr: 'الطابق الأرضي', share: 0.03, m2: 0.1 },
-  { key: 'staff', en: 'Staff area', ar: 'منطقة الموظفين', floorEn: 'Ground floor', floorAr: 'الطابق الأرضي', share: 0.01, m2: 0.04 },
+  { key: 'lockers', en: 'Changing rooms', ar: 'غرف تبديل الملابس', floorEn: 'Ground floor', floorAr: 'الطابق الأرضي', share: 0.08, m2: 0.121 },
+  { key: 'reception', en: 'Reception and lounge', ar: 'الاستقبال والاستراحة', floorEn: 'Ground floor', floorAr: 'الطابق الأرضي', share: 0.03, m2: 0.095 },
+  { key: 'staff', en: 'Staff area', ar: 'منطقة الموظفين', floorEn: 'Ground floor', floorAr: 'الطابق الأرضي', share: 0.01, m2: 0.038 },
 ];
 
 export const AGENTS: AgentDef[] = [

@@ -4,8 +4,8 @@ import { useScope } from './filters';
 import { useAuth } from './auth';
 
 /*
-  One place for what each role may open. Shell (sidebar), routes (guard) and in-page links all read it.
-  COO: every page, the Kingdom map and Settings.
+  One place for what each role may open. Shell (top bar menu), routes (guard) and in-page links all read it.
+  COO: every page, Branches (map and list) and Settings.
   Facility Manager (fm): one gym (OPTIMO Al Malqa (Men)), a short menu and more building control.
   Ask OPTIMO (assistant) is open to both; for the Facility Manager it answers about his gym only.
 */
@@ -18,7 +18,7 @@ export const FM_SCOPE: Scope = { level: 'club', clubId: FM_CLUB_ID };
 const FM_PAGES = new Set([
   'overview', 'assistant',
   'bms-overview', 'hvac', 'lights', 'ai-agents', 'control', 'bms-settings',
-  'live-floor', 'machines', 'reports',
+  'live-floor', 'heatmap', 'machines', 'reports',
 ]);
 
 /** True when the role may open the page with this id ('map', 'settings', 'hvac', ...). */
@@ -36,10 +36,10 @@ export function canSeePath(role: Role, path: string): boolean {
 
 /** First page after sign-in. */
 export function homeFor(role: Role): string {
-  return role === 'fm' ? '/overview' : '/map';
+  return role === 'fm' ? '/overview' : '/branches?view=map';
 }
 
-/** Whether the role may change the scope (map, scope pill, gym pickers). */
+/** Whether the role may change the scope (Branches map and list, the "All branches" back control). */
 export function canChangeScope(role: Role): boolean {
   return role === 'coo';
 }

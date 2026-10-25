@@ -24,8 +24,8 @@ export interface AuthCtx {
 export const DEFAULT_EMAIL = 'coo@optimo.demo';
 const KEY = 'opt.auth';
 
-/** First page after sign-in for the COO: the Kingdom map (the Facility Manager lands on /overview, see homeFor). */
-export const HOME_AFTER_SIGNIN = '/map';
+/** First page after sign-in for the COO: Branches on the map view (the Facility Manager lands on /overview, see homeFor). */
+export const HOME_AFTER_SIGNIN = '/branches?view=map';
 
 /** Router state passed to /signin so a deep link (with a query string) can be restored after sign-in. */
 export interface SignInState { from?: string }

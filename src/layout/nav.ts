@@ -1,10 +1,12 @@
 import {
-  Activity, AirVent, BarChart3, Bot, Building2, Camera, Cctv, Cpu, Dumbbell, FileBarChart, Gauge, Grid3x3, LayoutDashboard,
+  Activity, AirVent, BarChart3, Bot, Building2, Camera, Cctv, Cpu, Dumbbell, FileBarChart, Flame, Gauge, Grid3x3, LayoutDashboard,
   Library, Lightbulb, ListVideo, MessageCircle, PlugZap, Radar, ScanEye, Settings, Settings2, SlidersHorizontal, Store, type LucideIcon,
 } from 'lucide-react';
 
 /**
- * One source of truth for the dashboard pages: sidebar order (Build 8.7), route path and i18n key.
+ * One source of truth for the dashboard pages: menu order (Build 8.7), route path and i18n key.
+ * Top bar menu (src/layout/Shell.tsx): network level (scope "All branches") shows the chain pages only;
+ * gym level shows Overview, Ask OPTIMO and the BMS Core and AI Vision dropdowns. Settings is the gear icon.
  * Route path = `/${id}`. Label = t(`nav.${key}`), tooltip = t(`nav.about.${key}`).
  * Page folders: src/pages/<folder>/index.tsx (lazy-loaded in src/App.tsx).
  */
@@ -37,6 +39,7 @@ export const BMS_PAGES: PageDef[] = [
 export const VISION_PAGES: PageDef[] = [
   { id: 'monitor', key: 'monitor', folder: 'Monitor', group: 'vision', icon: ScanEye },
   { id: 'live-floor', key: 'liveFloor', folder: 'LiveFloor', group: 'vision', icon: Grid3x3 },
+  { id: 'heatmap', key: 'heatmap', folder: 'Heatmap', group: 'vision', icon: Flame },
   { id: 'cameras', key: 'cameras', folder: 'Cameras', group: 'vision', icon: Cctv },
   { id: 'camera-list', key: 'cameraList', folder: 'CameraList', group: 'vision', icon: ListVideo },
   { id: 'zones', key: 'zones', folder: 'Zones', group: 'vision', icon: Radar },
@@ -55,6 +58,10 @@ export const ALL_PAGES: PageDef[] = [...CHAIN_PAGES, SETTINGS_PAGE, ...BMS_PAGES
 export function pageById(id: string): PageDef | undefined {
   return ALL_PAGES.find((p) => p.id === id);
 }
+
+/** Pages that belong to one gym (BMS Core and AI Vision). Opened at network scope they switch to the live gym. */
+export const GYM_PAGES: PageDef[] = [...BMS_PAGES, ...VISION_PAGES];
+export const isGymPage = (id: string) => GYM_PAGES.some((p) => p.id === id);
 
 /** Camera icon re-export for pages that want the same glyph as the sidebar. */
 export { Camera, Gauge };

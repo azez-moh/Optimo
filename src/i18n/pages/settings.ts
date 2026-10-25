@@ -3,7 +3,7 @@ export const en = {
   about: 'Account and system-wide settings. A building\'s own configuration is under BMS Core, BMS Settings.',
   appearance: {
     title: 'Appearance',
-    info: 'Theme and language for this device. Both are remembered here and stay in step with the top bar and the sidebar.',
+    info: 'Theme and language for this device. Both are remembered here and stay in step with the top bar.',
     theme: 'Theme',
     light: 'Light',
     dark: 'Dark',
@@ -15,11 +15,11 @@ export const en = {
   },
   context: {
     title: 'Building in view',
-    info: 'BMS Core and AI Vision pages show one building. With a wider scope they show Al Malqa Men when it is inside it. Change the scope here or on the Kingdom map.',
+    info: 'BMS Core and AI Vision pages show one building. With a wider scope they show Al Malqa Men when it is inside it. Change the scope here or in Branches.',
     scope: 'Scope',
     building: 'Building shown on BMS and AI Vision pages',
     allBranches: 'All branches',
-    openMap: 'Open the Kingdom map',
+    openMap: 'Open Branches',
     clubs: 'Gyms in scope',
     hours: 'Opening hours',
   },
@@ -36,7 +36,7 @@ export const en = {
   },
   more: {
     title: 'More pages',
-    info: 'Pages outside the sidebar groups. Each opens on its own address. Cameras and machines entries open the same pages as their AI Vision namesakes.',
+    info: 'Pages outside the BMS Core and AI Vision menus. Each opens on its own address. Cameras and machines entries open the same pages as their AI Vision namesakes.',
     search: 'Search pages',
     searchPlaceholder: 'Search in English or Arabic',
     none: 'No page matches that search.',
@@ -249,7 +249,7 @@ export const ar: typeof en = {
   about: 'إعدادات الحساب والنظام بالكامل. إعدادات كل مبنى موجودة في نظام إدارة المبنى، إعدادات نظام إدارة المبنى.',
   appearance: {
     title: 'المظهر',
-    info: 'المظهر واللغة على هذا الجهاز. يُحفظ الاختيار هنا ويبقى متوافقًا مع الشريط العلوي والقائمة الجانبية.',
+    info: 'المظهر واللغة على هذا الجهاز. يُحفظ الاختيار هنا ويبقى متوافقًا مع الشريط العلوي.',
     theme: 'المظهر',
     light: 'فاتح',
     dark: 'داكن',
@@ -261,11 +261,11 @@ export const ar: typeof en = {
   },
   context: {
     title: 'المبنى المعروض',
-    info: 'تعرض صفحات نظام إدارة المبنى والرؤية الذكية مبنى واحدًا. عند اختيار نطاق أوسع تعرض الملقا رجال إن كان ضمنه. غيّر النطاق هنا أو من خريطة المملكة.',
+    info: 'تعرض صفحات نظام إدارة المبنى والرؤية الذكية مبنى واحدًا. عند اختيار نطاق أوسع تعرض الملقا رجال إن كان ضمنه. غيّر النطاق هنا أو من صفحة الفروع.',
     scope: 'النطاق',
     building: 'المبنى المعروض في صفحات إدارة المبنى والرؤية الذكية',
     allBranches: 'جميع الفروع',
-    openMap: 'فتح خريطة المملكة',
+    openMap: 'فتح الفروع',
     clubs: 'الصالات الرياضية ضمن النطاق',
     hours: 'ساعات العمل',
   },
@@ -282,7 +282,7 @@ export const ar: typeof en = {
   },
   more: {
     title: 'صفحات إضافية',
-    info: 'صفحات خارج مجموعات القائمة الجانبية، لكل منها عنوان خاص. عناصر الكاميرات والأجهزة تفتح الصفحات نفسها الموجودة في الرؤية الذكية.',
+    info: 'صفحات خارج قائمتي نظام إدارة المبنى والرؤية الذكية، لكل منها عنوان خاص. عناصر الكاميرات والأجهزة تفتح الصفحات نفسها الموجودة في الرؤية الذكية.',
     search: 'البحث في الصفحات',
     searchPlaceholder: 'ابحث بالعربية أو الإنجليزية',
     none: 'لا توجد صفحة تطابق البحث.',
