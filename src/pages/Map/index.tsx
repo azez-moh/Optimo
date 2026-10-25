@@ -1,15 +1,15 @@
-import { Navigate, useLocation } from 'react-router-dom';
+import { MapExplorer } from './MapExplorer';
 
 /**
- * The Kingdom map now lives inside Branches (Map view). The drill-down itself is MapExplorer (./MapExplorer.tsx);
- * this default export only forwards an old /map link to /branches?view=map with the same query.
+ * Kingdom map page (/map, first item of the left menu): the drill-down Kingdom, region, district and gym fact card,
+ * with the "All branches" row first above the regions. The drill-down itself is MapExplorer (./MapExplorer.tsx).
  */
 export { MapExplorer } from './MapExplorer';
 
 export default function MapPage() {
-  const { search } = useLocation();
-  const p = new URLSearchParams(search);
-  p.delete('view');
-  const rest = p.toString();
-  return <Navigate to={`/branches?view=map${rest ? `&${rest}` : ''}`} replace />;
+  return (
+    <div className="page mappage">
+      <MapExplorer />
+    </div>
+  );
 }

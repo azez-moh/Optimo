@@ -1,7 +1,7 @@
-/* ---------- Kingdom map drill-down (Branches, Map view; inside the shell) ---------- */
+/* ---------- Kingdom map drill-down (/map page, inside the shell) ---------- */
 .mapx { display: flex; flex-direction: column; gap: var(--sp-3); min-width: 0; }
 .mapx.has-sheet { padding-block-end: 70vh; }
-.mappage__title { margin: 0 0 var(--sp-2); font-family: var(--font-display); font-weight: 400; font-size: var(--fs-2xl); line-height: 1.15; }
+.mappage__title { margin: 0 0 var(--sp-2); font-family: var(--font-display); font-weight: 400; font-size: var(--fs-3xl); line-height: 1.05; }
 
 /* Breadcrumb + back */
 .mapnav { display: flex; align-items: center; gap: var(--sp-3); flex-wrap: wrap; min-height: 24px; font-size: var(--fs-sm); }
@@ -207,7 +207,7 @@
 
 /* ---------- Narrow screens ---------- */
 @media (max-width: 640px) {
-  .mappage__title { font-size: var(--fs-xl); }
+  .mappage__title { font-size: var(--fs-2xl); }
   .mapkpis { gap: var(--sp-2); }
   .mapkpis .kpi { padding: var(--sp-3); gap: var(--sp-2); }
   .mapkpis .kpi__icon { display: none; }

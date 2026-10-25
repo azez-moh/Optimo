@@ -5,7 +5,7 @@ import { useAuth } from './auth';
 
 /*
   One place for what each role may open. Shell (top bar menu), routes (guard) and in-page links all read it.
-  COO: every page, Branches (map and list) and Settings.
+  COO: every page, the Kingdom map, Branches and Settings, and may change the gym (branch switcher by the logo).
   Facility Manager (fm): one gym (OPTIMO Al Malqa (Men)), a short menu and more building control.
   Ask OPTIMO (assistant) is open to both; for the Facility Manager it answers about his gym only.
 */
@@ -36,10 +36,10 @@ export function canSeePath(role: Role, path: string): boolean {
 
 /** First page after sign-in. */
 export function homeFor(role: Role): string {
-  return role === 'fm' ? '/overview' : '/branches?view=map';
+  return role === 'fm' ? '/overview' : '/map';
 }
 
-/** Whether the role may change the scope (Branches map and list, the "All branches" back control). */
+/** Whether the role may change the scope (branch switcher by the logo, the map, the Branches list). */
 export function canChangeScope(role: Role): boolean {
   return role === 'coo';
 }

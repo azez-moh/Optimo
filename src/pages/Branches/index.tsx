@@ -1,11 +1,10 @@
 import { useEffect, useMemo, useRef } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
-import { AlertOctagon, ArrowDownUp, ArrowRight, Check, LayoutList, ListChecks, Map as MapIcon, Store, Users } from 'lucide-react';
-import { ChipGroup, EmptyState, InfoTip, LiveTag, KpiTile, PageHeader, Segmented, Select } from '../../components';
+import { Navigate, useNavigate, useSearchParams } from 'react-router-dom';
+import { AlertOctagon, ArrowDownUp, ArrowRight, Check, ListChecks, Store, Users } from 'lucide-react';
+import { ChipGroup, EmptyState, InfoTip, LiveTag, KpiTile, PageHeader, Select } from '../../components';
 import { useI18n } from '../../i18n';
 import { useScope } from '../../layout/filters';
 import { useAccess } from '../../layout/access';
-import { MapExplorer } from '../Map/MapExplorer';
 import { useDemo, type Level } from '../../data';
 import { clubRows, type ClubRow } from '../Overview/metrics';
 import { AsAtLine, ClubStatus, STATUS_RANK, useFmtHour, useFmtMwh } from '../Overview/shared';
@@ -16,41 +15,35 @@ type Sort = 'status' | 'name' | 'people' | 'full' | 'machines' | 'energy' | 'ale
 const SORTS: Sort[] = ['status', 'name', 'people', 'full', 'machines', 'energy', 'alerts'];
 const FILTERS: Filter[] = ['all', 'attention'];
 
-type View = 'map' | 'list';
-
 /**
- * Branches (network level): a Map / List toggle at the top, Map by default.
- * Map = the Kingdom map drill-down; List = the gym cards. Picking a gym in either sets the gym scope and opens
- * its Overview, so the top bar menu switches to gym level. A link with ?club=<id> and no view opens the list
- * with that card highlighted (used by Overview).
+ * Branches (top menu): the gym list only, one card per gym with Open gym. Opening a gym sets the gym scope and
+ * opens its Overview; the left menu then shows the gym's BMS Core and AI Vision pages. The Kingdom map is its own
+ * page (/map); an old /branches?view=map link redirects there with the same drill-down query.
+ * A link with ?club=<id> highlights that card (used by Overview).
  */
 export default function BranchesPage() {
   const { t } = useI18n();
-  const [params, setParams] = useSearchParams();
+  const [params] = useSearchParams();
   const { scope, setScope } = useScope();
   const { changeScope } = useAccess();
-  const raw = params.get('view');
-  const view: View = raw === 'list' || raw === 'map' ? raw : params.get('club') && !params.get('region') ? 'list' : 'map';
 
   // Branches belongs to the network level: opened while a gym is picked, go back to all branches.
   useEffect(() => {
-    if (changeScope && scope.level === 'club') setScope({ level: 'all' });
+    if (changeScope && scope.level === 'club' && params.get('view') !== 'map') setScope({ level: 'all' });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const setView = (v: View) => setParams(new URLSearchParams({ view: v }));
+  if (params.get('view') === 'map') {
+    const p = new URLSearchParams(params);
+    p.delete('view');
+    const rest = p.toString();
+    return <Navigate to={`/map${rest ? `?${rest}` : ''}`} replace />;
+  }
 
   return (
     <div className="page br-page">
-      <div className="br-head">
-        <PageHeader title={t('branches.title')} actions={
-          <Segmented ariaLabel={t('branches.view.label')} value={view} onChange={setView} options={[
-            { value: 'map', label: <span className="br-view"><MapIcon aria-hidden />{t('branches.view.map')}</span> },
-            { value: 'list', label: <span className="br-view"><LayoutList aria-hidden />{t('branches.view.list')}</span> },
-          ]} />
-        } />
-      </div>
-      {view === 'map' ? <MapExplorer /> : <BranchesList />}
+      <PageHeader title={t('branches.title')} />
+      <BranchesList />
     </div>
   );
 }
@@ -59,7 +52,7 @@ function BranchesList() {
   const i18n = useI18n();
   const { t, pick, fmtNumber, fmtClubs } = i18n;
   const data = useDemo();
-  const { scope, clubs, districts } = useScope();
+  const { scope, allClubs: clubs, districts } = useScope();
   const [params, setParams] = useSearchParams();
   const filter: Filter = FILTERS.includes(params.get('filter') as Filter) ? (params.get('filter') as Filter) : 'all';
   const sort: Sort = SORTS.includes(params.get('sort') as Sort) ? (params.get('sort') as Sort) : 'status';

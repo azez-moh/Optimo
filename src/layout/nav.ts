@@ -1,12 +1,14 @@
 import {
   Activity, AirVent, BarChart3, Bot, Building2, Camera, Cctv, Cpu, Dumbbell, FileBarChart, Flame, Gauge, Grid3x3, LayoutDashboard,
-  Library, Lightbulb, ListVideo, MessageCircle, PlugZap, Radar, ScanEye, Settings, Settings2, SlidersHorizontal, Store, type LucideIcon,
+  Library, Lightbulb, ListVideo, Map as MapIcon, MessageCircle, PlugZap, Radar, ScanEye, Settings, Settings2, SlidersHorizontal, Store, type LucideIcon,
 } from 'lucide-react';
 
 /**
  * One source of truth for the dashboard pages: menu order (Build 8.7), route path and i18n key.
- * Top bar menu (src/layout/Shell.tsx): network level (scope "All branches") shows the chain pages only;
- * gym level shows Overview, Ask OPTIMO and the BMS Core and AI Vision dropdowns. Settings is the gear icon.
+ * Navigation (src/layout/Shell.tsx):
+ *   top centre menu, always the same: CHAIN_PAGES (Overview, Ask OPTIMO, Branches);
+ *   left menu: MAP_PAGE always, plus the BMS Core and AI Vision groups when one gym is picked;
+ *   Settings is the gear icon in the top bar corner.
  * Route path = `/${id}`. Label = t(`nav.${key}`), tooltip = t(`nav.about.${key}`).
  * Page folders: src/pages/<folder>/index.tsx (lazy-loaded in src/App.tsx).
  */
@@ -25,6 +27,9 @@ export const CHAIN_PAGES: PageDef[] = [
   { id: 'assistant', key: 'assistant', folder: 'Assistant', group: 'chain', icon: MessageCircle },
   { id: 'branches', key: 'branches', folder: 'Branches', group: 'chain', icon: Store },
 ];
+
+/** Kingdom map drill-down, always first in the left menu. */
+export const MAP_PAGE: PageDef = { id: 'map', key: 'map', folder: 'Map', group: 'chain', icon: MapIcon };
 
 export const BMS_PAGES: PageDef[] = [
   { id: 'bms-overview', key: 'bmsOverview', folder: 'BmsOverview', group: 'bms', icon: Building2 },
@@ -53,7 +58,7 @@ export const VISION_PAGES: PageDef[] = [
 
 export const SETTINGS_PAGE: PageDef = { id: 'settings', key: 'settings', folder: 'Settings', group: 'chain', icon: Settings };
 
-export const ALL_PAGES: PageDef[] = [...CHAIN_PAGES, SETTINGS_PAGE, ...BMS_PAGES, ...VISION_PAGES];
+export const ALL_PAGES: PageDef[] = [...CHAIN_PAGES, MAP_PAGE, SETTINGS_PAGE, ...BMS_PAGES, ...VISION_PAGES];
 
 export function pageById(id: string): PageDef | undefined {
   return ALL_PAGES.find((p) => p.id === id);

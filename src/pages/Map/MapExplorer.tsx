@@ -52,8 +52,9 @@ function parseSel(p: URLSearchParams): Selection | null {
 }
 
 /**
- * Kingdom map drill-down (Kingdom, region, district, gym fact card), shown as the Map view of Branches.
- * The drill-down lives in the URL (?region=&district=&club=) next to ?view=map so every level can be bookmarked.
+ * Kingdom map drill-down (Kingdom, region, district, gym fact card), the /map page.
+ * The drill-down lives in the URL (?region=&district=&club=) so every level can be bookmarked. When the scope is
+ * changed from the branch switcher by the logo, the map follows it.
  * Picking a gym sets the gym scope and opens its Overview; the "All branches" row opens the network Overview.
  */
 export function MapExplorer() {
@@ -75,12 +76,21 @@ export function MapExplorer() {
   const setSel = useCallback((s: Selection) => {
     setSelState(s);
     const p = new URLSearchParams();
-    p.set('view', 'map');
     if (s.region) p.set('region', s.region);
     if (s.district) p.set('district', s.district);
     if (s.clubId) p.set('club', s.clubId);
     setParams(p, { replace: true });
   }, [setParams]);
+
+  // Follow scope changes made elsewhere (the branch switcher by the logo).
+  const scopeKey = JSON.stringify(scope);
+  const lastScope = useRef(scopeKey);
+  useEffect(() => {
+    if (scopeKey === lastScope.current) return;
+    lastScope.current = scopeKey;
+    setSel(selectionFromScope(scope, clubs, districts));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [scopeKey]);
 
   const level = levelOf(sel);
   const region = sel.region;
@@ -277,7 +287,7 @@ export function MapExplorer() {
           </ol>
         </nav>
       </div>
-      <h2 className="mappage__title">{title}</h2>
+      <h1 className="mappage__title">{title}</h1>
 
       <div className="mapgrid">
         <aside className="mapgrid__side" aria-label={listTitle}>

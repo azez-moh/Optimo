@@ -1,5 +1,4 @@
-/* Branches page: Map / List toggle, then the Kingdom map (../Map/map.css) or the gym card grid.
-   Gym card grid. Shared bits (brand tag, as-at line, KPI accents) come from ../Overview/overview.css. */
+/* Branches page: the gym card grid. Shared bits (brand tag, as-at line, KPI accents) come from ../Overview/overview.css. */
 
 .br-toolbar { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-3); flex-wrap: wrap; }
 .br-toolbar .chip-group { min-width: 0; max-width: 100%; }
@@ -65,8 +64,4 @@
   .br-num__v { font-size: 2rem; }
 }
 
-/* Header: title and the Map / List toggle on one line */
-.br-head .page-head { align-items: center; }
-.br-view { display: inline-flex; align-items: center; gap: 6px; }
-.br-view svg { width: 15px; height: 15px; }
 .br-listhead { margin-block-start: calc(-1 * var(--sp-2)); }

@@ -1,7 +1,6 @@
 // Page strings for "branches". Keys resolve as t('branches.<key>'). Only the agent that owns this page edits this file.
 export const en = {
   title: 'Branches',
-  view: { label: 'Show gyms as', map: 'Map', list: 'List' },
   kpi: {
     clubs: 'Gyms',
     clubsInfo: 'OPTIMO gyms in the current scope, with their city.',
@@ -54,7 +53,6 @@ export const en = {
 
 export const ar: typeof en = {
   title: 'الفروع',
-  view: { label: 'عرض الصالات الرياضية', map: 'الخريطة', list: 'القائمة' },
   kpi: {
     clubs: 'الصالات الرياضية',
     clubsInfo: 'صالات أوبتيمو الرياضية ضمن النطاق الحالي مع مدينتها.',

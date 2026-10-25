@@ -36,11 +36,12 @@ React 18, TypeScript, Vite 5, React Router (hash routes, one per page), Leaflet 
 
 | Path | Contents |
 |---|---|
-| `src/layout/nav.ts` | Sidebar order, routes and labels (single source) |
+| `src/layout/Shell.tsx` | Top bar (logo, branch switcher, centre menu Overview / Ask OPTIMO / Branches, Settings gear) and the left menu (Map, then the gym's BMS Core and AI Vision groups) |
+| `src/layout/nav.ts` | Menu order, routes and labels (single source) |
 | `src/layout/access.ts` | Which pages each role can open |
 | `src/layout/auth.tsx` | Demo sign-in and roles (COO, Facility Manager) |
 | `src/data/` | Generated demo data: gyms (`clubs.ts`), machines and demand (`fleet.ts`, `build.ts`), live ticking (`dynamics.ts`), selectors |
-| `src/pages/<Page>/` | One folder per page |
+| `src/pages/<Page>/` | One folder per page (`Map/` is the Kingdom map at `/map`, `Branches/` the gym list) |
 | `src/pages/Overview/insights.ts` | Recommended actions (move, buy, retire, service, energy, crowding) |
 | `src/pages/Assistant/` | Ask OPTIMO chat (built-in answers, optional Claude mode with a key kept in the browser) |
 | `src/three/` | Procedural 3D machine models and GLB export |

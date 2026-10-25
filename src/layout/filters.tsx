@@ -4,7 +4,7 @@ import type { Club, District, RegionId, Role, Scope } from '../data/types';
 import { LIVE_CLUB_ID } from '../data/clubs';
 
 /**
- * Global scope (all / region / district / club), set from Branches (map or list) or the top bar back control, plus the
+ * Global scope (all / region / district / club), set from the branch switcher by the logo, the Kingdom map or the Branches list, plus the
  * signed-in role. Both persist in localStorage (opt.scope, opt.role). Pages read the scope with useScope()
  * and pass it to the selectors in src/data/selectors.ts.
  * The Facility Manager is locked to one gym: his scope is always OPTIMO Al Malqa (Men) and setScope is ignored.
@@ -69,7 +69,9 @@ export function FiltersProvider({ children, clubs, districts }: { children: Reac
   }, []);
 
   const value = useMemo<ScopeCtx>(() => {
-    const scope = role === 'fm' ? FM_LOCK : scopeState;
+    // A stored gym that no longer exists falls back to all branches.
+    const scope = role === 'fm' ? FM_LOCK
+      : scopeState.level === 'club' && !clubs.some((c) => c.id === scopeState.clubId) ? { level: 'all' as const } : scopeState;
     const inScope = scope.level === 'all' ? clubs
       : scope.level === 'region' ? clubs.filter((c) => c.region === scope.region)
       : scope.level === 'district' ? clubs.filter((c) => c.district === scope.district)
@@ -91,7 +93,7 @@ export const useFilters = useScope;
 
 /**
  * Gym-level pages (BMS Core, AI Vision) need one gym. Opened at network scope, the scope switches to the live gym
- * (OPTIMO Al Malqa (Men), the gym with data) before the page renders, and the top bar menu moves to gym level.
+ * (OPTIMO Al Malqa (Men), the gym with data) before the page renders, and the left menu shows the gym's BMS Core and AI Vision pages.
  */
 export function RequireGym({ children, fallback = null }: { children: ReactNode; fallback?: ReactNode }) {
   const { scope, setScope } = useScope();
