@@ -10,10 +10,10 @@ import { BMS_PAGES, BRANCH_PAGES, CHAIN_PAGES, MAP_PAGE, VISION_PAGES, isGymPage
 
 /*
   Routes: /signin (public), then one route per dashboard page inside the shell (ids from src/layout/nav.ts).
-  Pages are lazy-loaded from src/pages/<Folder>/index.tsx. The Kingdom map is its own page (/map, first item of the
-  left menu); an old /branches?view=map link redirects there and keeps its region/district/club query.
+  Pages are lazy-loaded from src/pages/<Folder>/index.tsx. The Kingdom map is its own page (/map): in no menu, the
+  COO lands on it after sign-in; an old /branches?view=map link redirects there and keeps its region/district/club query.
   Branch overview, Branch settings, BMS Core and AI Vision pages are gym level: opened at network scope they switch
-  to the live gym first. /overview is always the overview of all branches (the Facility Manager sees his gym).
+  to the live gym first. /overview is always the overview of all branches (the Facility Manager is forwarded to /branch, his gym).
   Settings has nested routes /settings/<slug> for the Build 8.7 "More pages".
   Every route is guarded by role (src/layout/access.ts): a page the role may not open redirects to its home.
 */
@@ -31,7 +31,7 @@ const MorePageView = lazy(() => import('./pages/Settings').then((m) => ({ defaul
 
 const DASH = [...CHAIN_PAGES, MAP_PAGE, ...BRANCH_PAGES, ...BMS_PAGES, ...VISION_PAGES].map((p) => ({ ...p, Component: lazyPage(p.folder, p.key) }));
 
-/** "/" goes to the role's home: the Kingdom map for the COO, the gym overview for the Facility Manager. */
+/** "/" goes to the role's home: the Kingdom map for the COO, Branch overview (his gym) for the Facility Manager. */
 function Home() {
   const { user } = useAuth();
   return <Navigate to={homeFor(user?.role ?? 'coo')} replace />;

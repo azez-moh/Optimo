@@ -1,11 +1,16 @@
-/* App shell: top bar across (logo, branch switcher, centre menu, controls), a slim left menu (collapsible to icons;
-   a drawer under 1024px) and the page. Logical properties throughout, so RTL mirrors it. */
+/* App shell: top bar across (logo, branch switcher, centre menu, controls) and the page. At branch level
+   (.shell--branch) a slim left menu (collapsible to icons; a drawer under 1024px); at network level
+   (.shell--network) no left menu, the page uses the full width. Logical properties throughout, so RTL mirrors it. */
 
 .shell {
   --side-w: 232px;
   min-height: 100vh; display: grid; grid-template-columns: var(--side-w) minmax(0, 1fr); grid-template-rows: var(--topbar-h) 1fr;
 }
 .shell.is-collapsed { --side-w: 60px; }
+.shell--network { grid-template-columns: minmax(0, 1fr); }
+@media (min-width: 900px) {
+  .shell--network .shell__side, .shell--network .shell__scrim, .shell--network .topbar__menu { display: none !important; }
+}
 .shell__top { grid-column: 1 / -1; position: sticky; top: 0; z-index: 40; }
 .shell__side {
   position: sticky; top: var(--topbar-h); height: calc(100vh - var(--topbar-h)); overflow-y: auto; overflow-x: hidden;
@@ -115,6 +120,10 @@
 .topnav__link.active::after { content: ''; position: absolute; inset-inline: 14px; inset-block-end: -1px; height: 2px; background: var(--primary); }
 :root[data-theme='light'] .topnav__link.active::after { background: var(--text); }
 .topnav__link:focus-visible { box-shadow: inset 0 0 0 2px var(--focus, var(--primary)); }
+.topnav__link--back { gap: 4px; padding-inline-start: 8px; }
+.topnav__backicon { width: 16px; height: 16px; flex-shrink: 0; }
+.topnav__item:has(.topnav__link--back) { margin-inline-end: 6px; padding-inline-end: 6px; }
+.topnav__item:has(.topnav__link--back)::after { content: ''; position: absolute; inset-inline-end: 0; top: 50%; height: 20px; transform: translateY(-50%); width: 1px; background: var(--border-strong); }
 
 /* ---------- Left menu ---------- */
 .sidenav__head { display: none; }
@@ -122,6 +131,7 @@
 .sidenav__list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
 .sidenav__list[hidden] { display: none; }
 .sidenav__list--top { display: none; }
+.sidenav__link--back { color: var(--text-muted); }
 .sidenav__link {
   position: relative; display: flex; align-items: center; gap: 10px; height: 34px; padding-inline: var(--sp-5) var(--sp-3);
   color: var(--text-muted); font-size: var(--fs-sm); text-decoration: none; white-space: nowrap;

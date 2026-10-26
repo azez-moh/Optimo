@@ -94,8 +94,8 @@ export default function VisionOverviewPage() {
   const links = [
     { to: '/live-floor', label: t('nav.liveFloor'), icon: Grid3x3 },
     { to: '/heatmap', label: t('nav.heatmap'), icon: Flame },
-    { to: '/machines', label: t('nav.machines'), icon: Dumbbell },
-    { to: '/usage-report', label: t('nav.usageReport'), icon: BarChart3 },
+    { to: '/machines', label: t('visionOverview.links.machines'), icon: Dumbbell },
+    { to: '/usage-report', label: t('visionOverview.links.usage'), icon: BarChart3 },
   ].filter((l) => can(l.to.slice(1)));
 
   return (

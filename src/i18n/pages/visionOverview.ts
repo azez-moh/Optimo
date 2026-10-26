@@ -55,6 +55,8 @@ export const en = {
   },
   links: {
     title: 'Go to',
+    machines: 'Machines',
+    usage: 'Usage',
   },
 };
 
@@ -114,5 +116,7 @@ export const ar: typeof en = {
   },
   links: {
     title: 'انتقل إلى',
+    machines: 'الأجهزة',
+    usage: 'الاستخدام',
   },
 };

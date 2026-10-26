@@ -5,10 +5,12 @@ import { useAuth } from './auth';
 
 /*
   One place for what each role may open. Shell (top bar menu), routes (guard) and in-page links all read it.
-  COO: every page, the Kingdom map, Branches and Settings, and may change the gym (branch switcher by the logo).
-  Facility Manager (fm): one gym (OPTIMO Al Malqa (Men)), a short menu and more building control. He opens Branch
-  overview (his gym overview), Branch settings (only operating hours and alert thresholds editable, see
-  canEditBranch) and AI Vision overview (no camera images).
+  COO: every page, the Kingdom map (after sign-in only), Branches and Settings, and may change the gym (branch
+  switcher by the logo). He works at two levels (navLevel): network (All branches, no left menu) and branch.
+  Facility Manager (fm): one gym (OPTIMO Al Malqa (Men)), always branch level, no map and no other gyms. His top menu
+  is Branch overview (his gym overview, Fm.tsx) and Ask OPTIMO; his left menu Branch settings (only operating hours
+  and alert thresholds editable, see canEditBranch) and his BMS Core and AI Vision pages (no camera images).
+  /overview stays open to him (old links) and forwards to /branch.
   Ask OPTIMO (assistant) is open to both; for the Facility Manager it answers about his gym only.
 */
 
@@ -38,7 +40,19 @@ export function canSeePath(role: Role, path: string): boolean {
 
 /** First page after sign-in. */
 export function homeFor(role: Role): string {
-  return role === 'fm' ? '/overview' : '/map';
+  return role === 'fm' ? '/branch' : '/map';
+}
+
+/**
+ * Navigation level: 'network' (All branches: top menu Overview, Ask OPTIMO, Branches; no left menu) or 'branch'
+ * (one gym: top menu "← Overview", Branch overview, Ask OPTIMO, Branches; left menu with the gym's pages).
+ * The Facility Manager is always at branch level; the Kingdom map is always network level.
+ */
+export type NavLevel = 'network' | 'branch';
+export function navLevel(role: Role, scope: Scope, pageId: string): NavLevel {
+  if (role === 'fm') return 'branch';
+  if (pageId === 'map') return 'network';
+  return scope.level === 'club' ? 'branch' : 'network';
 }
 
 /** Whether the role may change the scope (branch switcher by the logo, the map, the Branches list). */

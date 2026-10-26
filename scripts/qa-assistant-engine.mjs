@@ -19,7 +19,9 @@ try {
     patch() {}, remove() {}, add() {}, reset() {}, patches: { set: {}, removed: {}, added: {} },
   };
   const scopeClubs = role === 'fm' ? stat.clubs.filter((c) => c.id === 'optimo-malqa-men') : stat.clubs;
-  const fmPages = ['overview', 'assistant', 'bms-overview', 'hvac', 'lights', 'ai-agents', 'control', 'bms-settings', 'live-floor', 'machines', 'reports'];
+  // Same list as FM_PAGES in src/layout/access.ts (/overview forwards him to /branch).
+  const fmPages = ['overview', 'assistant', 'branch', 'branch-settings', 'bms-overview', 'hvac', 'lights', 'ai-agents', 'control', 'bms-settings',
+    'vision-overview', 'live-floor', 'heatmap', 'machines', 'reports'];
   const can = (path) => role === 'coo' || fmPages.includes(path.replace(/^[#/]+/, '').split(/[/?#]/)[0]);
   const QS = [
     ['en', 'Compare Al Malqa and An Nakheel'],

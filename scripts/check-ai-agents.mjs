@@ -62,7 +62,7 @@ try {
         await page.goto(`${base}?now=${nowMs}#/signin`, { waitUntil: 'load' });
         await page.locator('.rolepick__opt').nth(role === 'fm' ? 1 : 0).click();
         await page.locator('.signin__submit').click();
-        await page.waitForURL(/#\/(map|overview)/);
+        await page.waitForURL(/#\/(map|overview|branch)/);
         await page.goto(`${base}?now=${nowMs}#/${ROUTE}`, { waitUntil: 'load' });
         await page.waitForSelector(WALL);
         await page.evaluate(() => document.fonts.ready);

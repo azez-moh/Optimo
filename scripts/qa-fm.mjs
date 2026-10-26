@@ -1,6 +1,7 @@
 // Facility Manager click-through (headless): node scripts/qa-fm.mjs [--base=http://localhost:5299/]
-// Signs in as Facility Manager, sets the building to Night, checks HVAC, the route guard, the top menu (Overview,
-// Ask OPTIMO), the fixed gym name by the logo and the left menu, then signs in as COO and checks every page is open.
+// Signs in as Facility Manager, sets the building to Night, checks HVAC, the route guard, the top menu (Branch
+// overview, Ask OPTIMO), the fixed gym name by the logo and the left menu (Branch settings, his BMS Core and AI
+// Vision pages), then signs in as COO and checks every page is open.
 import { chromium } from 'playwright-core';
 import { readdirSync, existsSync } from 'node:fs';
 const base = (process.argv.find((a) => a.startsWith('--base=')) || '--base=http://localhost:5299/').slice(7);
@@ -22,25 +23,30 @@ const groupCounts = async () => {
   return out.join(',');
 };
 
-await step('sign in as Facility Manager lands on Al Malqa overview', async () => {
+await step('sign in as Facility Manager lands on Branch overview (his Al Malqa overview)', async () => {
   await page.goto(`${base}#/signin`); await page.getByRole('radio', { name: /Facility Manager/ }).click();
   const email = await page.locator('input[type=email]').inputValue();
   if (email !== 'fm@optimo.demo') throw new Error(`email ${email}`);
   await page.locator('button[type=submit]').click(); await page.waitForTimeout(1000);
-  if (!(await hash()).startsWith('#/overview')) throw new Error(`at ${await hash()}`);
+  if (!(await hash()).startsWith('#/branch')) throw new Error(`at ${await hash()}`);
+  await page.locator('.fm-controls').waitFor({ timeout: 5000 });
   const h1 = await page.locator('h1').first().innerText();
   if (!/Al Malqa \(Men\)/.test(h1)) throw new Error(`title ${h1}`);
 });
-await step('menus: top Overview, Ask OPTIMO; gym name fixed; left Branch overview, Branch settings, 6 BMS + 5 AI Vision; no Map/Branches/Settings/Cameras', async () => {
+await step('menus: top Branch overview (active), Ask OPTIMO; gym name fixed; left Branch settings, 6 BMS + 5 AI Vision; no back item, Map, Branches, Settings, Cameras', async () => {
   const top = (await page.locator('.topnav .topnav__link').allTextContents()).map((x) => x.trim());
-  if (top.join('|') !== 'Overview|Ask OPTIMO') throw new Error(`top ${top}`);
+  if (top.join('|') !== 'Branch overview|Ask OPTIMO') throw new Error(`top ${top}`);
+  if (await page.locator('.topnav__link--back').count()) throw new Error('back item shown');
+  const act = (await page.locator('.topnav .topnav__link.active').innerText()).trim();
+  if (act !== 'Branch overview') throw new Error(`active ${act}`);
   const links = (await page.locator('.topnav a, .shell__side .sidenav a').allTextContents()).map((x) => x.trim());
   for (const bad of ['Map', 'Cameras', 'Settings', 'Branches', 'Integration', 'Monitor', 'Usage Report']) if (links.includes(bad)) throw new Error(`menu shows ${bad}`);
   const vision = (await page.locator('#navgroup-vision .sidenav__text').allTextContents()).map((x) => x.trim());
   if (vision.join('|') !== 'AI Vision overview|Live Floor|Heatmap|Reports|Machines and Devices') throw new Error(`AI Vision ${vision}`);
   if (await groupCounts() !== '6,5') throw new Error(`counts ${await groupCounts()}`);
-  const main = (await page.locator('.shell__side .sidenav__list--map .sidenav__text').allTextContents()).map((x) => x.trim());
-  if (main.join('|') !== 'Branch overview|Branch settings') throw new Error(`side ${main}`);
+  const main = (await page.locator('.shell__side .sidenav__list--branch .sidenav__text').allTextContents()).map((x) => x.trim());
+  if (main.join('|') !== 'Branch settings') throw new Error(`side ${main}`);
+  if (!(await page.locator('.shell__side').isVisible())) throw new Error('no left menu');
   if (await page.locator('.scopesw__btn, .topbar__gear').count()) throw new Error('branch switcher or Settings gear shown');
   const gym = (await page.locator('.scopesw--fixed .scopesw__name').innerText()).trim();
   if (gym !== 'OPTIMO Al Malqa (Men)') throw new Error(`gym ${gym}`);
@@ -57,14 +63,14 @@ await step('HVAC page shows the new setpoints', async () => {
   const sp = await page.locator('.apl-set__v').allInnerTexts();
   if (!sp.length || sp.some((x) => !x.includes('26'))) throw new Error(`setpoints ${sp.slice(0, 5)}`);
 });
-for (const r of ['cameras', 'map', 'branches', 'settings', 'settings/site-entities', 'usage-report']) {
-  await step(`#/${r} redirects to overview`, async () => {
+for (const r of ['cameras', 'map', 'branches', 'settings', 'settings/site-entities', 'usage-report', 'overview']) {
+  await step(`#/${r} redirects to Branch overview`, async () => {
     await page.goto(`${base}#/${r}`); await page.waitForTimeout(800);
-    if (!(await hash()).startsWith('#/overview')) throw new Error(`at ${await hash()}`);
+    if (!/^#\/branch(\?|$)/.test(await hash())) throw new Error(`at ${await hash()}`);
   });
 }
 await step('Branch overview shows his gym overview; Branch settings: only hours and thresholds editable', async () => {
-  await page.locator('.shell__side a', { hasText: 'Branch overview' }).click(); await page.waitForTimeout(1000);
+  await page.locator('.topnav a', { hasText: 'Branch overview' }).click(); await page.waitForTimeout(1000);
   if (!(await hash()).startsWith('#/branch')) throw new Error(`at ${await hash()}`);
   if (!(await page.locator('.fm-log').count())) throw new Error('not the FM overview');
   await page.locator('.shell__side a', { hasText: 'Branch settings' }).click(); await page.waitForTimeout(1000);

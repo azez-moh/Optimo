@@ -5,11 +5,14 @@ import {
 
 /**
  * One source of truth for the dashboard pages: menu order (Build 8.7), route path and i18n key.
- * Navigation (src/layout/Shell.tsx):
- *   top centre menu, always the same: CHAIN_PAGES (Overview, Ask OPTIMO, Branches);
- *   left menu: MAP_PAGE always; when one gym is picked also BRANCH_PAGES (Branch overview, Branch settings) and the
- *   BMS Core and AI Vision groups (AI Vision starts with AI Vision overview);
- *   Settings is the gear icon in the top bar corner.
+ * Navigation (src/layout/Shell.tsx), two levels (navLevel in src/layout/access.ts):
+ *   network level (All branches, and the Kingdom map): top centre menu NETWORK_TOP (Overview, Ask OPTIMO, Branches),
+ *     no left menu;
+ *   branch level (one gym picked): top centre menu BRANCH_TOP ("← Overview" back item, Branch overview, Ask OPTIMO,
+ *     Branches); left menu SIDE_PAGES (Branch settings) then the BMS Core and AI Vision groups (AI Vision starts with
+ *     AI Vision overview).
+ *   The Kingdom map (MAP_PAGE, /map) is in no menu: the COO lands on it after sign-in.
+ *   Settings is the gear icon in the top bar corner. Every menu is filtered by role (canSee in access.ts).
  * Route path = `/${id}`. Label = t(`nav.${key}`), tooltip = t(`nav.about.${key}`).
  * Page folders: src/pages/<folder>/index.tsx (lazy-loaded in src/App.tsx).
  */
@@ -29,14 +32,13 @@ export const CHAIN_PAGES: PageDef[] = [
   { id: 'branches', key: 'branches', folder: 'Branches', group: 'chain', icon: Store },
 ];
 
-/** Kingdom map drill-down, always first in the left menu. */
+/** Kingdom map drill-down: the COO's first page after sign-in, in no menu. */
 export const MAP_PAGE: PageDef = { id: 'map', key: 'map', folder: 'Map', group: 'chain', icon: MapIcon };
 
-/** One gym: shown under Map in the left menu when a gym is picked. Overview of all branches stays at /overview. */
-export const BRANCH_PAGES: PageDef[] = [
-  { id: 'branch', key: 'branch', folder: 'Branch', group: 'branch', icon: Home },
-  { id: 'branch-settings', key: 'branchSettings', folder: 'BranchSettings', group: 'branch', icon: Cog },
-];
+/** One gym: Branch overview (top menu at branch level) and Branch settings (first item of the left menu). */
+export const BRANCH_OVERVIEW_PAGE: PageDef = { id: 'branch', key: 'branch', folder: 'Branch', group: 'branch', icon: Home };
+export const BRANCH_SETTINGS_PAGE: PageDef = { id: 'branch-settings', key: 'branchSettings', folder: 'BranchSettings', group: 'branch', icon: Cog };
+export const BRANCH_PAGES: PageDef[] = [BRANCH_OVERVIEW_PAGE, BRANCH_SETTINGS_PAGE];
 
 export const BMS_PAGES: PageDef[] = [
   { id: 'bms-overview', key: 'bmsOverview', folder: 'BmsOverview', group: 'bms', icon: Building2 },
@@ -63,6 +65,18 @@ export const VISION_PAGES: PageDef[] = [
   { id: 'usage-report', key: 'usageReport', folder: 'UsageReport', group: 'vision', icon: BarChart3 },
   { id: 'library-management', key: 'libraryManagement', folder: 'LibraryManagement', group: 'vision', icon: Cpu },
 ];
+
+/** Top centre menu at network level (All branches). */
+export const NETWORK_TOP: PageDef[] = CHAIN_PAGES;
+
+/** 'back' is the "← Overview" item: switches the scope to All branches and opens the network Overview. */
+export type TopItem = PageDef | 'back';
+
+/** Top centre menu at branch level, always in this order. */
+export const BRANCH_TOP: TopItem[] = ['back', BRANCH_OVERVIEW_PAGE, CHAIN_PAGES[1], CHAIN_PAGES[2]];
+
+/** Left menu (branch level only): these items, then the BMS Core and AI Vision groups. */
+export const SIDE_PAGES: PageDef[] = [BRANCH_SETTINGS_PAGE];
 
 export const SETTINGS_PAGE: PageDef = { id: 'settings', key: 'settings', folder: 'Settings', group: 'chain', icon: Settings };
 

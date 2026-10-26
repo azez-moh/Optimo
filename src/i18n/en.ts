@@ -49,7 +49,9 @@ const en = {
     gymPages: 'Pages for this gym',
     collapseSide: 'Collapse menu',
     expandSide: 'Expand menu',
+    back: 'Back to the overview of all branches',
     about: {
+      back: 'Back to all branches: the network overview.',
       overview: 'Every branch at a glance.',
       branch: 'The selected gym at a glance.',
       branchSettings: 'This gym\'s details, floor areas, hours and alert thresholds.',

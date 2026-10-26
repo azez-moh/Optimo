@@ -1,29 +1,29 @@
-import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useCallback, useEffect, useId, useRef, useState, type KeyboardEvent as ReactKeyboardEvent } from 'react';
-import { Bell, Check, ChevronDown, Globe, LayoutGrid, LogOut, Menu, Moon, PanelLeftClose, PanelLeftOpen, Settings, Store, Sun, UserRound, X } from 'lucide-react';
+import { Bell, Check, ChevronDown, ChevronLeft, Globe, LayoutGrid, LogOut, Menu, Moon, PanelLeftClose, PanelLeftOpen, Settings, Store, Sun, UserRound, X } from 'lucide-react';
 import { useI18n } from '../i18n';
 import { useTheme } from '../theme/theme';
 import { BrandMark, StatusBadge } from '../components';
 import { useDemo } from '../data/store';
 import { alertsIn } from '../data/selectors';
 import type { Scope } from '../data/types';
-import { BMS_PAGES, BRANCH_PAGES, CHAIN_PAGES, MAP_PAGE, VISION_PAGES, isGymPage, type PageDef } from './nav';
+import { BMS_PAGES, BRANCH_TOP, NETWORK_TOP, SIDE_PAGES, VISION_PAGES, type PageDef, type TopItem } from './nav';
 import { useScope } from './filters';
 import { useAuth } from './auth';
 import { scopeLabel } from './scopeLabel';
-import { useAccess } from './access';
+import { navLevel, useAccess, type NavLevel } from './access';
 import './layout.css';
 
 /*
-  App shell
-    Top bar: logo, a thin divider and the branch switcher (current scope: "All branches" or the gym name) on the
-    inline start; the centre menu, always Overview, Ask OPTIMO, Branches (filtered by role); controls and the
-    Settings gear on the inline end.
-    Left menu (slim sidebar, collapsible to icons; a drawer under 1024px): Map always, and when one gym is picked
-    Branch overview, Branch settings and the BMS Core and AI Vision groups with all their pages (filtered by role).
-    The top "Overview" is always the overview of all branches: opening it sets the scope to All branches.
-  The Facility Manager is locked to his gym: the branch name is shown but not clickable, no Branches and no Map.
-  Under 900px the centre menu moves into the drawer, above the left menu items.
+  App shell, two levels (navLevel in src/layout/access.ts, menus from src/layout/nav.ts):
+    Network level (All branches, and the Kingdom map after sign-in): top bar only, no left menu, the page uses the
+    full width. Top bar: logo, divider, branch switcher ("All branches"); centre menu Overview, Ask OPTIMO, Branches;
+    alerts, theme, language, user, sign out and the Settings gear on the inline end.
+    Branch level (one gym picked from the map, Branches or the switcher): centre menu "← Overview" (back to the
+    network Overview), Branch overview, Ask OPTIMO, Branches; a slim left menu (collapsible to icons; a drawer under
+    1024px) with Branch settings and the BMS Core and AI Vision groups (filtered by role).
+  The Facility Manager is always at branch level, locked to his gym: the branch name is a plain label, top menu Branch
+  overview and Ask OPTIMO only. Under 900px the centre menu moves into the drawer, above the left menu items.
 */
 
 const GROUPS_KEY = 'opt.navGroups';
@@ -191,12 +191,14 @@ function ScopeSwitcher() {
     );
   }
 
+  // "All branches" behaves like "← Overview" (network Overview); a gym keeps a gym page or Ask OPTIMO and opens
+  // Branch overview from a network page (Overview, Branches, map).
   const choose = (s: Scope) => {
     setOpen(false);
     trigger.current?.focus();
     const page = firstSegment(pathname);
-    if (s.level === 'all' && isGymPage(page)) navigate('/overview');
-    else if (s.level === 'club' && (page === 'branches' || page === 'overview')) navigate('/branch');
+    if (s.level === 'all') navigate('/overview');
+    else if (s.level === 'club' && (page === 'branches' || page === 'overview' || page === 'map')) navigate('/branch');
     setScope(s);
   };
   const items = () => Array.from(list.current?.querySelectorAll<HTMLButtonElement>('button') ?? []);
@@ -249,21 +251,45 @@ function ScopeSwitcher() {
 }
 
 // ---------------------------------------------------------------------------------------------------------
-// Top centre menu (always the same items)
+// Top centre menu: network level Overview, Ask OPTIMO, Branches; branch level "← Overview", Branch overview,
+// Ask OPTIMO, Branches (filtered by role)
 // ---------------------------------------------------------------------------------------------------------
 
-function useTopItems(): PageDef[] {
-  const { can } = useAccess();
-  return CHAIN_PAGES.filter((p) => can(p.id));
+function useLevel(): NavLevel {
+  const { scope } = useScope();
+  const { role } = useAccess();
+  const { pathname } = useLocation();
+  return navLevel(role, scope, firstSegment(pathname));
+}
+
+function useTopItems(): TopItem[] {
+  const { can, changeScope } = useAccess();
+  const level = useLevel();
+  const items = level === 'network' ? NETWORK_TOP : BRANCH_TOP;
+  return items.filter((p) => (p === 'back' ? changeScope : can(p.id)));
+}
+
+/** "← Overview": back to all branches (scope All branches, network Overview). The chevron mirrors in Arabic. */
+function useBack() {
+  const { setScope } = useScope();
+  return useCallback(() => setScope({ level: 'all' }), [setScope]);
 }
 
 function TopNav() {
   const { t } = useI18n();
   const items = useTopItems();
+  const back = useBack();
   return (
     <nav className="topnav" aria-label={t('nav.main')}>
       <ul className="topnav__list">
-        {items.map((p) => (
+        {items.map((p) => p === 'back' ? (
+          <li key="back" className="topnav__item">
+            <Link to="/overview" className="topnav__link topnav__link--back" onClick={back} title={t('nav.about.back')} aria-label={t('nav.back')}>
+              <ChevronLeft aria-hidden className="topnav__backicon flip-rtl" />
+              <span>{t('nav.overview')}</span>
+            </Link>
+          </li>
+        ) : (
           <li key={p.id} className="topnav__item">
             <NavLink to={`/${p.id}`} className="topnav__link" title={t(`nav.about.${p.key}`)}>{t(`nav.${p.key}`)}</NavLink>
           </li>
@@ -274,7 +300,7 @@ function TopNav() {
 }
 
 // ---------------------------------------------------------------------------------------------------------
-// Left menu: Map, and the gym's BMS Core and AI Vision groups
+// Left menu (branch level only): Branch settings, then the gym's BMS Core and AI Vision groups
 // ---------------------------------------------------------------------------------------------------------
 
 interface MenuGroup { id: 'bms' | 'vision'; label: string; pages: PageDef[] }
@@ -296,11 +322,11 @@ function SideLink({ p, collapsed, onNavigate, sub }: { p: PageDef; collapsed: bo
 
 function Sidebar({ collapsed, onToggleCollapsed, onNavigate, onClose }: { collapsed: boolean; onToggleCollapsed: () => void; onNavigate: () => void; onClose: () => void }) {
   const { t } = useI18n();
-  const { scope } = useScope();
   const { can } = useAccess();
   const topItems = useTopItems();
-  const gym = scope.level === 'club';
-  const branchItems = gym ? BRANCH_PAGES.filter((p) => can(p.id)) : [];
+  const back = useBack();
+  const gym = useLevel() === 'branch';
+  const sideItems = gym ? SIDE_PAGES.filter((p) => can(p.id)) : [];
   const groups = (gym ? [
     { id: 'bms', label: t('nav.groupBms'), pages: BMS_PAGES.filter((p) => can(p.id)) },
     { id: 'vision', label: t('nav.groupVision'), pages: VISION_PAGES.filter((p) => can(p.id)) },
@@ -330,12 +356,18 @@ function Sidebar({ collapsed, onToggleCollapsed, onNavigate, onClose }: { collap
       <nav className="sidenav" aria-label={t('nav.menu')}>
         {/* centre menu items, shown here only under 900px where the top bar has no room for them */}
         <ul className="sidenav__list sidenav__list--top">
-          {topItems.map((p) => <SideLink key={p.id} p={p} collapsed={false} onNavigate={onNavigate} />)}
+          {topItems.map((p) => p === 'back' ? (
+            <li key="back">
+              <Link to="/overview" className="sidenav__link sidenav__link--back" onClick={() => { back(); onNavigate(); }} aria-label={t('nav.back')}>
+                <ChevronLeft aria-hidden className="sidenav__icon flip-rtl" />
+                <span className="sidenav__text">{t('nav.overview')}</span>
+              </Link>
+            </li>
+          ) : <SideLink key={p.id} p={p} collapsed={false} onNavigate={onNavigate} />)}
         </ul>
-        {(can(MAP_PAGE.id) || branchItems.length > 0) && (
-          <ul className="sidenav__list sidenav__list--map">
-            {can(MAP_PAGE.id) && <SideLink p={MAP_PAGE} collapsed={collapsed} onNavigate={onNavigate} />}
-            {branchItems.map((p) => <SideLink key={p.id} p={p} collapsed={collapsed} onNavigate={onNavigate} />)}
+        {sideItems.length > 0 && (
+          <ul className="sidenav__list sidenav__list--branch">
+            {sideItems.map((p) => <SideLink key={p.id} p={p} collapsed={collapsed} onNavigate={onNavigate} />)}
           </ul>
         )}
         {groups.map((g) => {
@@ -369,11 +401,12 @@ function Sidebar({ collapsed, onToggleCollapsed, onNavigate, onClose }: { collap
 
 function TopBar({ onMenu }: { onMenu: () => void }) {
   const { t } = useI18n();
+  const { changeScope } = useAccess();
   return (
     <div className="topbar">
       <div className="topbar__start">
         <button type="button" className="btn btn--icon btn--ghost topbar__menu" onClick={onMenu} aria-label={t('nav.menu')}><Menu aria-hidden /></button>
-        <NavLink to="/overview" className="topbar__brand" aria-label={t('app.title')}><BrandMark /></NavLink>
+        <NavLink to={changeScope ? '/overview' : '/branch'} className="topbar__brand" aria-label={t('app.title')}><BrandMark /></NavLink>
         <span className="topbar__divider" aria-hidden />
         <ScopeSwitcher />
       </div>
@@ -396,6 +429,7 @@ export function Shell() {
   const [drawer, setDrawer] = useState(false);
   const [collapsed, setCollapsed] = useState(readCollapsed);
   const { role: viewerRole } = useScope();
+  const level = useLevel();
   const side = useRef<HTMLElement>(null);
   const closeDrawer = useCallback(() => setDrawer(false), []);
   const toggleCollapsed = useCallback(() => setCollapsed((c) => {
@@ -412,7 +446,7 @@ export function Shell() {
     return () => document.removeEventListener('keydown', onKey);
   }, [drawer]);
   return (
-    <div className={`shell${drawer ? ' is-drawer-open' : ''}${collapsed ? ' is-collapsed' : ''}`}>
+    <div className={`shell shell--${level}${drawer ? ' is-drawer-open' : ''}${collapsed ? ' is-collapsed' : ''}`}>
       <a href="#main" className="skip-link" onClick={(e) => { e.preventDefault(); document.getElementById('main')?.focus(); }}>{t('shell.skip')}</a>
       <header className="shell__top"><TopBar onMenu={() => setDrawer(true)} /></header>
       <aside ref={side} className="shell__side">

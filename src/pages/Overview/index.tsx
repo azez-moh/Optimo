@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { Navigate, useSearchParams } from 'react-router-dom';
 import type { Scope } from '../../data/types';
 import { Activity, Bell, Building2, Gauge, Leaf, Users, Zap } from 'lucide-react';
 import { KpiTile, PageHeader, Segmented, Tabs, type TabDef } from '../../components';
@@ -17,21 +17,20 @@ import { CompareDrawer, EquipmentMatrix, GymComparison, ThisGym, useGymCmp } fro
 import { BusinessSection } from './Business';
 import { EnergySection } from './Energy';
 import { BmsSection } from './Bms';
-import { FmOverview } from './Fm';
 import { CrowdHeatmapCard } from '../Heatmap/Compact';
 
 type Section = 'business' | 'energy' | 'bms';
 const SECTIONS: Section[] = ['business', 'energy', 'bms'];
 
 /**
- * Top-centre "Overview" (/overview): always the overview of all branches. Opening it sets the scope to All
- * branches, so the branch name by the logo reads "All branches" and the left menu shows Map only.
- * The Facility Manager is locked to his gym: his Overview is his gym's operations page.
+ * Top-centre "Overview" (/overview, network level): always the overview of all branches. Opening it sets the scope to
+ * All branches, so the branch name by the logo reads "All branches" and there is no left menu.
+ * The Facility Manager is locked to his gym: /overview forwards him to Branch overview (/branch, his operations page).
  * The single-gym overview is Branch overview (/branch, src/pages/Branch), the same component in 'branch' mode.
  */
 export default function OverviewPage() {
   const { isFm } = useAccess();
-  return isFm ? <FmOverview /> : <NetworkOverview />;
+  return isFm ? <Navigate to="/branch" replace /> : <NetworkOverview />;
 }
 
 function NetworkOverview() {

@@ -16,21 +16,42 @@ const hash = () => page.evaluate(() => location.hash);
 const topItems = async () => (await page.locator('.topnav .topnav__link').allTextContents()).map((x) => x.trim());
 const scopeName = async () => (await page.locator('.scopesw__name').innerText()).trim();
 const sideGroups = async () => (await page.locator('.shell__side .sidenav__grouplabel').allTextContents()).map((x) => x.trim());
-const sideMain = async () => (await page.locator('.shell__side .sidenav__list--map .sidenav__text').allTextContents()).map((x) => x.trim());
+const sideMain = async () => (await page.locator('.shell__side .sidenav__list--branch .sidenav__text').allTextContents()).map((x) => x.trim());
+const sideShown = async () => page.locator('.shell__side').isVisible();
+const topActive = async () => (await page.locator('.topnav .topnav__link.active').allTextContents()).map((x) => x.trim()).join('|');
 const TOP = 'Overview|Ask OPTIMO|Branches';
+const TOP_BRANCH = 'Overview|Branch overview|Ask OPTIMO|Branches';
+const noLeftMenu = async () => {
+  if (await sideShown()) throw new Error('left menu shown at network level');
+  if (!(await page.locator('.shell--network').count())) throw new Error('shell not at network level');
+  if (await page.locator('.topbar__menu').isVisible()) throw new Error('menu button shown at network level');
+  const w = (await page.locator('.shell__main').boundingBox()).width;
+  if (w < 1400) throw new Error(`page not full width: ${w}`);
+};
+const branchMenus = async () => {
+  if ((await topItems()).join('|') !== TOP_BRANCH) throw new Error(`top ${await topItems()}`);
+  if (!(await page.locator('.topnav .topnav__link--back').count())) throw new Error('no back item');
+  if (!(await sideShown())) throw new Error('no left menu at branch level');
+  if ((await sideMain()).join('|') !== 'Branch settings') throw new Error(`side ${await sideMain()}`);
+  if ((await sideGroups()).join('|') !== 'BMS Core|AI Vision') throw new Error(`groups ${await sideGroups()}`);
+  const all = (await page.locator('.shell__side .sidenav__list:not(.sidenav__list--top) .sidenav__text').allTextContents()).map((x) => x.trim());
+  for (const bad of ['Map', 'Branch overview']) if (all.includes(bad)) throw new Error(`left menu shows ${bad}`);
+};
 
-await step('sign in as COO lands on the Kingdom map (/map)', async () => {
+await step('sign in as COO lands on the Kingdom map (/map) with no left menu', async () => {
   await page.goto(`${base}#/signin`); await page.getByRole('radio', { name: /COO/ }).click();
   await page.locator('button[type=submit]').click(); await page.waitForTimeout(800);
   if (!(await hash()).startsWith('#/map')) throw new Error(`at ${await hash()}`);
   await page.locator('.mapall').waitFor({ timeout: 4000 });
+  await noLeftMenu();
 });
-await step('network level: top menu Overview, Ask OPTIMO, Branches; "All branches" by the logo; left menu Map only', async () => {
+await step('network level: top menu Overview, Ask OPTIMO, Branches (no Map anywhere); "All branches" by the logo; no left menu', async () => {
   if ((await topItems()).join('|') !== TOP) throw new Error(`menu ${await topItems()}`);
   if ((await scopeName()) !== 'All branches') throw new Error(`scope ${await scopeName()}`);
-  if ((await sideMain()).join('|') !== 'Map') throw new Error(`side ${await sideMain()}`);
   if ((await sideGroups()).length) throw new Error(`groups at network level ${await sideGroups()}`);
-  if (await page.locator('.topnav__back, .topnav__trigger, .topnav__dd').count()) throw new Error('old gym controls in top bar');
+  if (await page.locator('a[href="#/map"]').count()) throw new Error('Map link in a menu');
+  if (await page.locator('.topnav__link--back, .topnav__trigger, .topnav__dd').count()) throw new Error('back item or old gym controls at network level');
+  for (const sel of ['.bell__btn', '.lang-btn', '.topbar__gear', 'button[aria-label="Sign out"]']) if (!(await page.locator(sel).isVisible())) throw new Error(`missing ${sel}`);
   if (await page.locator('.topnav__link', { hasText: 'Settings' }).count()) throw new Error('Settings in menu');
   if (!(await page.locator('.topbar__gear').isVisible())) throw new Error('no Settings gear');
 });
@@ -41,6 +62,8 @@ await step('map: All branches row first above the regions, opens network overvie
   if (!(await hash()).includes('/overview')) throw new Error(`at ${await hash()}`);
   await page.locator('.ov-asat', { hasText: '2 gyms' }).waitFor({ timeout: 4000 });
   if ((await topItems()).join('|') !== TOP) throw new Error('menu changed');
+  if ((await topActive()) !== 'Overview') throw new Error(`active ${await topActive()}`);
+  await noLeftMenu();
 });
 await step('/branches?view=map redirects to /map; Riyadh -> district -> fact card -> Open gym', async () => {
   await page.goto(`${base}#/branches?view=map`); await page.waitForTimeout(800);
@@ -55,11 +78,10 @@ await step('/branches?view=map redirects to /map; Riyadh -> district -> fact car
   if (!(await hash()).startsWith('#/branch')) throw new Error(`not on Branch overview ${await hash()}`);
   results.push(`  -> landed on ${await hash()}`);
 });
-await step('gym level: same top menu; gym name by the logo; left menu Map, Branch overview, Branch settings + BMS Core (7) + AI Vision (13)', async () => {
-  if ((await topItems()).join('|') !== TOP) throw new Error(`menu ${await topItems()}`);
+await step('branch level: top menu ← Overview, Branch overview (active), Ask OPTIMO, Branches; gym name by the logo; left menu Branch settings + BMS Core (7) + AI Vision (13)', async () => {
+  await branchMenus();
+  if ((await topActive()) !== 'Branch overview') throw new Error(`active ${await topActive()}`);
   if (!/^OPTIMO /.test(await scopeName())) throw new Error(`scope ${await scopeName()}`);
-  if ((await sideMain()).join('|') !== 'Map|Branch overview|Branch settings') throw new Error(`side ${await sideMain()}`);
-  if ((await sideGroups()).join('|') !== 'BMS Core|AI Vision') throw new Error(`groups ${await sideGroups()}`);
   const bms = (await page.locator('#navgroup-bms .sidenav__text').allTextContents()).map((x) => x.trim());
   if (bms.join('|') !== 'BMS Overview|HVAC|Lights|AI Agents|Control|BMS Settings|Integration') throw new Error(`bms ${bms}`);
   const vis = (await page.locator('#navgroup-vision .sidenav__text').allTextContents()).map((x) => x.trim());
@@ -97,6 +119,7 @@ await step('branch switcher: All branches on a gym page falls back to Overview',
   if (!(await hash()).startsWith('#/overview')) throw new Error(`at ${await hash()}`);
   if ((await scopeName()) !== 'All branches') throw new Error(`scope ${await scopeName()}`);
   if ((await sideGroups()).length) throw new Error('groups still shown');
+  await noLeftMenu();
 });
 await step('branch switcher: picking a gym keeps a network page (Ask OPTIMO) and shows its groups', async () => {
   await page.locator('.topnav__link', { hasText: 'Ask OPTIMO' }).click(); await page.waitForTimeout(800);
@@ -104,7 +127,8 @@ await step('branch switcher: picking a gym keeps a network page (Ask OPTIMO) and
   await page.locator('.scopesw__item', { hasText: 'An Nakheel' }).click(); await page.waitForTimeout(800);
   if (!(await hash()).startsWith('#/assistant')) throw new Error(`at ${await hash()}`);
   if (!/An Nakheel/.test(await scopeName())) throw new Error(`scope ${await scopeName()}`);
-  if ((await sideGroups()).join('|') !== 'BMS Core|AI Vision') throw new Error(`groups ${await sideGroups()}`);
+  await branchMenus();
+  if ((await topActive()) !== 'Ask OPTIMO') throw new Error(`active ${await topActive()}`);
 });
 await step('branch switcher: other gym on a gym page stays on that page', async () => {
   await page.locator('#navgroup-bms a', { hasText: 'HVAC' }).click(); await page.waitForTimeout(800);
@@ -120,23 +144,25 @@ await step('gym page at network scope switches to OPTIMO Al Malqa (Men)', async 
   if (!(await hash()).startsWith('#/hvac')) throw new Error(`at ${await hash()}`);
   if ((await scopeName()) !== 'OPTIMO Al Malqa (Men)') throw new Error(`scope ${await scopeName()}`);
 });
-await step('Branches: gym list only (no Map/List toggle); Open gym sets the gym and opens its Branch overview', async () => {
+await step('Branches: gym list only (no Map/List toggle), network level; Open gym sets the gym and opens its Branch overview', async () => {
   await page.locator('.topnav__link', { hasText: 'Branches' }).click(); await page.waitForTimeout(800);
   if (await page.locator('.br-view, .segmented').count()) throw new Error('view toggle still there');
   if ((await scopeName()) !== 'All branches') throw new Error(`scope ${await scopeName()}`);
+  await noLeftMenu();
   await page.locator('.br-card', { hasText: 'An Nakheel' }).locator('.br-card__btn--go').click(); await page.waitForTimeout(800);
   if (!(await hash()).startsWith('#/branch')) throw new Error(`at ${await hash()}`);
   if (!/An Nakheel/.test(await scopeName())) throw new Error(`scope ${await scopeName()}`);
 });
-await step('pick Al Malqa from the switcher on Overview opens its Branch overview (This gym, gym heatmap)', async () => {
-  await page.locator('.topnav__link', { hasText: 'Overview' }).click(); await page.waitForTimeout(800);
+await step('pick Al Malqa from the switcher on Overview opens its Branch overview (This gym, gym heatmap); Branch overview active on top, left menu Branch settings / BMS Core / AI Vision', async () => {
+  await page.locator('.topnav__link--back').click(); await page.waitForTimeout(800);
+  if (!(await hash()).startsWith('#/overview')) throw new Error(`back at ${await hash()}`);
   await page.locator('.scopesw__btn').click(); await page.waitForTimeout(200);
   await page.locator('.scopesw__item', { hasText: 'Al Malqa' }).click(); await page.waitForTimeout(1500);
   if (!(await hash()).startsWith('#/branch')) throw new Error(`at ${await hash()}`);
   if (!/Al Malqa/.test(await scopeName())) throw new Error(`scope ${await scopeName()}`);
   await page.locator('.tg').waitFor({ timeout: 4000 });
-  const active = (await page.locator('.shell__side .sidenav__link.active').innerText()).trim();
-  if (active !== 'Branch overview') throw new Error(`active ${active}`);
+  if ((await topActive()) !== 'Branch overview') throw new Error(`active ${await topActive()}`);
+  await branchMenus();
   if (!(await page.locator('.cmp__table tbody tr.is-scope', { hasText: 'Al Malqa' }).count())) throw new Error('this gym not highlighted');
 });
 await step('Branch settings: change crowding threshold to 30%, save with confirmation, Heatmap and AI Vision overview use it', async () => {
@@ -163,22 +189,36 @@ await step('AI Vision overview: 4 KPIs, heatmap, families, cameras, alerts (crow
   if (!(await page.locator('.vo-alerts', { hasText: 'Heatmap, above 30%' }).count())) throw new Error('no crowding alert at 30%');
   const sc = await page.evaluate(() => document.scrollingElement.scrollHeight - window.innerHeight);
   if (sc > 1) throw new Error(`page scrolls ${sc}`);
+  const cut = await page.locator('.vo-link span').evaluateAll((els) => els.filter((e) => e.scrollWidth > e.clientWidth + 1).map((e) => e.textContent));
+  if (cut.length) throw new Error(`quick links cut off: ${cut}`);
 });
-await step('top Overview after picking a gym: scope reads All branches, page shows all gyms, left menu Map only', async () => {
-  await page.locator('.topnav__link', { hasText: 'Overview' }).click(); await page.waitForTimeout(1500);
+await step('"← Overview" returns to the network: All branches, all gyms, no left menu', async () => {
+  await page.locator('.topnav__link--back').click(); await page.waitForTimeout(1500);
   if (!(await hash()).startsWith('#/overview')) throw new Error(`at ${await hash()}`);
   if ((await scopeName()) !== 'All branches') throw new Error(`scope ${await scopeName()}`);
   await page.locator('.ov-asat', { hasText: '2 gyms' }).waitFor({ timeout: 4000 });
   if (await page.locator('.tg').count()) throw new Error('This gym shown on network overview');
-  if ((await sideMain()).join('|') !== 'Map') throw new Error(`side ${await sideMain()}`);
+  if ((await topItems()).join('|') !== TOP) throw new Error(`menu ${await topItems()}`);
   if ((await sideGroups()).length) throw new Error('groups shown');
+  await noLeftMenu();
 });
 await step('Settings gear opens Settings', async () => {
   await page.locator('.topbar__gear').click(); await page.waitForTimeout(800);
   if (!(await hash()).startsWith('#/settings')) throw new Error(`at ${await hash()}`);
 });
-await step('phone: menu button opens the drawer with top items, Map and the gym groups', async () => {
+await step('phone, network level: drawer has the top items only', async () => {
   await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto(`${base}#/overview`); await page.waitForTimeout(800);
+  await page.locator('.topbar__menu').click(); await page.waitForTimeout(400);
+  const d = page.locator('.shell.is-drawer-open .shell__side'); await d.waitFor({ timeout: 2000 });
+  const top = (await d.locator('.sidenav__list--top .sidenav__text').allTextContents()).map((x) => x.trim());
+  if (top.join('|') !== TOP) throw new Error(`top ${top}`);
+  if ((await sideGroups()).length) throw new Error('groups at network level');
+  await page.keyboard.press('Escape'); await page.waitForTimeout(300);
+});
+await step('phone, branch level: menu button opens the drawer with top items, Branch settings and the gym groups', async () => {
+  await page.locator('.scopesw__btn').click(); await page.waitForTimeout(200);
+  await page.locator('.scopesw__item', { hasText: 'Al Malqa' }).click(); await page.waitForTimeout(800);
   await page.goto(`${base}#/branch`); await page.waitForTimeout(800);
   if (await page.locator('.topnav').isVisible()) throw new Error('centre menu visible on phone');
   if (!(await page.locator('.scopesw__btn').isVisible())) throw new Error('branch name not visible on phone');
@@ -187,7 +227,8 @@ await step('phone: menu button opens the drawer with top items, Map and the gym 
   await page.locator('.topbar__menu').click(); await page.waitForTimeout(400);
   const d = page.locator('.shell.is-drawer-open .shell__side'); await d.waitFor({ timeout: 2000 });
   const top = (await d.locator('.sidenav__list--top .sidenav__text').allTextContents()).map((x) => x.trim());
-  if (top.join('|') !== TOP) throw new Error(`top ${top}`);
+  if (top.join('|') !== TOP_BRANCH) throw new Error(`top ${top}`);
+  if ((await sideMain()).join('|') !== 'Branch settings') throw new Error(`side ${await sideMain()}`);
   if ((await sideGroups()).join('|') !== 'BMS Core|AI Vision') throw new Error(`groups ${await sideGroups()}`);
   await d.getByRole('link', { name: 'Heatmap' }).click(); await page.waitForTimeout(800);
   if (!(await hash()).startsWith('#/heatmap')) throw new Error(`at ${await hash()}`);
@@ -202,11 +243,12 @@ await step('machines: expand row -> Show on floor', async () => {
 });
 await step('destructive: Camera List Remove asks for confirmation', async () => {
   await page.goto(`${base}#/camera-list`); await page.waitForTimeout(1000);
+  await page.locator('tbody tr').first().waitFor({ timeout: 5000 }); await page.waitForTimeout(500);
   const before = await page.locator('tbody tr').count();
   await page.getByRole('button', { name: /Remove/ }).first().click(); await page.waitForTimeout(300);
   const dlg = page.getByRole('dialog'); await dlg.waitFor({ timeout: 2000 });
   await dlg.getByRole('button', { name: 'Cancel' }).click(); await page.waitForTimeout(300);
-  if ((await page.locator('tbody tr').count()) !== before) throw new Error('row removed without confirm');
+  if ((await page.locator('tbody tr').count()) !== before) throw new Error(`row removed without confirm (${before} -> ${await page.locator('tbody tr').count()})`);
 });
 await step('destructive: Usage Report reset asks for confirmation', async () => {
   await page.goto(`${base}#/usage-report`); await page.waitForTimeout(1000);
