@@ -51,6 +51,21 @@
 :root[dir='rtl'] .hm-legend__ticks span { transform: translateX(50%); }
 .hm-legend__item { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
 .hm-legend__note { margin-inline-start: auto; color: var(--text-faint); }
+.hm-scalebar { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+.hm-scalebar__bar { display: inline-block; height: 8px; border: 1px solid var(--text-muted); border-block-start: 0; }
+.hm-key { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 4px 12px; }
+.hm-key button { display: inline-flex; align-items: center; gap: 6px; background: none; border: 0; padding: 0; color: var(--text); font: inherit; font-size: var(--fs-xs); cursor: pointer; text-align: start; }
+.hm-key button:hover { text-decoration: underline; text-underline-offset: 3px; }
+.hm-key__n { display: inline-grid; place-items: center; width: 16px; height: 16px; border-radius: 50%; background: var(--text); color: var(--bg); font-size: 10px; flex-shrink: 0; }
+
+/* single floor on wide screens: the plan fills the card height, legend in a column beside it */
+.hm-plancard.is-aside { display: grid; grid-template-columns: minmax(0, 1fr) 200px; grid-template-rows: minmax(0, 1fr); gap: var(--sp-4); }
+.hm-plancard.is-aside .hm-plans { min-height: 0; }
+.hm-plancard__aside { display: flex; flex-direction: column; gap: var(--sp-3); min-height: 0; min-width: 0; overflow: hidden; }
+.hm-plancard.is-aside .hm-legend { flex-direction: column; align-items: stretch; flex-wrap: nowrap; gap: var(--sp-3); border-block-start: 0; padding-block-start: 0; flex: 1 1 auto; min-height: 0; }
+.hm-plancard.is-aside .hm-legend__scale { width: auto; margin-inline: 12px 14px; }
+.hm-plancard.is-aside .hm-key { flex-direction: column; flex-wrap: nowrap; gap: 6px; }
+.hm-plancard.is-aside .hm-legend__note { margin-inline-start: 0; margin-block-start: auto; }
 .hm-swatch { display: inline-block; width: 12px; height: 12px; border: 1px solid var(--border-strong); }
 .hm-swatch--hatch { background: repeating-linear-gradient(45deg, transparent 0 3px, var(--border-strong) 3px 4px); }
 .hm-swatch--use { width: 7px; height: 12px; background: #020c0a; border-color: #020c0a; opacity: 0.8; }
@@ -108,6 +123,8 @@
   .hm-page.is-fit .hm-svgwrap { aspect-ratio: auto; flex: 1 1 0; height: auto; min-height: 120px; }
   .hm-page.is-fit .hm-kpis .kpi { padding-block: 10px; gap: 6px; }
   .hm-page.is-fit .hm-kpis .kpi__value { font-size: var(--fs-2xl); }
+  .hm-page.is-fit .hm-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); column-gap: var(--sp-5); align-content: start; }
+  .hm-page.is-fit .hm-list li .hm-row { border-block-start: 1px solid var(--border); }
 }
 @media (min-width: 1700px) {
   .hm-main { grid-template-columns: minmax(0, 1fr) 340px; }

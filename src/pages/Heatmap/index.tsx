@@ -10,7 +10,7 @@ import {
   areaPeaks, climateAt, floorPlanOf, liveClimate, occupancyToday,
   type AreaClimate, type AreaOccupancy, type FloorId, type PlanArea,
 } from '../../data/floors';
-import { PlanSvg } from './PlanSvg';
+import { PlanSvg, planWidthForHeight, type PlanKeyItem } from './PlanSvg';
 import { HOT_RATIO, heatColor, legendGradient } from './scale';
 import { usePeopleText } from './people';
 import './heatmap.css';
@@ -168,6 +168,59 @@ function HeatmapView() {
     );
   };
 
+  // ---------- plan card: as wide as the plan needs to fill the height (single floor), legend beside it ----------
+  const mainRef = useRef<HTMLDivElement>(null);
+  const [mainH, setMainH] = useState(0);
+  useEffect(() => {
+    const el = mainRef.current;
+    if (!el) return;
+    const ro = new ResizeObserver(() => setMainH(el.clientHeight));
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+  const [ppm, setPpm] = useState(0);
+  const [keyItems, setKeyItems] = useState<PlanKeyItem[]>([]);
+  const asideLayout = !!fitH && view !== 'both';
+  // card: 12 px padding top and bottom, 16 px sides, 200 px legend column and a 16 px gap
+  const cardW = asideLayout && mainH > 200 ? Math.ceil(planWidthForHeight(floors, mainH - 26) + 32 + 200 + 16 + 2) : 0;
+
+  const planHead = (
+    <div className="hm-plancard__head">
+      <span className="hm-plancard__title">{view === 'both' ? t('heatmap.floors.both') : floorName(view)}</span>
+      <span className="hm-plancard__end">
+        {isLive ? <LiveTag /> : <Badge tone="neutral" icon={Clock}>{t('heatmap.time.at', { time: fmtTime(step.ms) })}</Badge>}
+        <InfoTip text={t('heatmap.info')} />
+      </span>
+    </div>
+  );
+  const legend = (
+    <div className="hm-legend">
+      <span className="hm-legend__title">{t('heatmap.legend.title')}</span>
+      <span className="hm-legend__scale">
+        <span className="hm-legend__bar" style={{ background: legendGradient(theme, i18n.isRtl ? 'to left' : 'to right') }} />
+        <span className="hm-legend__ticks num">
+          <span style={{ insetInlineStart: '0%' }}>0%</span>
+          <span style={{ insetInlineStart: '50%' }}>50%</span>
+          <span style={{ insetInlineStart: '85%' }}>85%</span>
+          <span style={{ insetInlineStart: '100%' }}>100%</span>
+        </span>
+      </span>
+      {ppm > 0 && (
+        <span className="hm-scalebar"><span className="hm-scalebar__bar" style={{ width: Math.round(10 * ppm) }} />{t('heatmap.legend.scale')}</span>
+      )}
+      {keyItems.length > 0 && (
+        <ol className="hm-key">
+          {keyItems.map((k) => (
+            <li key={k.key}>
+              <button type="button" onClick={() => select(k.key)}><span className="hm-key__n num">{fmtNumber(k.n)}</span>{k.name}</button>
+            </li>
+          ))}
+        </ol>
+      )}
+      <span className="hm-legend__note">{t('heatmap.planNote')}</span>
+    </div>
+  );
+
   const kpiTime = isLive ? undefined : t('heatmap.time.at', { time: fmtTime(step.ms) });
 
   return (
@@ -202,32 +255,14 @@ function HeatmapView() {
           hint={t('heatmap.kpi.peakHint', { time: fmtTime(gymPeak.ms), pct: fmtNumber(Math.round((gymPeak.peopleIn / club.capacity) * 100)) })} />
       </div>
 
-      <div className="hm-main">
-        <section className="card hm-plancard">
-          <div className="hm-plancard__head">
-            <span className="hm-plancard__title">{view === 'both' ? t('heatmap.floors.both') : floorName(view)}</span>
-            <span className="hm-plancard__end">
-              {isLive ? <LiveTag /> : <Badge tone="neutral" icon={Clock}>{t('heatmap.time.at', { time: fmtTime(step.ms) })}</Badge>}
-              <InfoTip text={t('heatmap.info')} />
-            </span>
-          </div>
+      <div ref={mainRef} className="hm-main" style={cardW ? { gridTemplateColumns: `minmax(0, ${cardW}px) minmax(300px, 1fr)` } : undefined}>
+        <section className={`card hm-plancard ${asideLayout ? 'is-aside' : ''}`}>
+          {!asideLayout && planHead}
           <div className="hm-plans">
-            <PlanSvg plan={plan} floors={floors} occ={occ} theme={theme} crop={!wide}
+            <PlanSvg plan={plan} floors={floors} occ={occ} theme={theme} onScale={setPpm} onKey={setKeyItems}
               selected={selected} onSelect={select} tooltip={tooltip} />
           </div>
-          <div className="hm-legend">
-            <span className="hm-legend__title">{t('heatmap.legend.title')}</span>
-            <span className="hm-legend__scale">
-              <span className="hm-legend__bar" style={{ background: legendGradient(theme, i18n.isRtl ? 'to left' : 'to right') }} />
-              <span className="hm-legend__ticks num">
-                <span style={{ insetInlineStart: '0%' }}>0%</span>
-                <span style={{ insetInlineStart: '50%' }}>50%</span>
-                <span style={{ insetInlineStart: '85%' }}>85%</span>
-                <span style={{ insetInlineStart: '100%' }}>100%</span>
-              </span>
-            </span>
-            <span className="hm-legend__note">{t('heatmap.planNote')}</span>
-          </div>
+          {asideLayout ? <div className="hm-plancard__aside">{planHead}{legend}</div> : legend}
         </section>
 
         <aside className="card hm-side">

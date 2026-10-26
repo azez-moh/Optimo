@@ -34,6 +34,9 @@ export interface PlanArea {
   floor: FloorId;
   nameEn: string;
   nameAr: string;
+  /** Short label used on the plan when the full name does not fit. */
+  shortEn: string;
+  shortAr: string;
   points: Pt[];
   /** Floor area from the plan, m². */
   m2: number;
@@ -145,44 +148,44 @@ function finish(floor: FloorId) {
 
 /** Ground floor (the one with the swimming pool), sheet CC-OPT-GF-AS-MS-124-106-02. */
 const GROUND: Seed[] = [
-  { key: 'lockers', nameEn: 'Locker rooms', nameAr: 'غرف الخزائن', points: box(1.6, 4.7, 32.3, 13.3) },
+  { key: 'lockers', nameEn: 'Locker rooms', nameAr: 'غرف الخزائن', shortEn: 'Lockers', shortAr: 'الخزائن', points: box(1.6, 4.7, 32.3, 13.3) },
   {
-    key: 'spa', nameEn: 'Spa', nameAr: 'السبا', labelAt: [7.3, 25.7], labelBox: [6.2, 16.4],
+    key: 'spa', nameEn: 'Spa', nameAr: 'السبا', shortEn: 'Spa', shortAr: 'السبا', labelAt: [7.3, 25.7], labelBox: [6.2, 16.4],
     points: [[4.2, 17.5], [4.2, 33.9], [10.4, 33.9], [10.4, 17.5], [17.5, 17.5], [17.5, 15.3], [6.7, 15.3], [6.7, 17.5]],
   },
-  { key: 'massage', nameEn: 'Massage area', nameAr: 'منطقة المساج', points: box(20.9, 15.3, 25.7, 17.5) },
-  { key: 'pool', nameEn: 'Swimming pool', nameAr: 'المسبح', points: box(10.4, 17.5, 33.3, 34), detail: box(12.4, 19.2, 32.1, 30.6) },
-  { key: 'freestyle', nameEn: 'Freestyle', nameAr: 'منطقة التمارين الحرة', points: box(3.9, 34, 26.3, 42.8) },
-  { key: 'prayer', nameEn: 'Prayer room', nameAr: 'المصلى', points: box(29.5, 36.5, 37.4, 42.6) },
+  { key: 'massage', nameEn: 'Massage area', nameAr: 'منطقة المساج', shortEn: 'Massage', shortAr: 'المساج', points: box(20.9, 15.3, 25.7, 17.5) },
+  { key: 'pool', nameEn: 'Swimming pool', nameAr: 'المسبح', shortEn: 'Pool', shortAr: 'المسبح', points: box(10.4, 17.5, 33.3, 34), detail: box(12.4, 19.2, 32.1, 30.6) },
+  { key: 'freestyle', nameEn: 'Freestyle', nameAr: 'منطقة التمارين الحرة', shortEn: 'Freestyle', shortAr: 'الحرة', points: box(3.9, 34, 26.3, 42.8) },
+  { key: 'prayer', nameEn: 'Prayer room', nameAr: 'المصلى', shortEn: 'Prayer', shortAr: 'المصلى', points: box(29.5, 36.5, 37.4, 42.6) },
   {
-    key: 'reception', nameEn: 'Reception and entrance', nameAr: 'الاستقبال والمدخل', labelAt: [38.5, 10.6], labelBox: [4.4, 9.9],
+    key: 'reception', nameEn: 'Reception and entrance', nameAr: 'الاستقبال والمدخل', shortEn: 'Reception', shortAr: 'الاستقبال', labelAt: [38.5, 10.6], labelBox: [4.4, 9.9],
     points: [[36.4, 5.3], [46.2, 5.3], [46.2, 7.6], [40.6, 7.6], [40.6, 15.2], [36.4, 15.2]],
   },
   {
-    key: 'retail', nameEn: 'Retail area', nameAr: 'منطقة البيع', labelAt: [43.75, 12.3], labelBox: [6.3, 5.8],
+    key: 'retail', nameEn: 'Retail area', nameAr: 'منطقة البيع', shortEn: 'Retail', shortAr: 'البيع', labelAt: [43.75, 12.3], labelBox: [6.3, 5.8],
     points: [[40.6, 7.6], [45.3, 7.6], [45.3, 9.4], [46.9, 9.4], [46.9, 15.2], [40.6, 15.2]],
   },
-  { key: 'lounge', nameEn: 'Lounge area', nameAr: 'منطقة الاستراحة', points: box(36.5, 15.3, 46.9, 19.9) },
-  { key: 'atrium', nameEn: 'Atrium lounge', nameAr: 'استراحة البهو', points: box(36.4, 19.9, 46.9, 30.3) },
-  { key: 'smoothie', nameEn: 'Smoothie bar', nameAr: 'ركن العصائر', points: box(40.5, 30.3, 46.9, 32.9) },
+  { key: 'lounge', nameEn: 'Lounge area', nameAr: 'منطقة الاستراحة', shortEn: 'Lounge', shortAr: 'الاستراحة', points: box(36.5, 15.3, 46.9, 19.9) },
+  { key: 'atrium', nameEn: 'Atrium lounge', nameAr: 'استراحة البهو', shortEn: 'Atrium', shortAr: 'البهو', points: box(36.4, 19.9, 46.9, 30.3) },
+  { key: 'smoothie', nameEn: 'Smoothie bar', nameAr: 'ركن العصائر', shortEn: 'Smoothie', shortAr: 'العصائر', points: box(40.5, 30.3, 46.9, 32.9) },
 ];
 
 /** First floor, sheet CC-OPT-FF-AS-MS-124-109-01. The running track rings the void over the pool. */
 const FIRST: Seed[] = [
-  { key: 'gym', nameEn: 'Gym area', nameAr: 'صالة التمارين', points: box(0.4, 0.4, 36.3, 13.4) },
-  { key: 'functional', nameEn: 'Functional', nameAr: 'منطقة التمارين الوظيفية', points: box(36.4, 0.4, 46.3, 13.1) },
-  { key: 'pt', nameEn: 'PT zones', nameAr: 'مناطق التدريب الشخصي', points: box(4.4, 15.6, 8.2, 30.6) },
+  { key: 'gym', nameEn: 'Gym area', nameAr: 'صالة التمارين', shortEn: 'Gym', shortAr: 'التمارين', points: box(0.4, 0.4, 36.3, 13.4) },
+  { key: 'functional', nameEn: 'Functional', nameAr: 'منطقة التمارين الوظيفية', shortEn: 'Functional', shortAr: 'الوظيفية', points: box(36.4, 0.4, 46.3, 13.1) },
+  { key: 'pt', nameEn: 'PT zones', nameAr: 'مناطق التدريب الشخصي', shortEn: 'PT', shortAr: 'تدريب شخصي', points: box(4.4, 15.6, 8.2, 30.6) },
   {
-    key: 'track', nameEn: 'Running track', nameAr: 'مضمار الجري', labelAt: [22.15, 23.2], labelBox: [17.3, 9.2],
+    key: 'track', nameEn: 'Running track', nameAr: 'مضمار الجري', shortEn: 'Track', shortAr: 'المضمار', labelAt: [22.15, 23.2], labelBox: [17.3, 9.2],
     points: [[11.2, 16.2], [11.2, 30.4], [33.1, 30.4], [33.1, 16.2], [13.5, 16.2], [13.5, 18.6], [30.8, 18.6], [30.8, 27.8], [13.5, 27.8], [13.5, 16.2]],
   },
-  { key: 'boxing', nameEn: 'Boxing', nameAr: 'منطقة الملاكمة', points: box(36.4, 28.2, 46.3, 37.9) },
-  { key: 'performance', nameEn: 'Performance zone', nameAr: 'منطقة الأداء', points: box(20.9, 31.9, 28.8, 36.2) },
+  { key: 'boxing', nameEn: 'Boxing', nameAr: 'منطقة الملاكمة', shortEn: 'Boxing', shortAr: 'الملاكمة', points: box(36.4, 28.2, 46.3, 37.9) },
+  { key: 'performance', nameEn: 'Performance zone', nameAr: 'منطقة الأداء', shortEn: 'Perf.', shortAr: 'الأداء', points: box(20.9, 31.9, 28.8, 36.2) },
   {
-    key: 'cardio', nameEn: 'Cardio area', nameAr: 'منطقة الكارديو', labelAt: [16.05, 36.3], labelBox: [9.7, 8.8],
+    key: 'cardio', nameEn: 'Cardio area', nameAr: 'منطقة الكارديو', shortEn: 'Cardio', shortAr: 'الكارديو', labelAt: [16.05, 36.3], labelBox: [9.7, 8.8],
     points: [[11.2, 31.9], [20.9, 31.9], [20.9, 36.2], [28.8, 36.2], [28.8, 31.9], [36.3, 31.9], [36.3, 40.7], [11.2, 40.7]],
   },
-  { key: 'relaxing', nameEn: 'Relaxing room', nameAr: 'غرفة الاسترخاء', points: box(0.4, 32.2, 11, 40.7) },
+  { key: 'relaxing', nameEn: 'Relaxing room', nameAr: 'غرفة الاسترخاء', shortEn: 'Relaxing', shortAr: 'الاسترخاء', points: box(0.4, 32.2, 11, 40.7) },
 ];
 
 const MALQA_PLAN: GymPlan = {
