@@ -8,7 +8,7 @@ export const en = {
   nothingUndo: 'Nothing to undo',
   nothingRedo: 'Nothing to redo',
   model: 'Building designer',
-  modelHint: 'Open the building model that BMS Overview, AI Agents and Control read',
+  modelHint: 'Open the building model that Site overview, AI Agents and Control read',
   tabsLabel: 'Control room views',
   tab: { decks: 'Decks', schedule: 'Schedule', times: 'Times', boards: 'Boards', data: 'Data' },
   undone: 'Undone: {what}',
@@ -212,7 +212,7 @@ export const en = {
   designer: {
     title: 'Building designer',
     back: 'Back',
-    purpose: 'The building model that BMS Overview, AI Agents and Control read: its floors, areas and what is placed in them.',
+    purpose: 'The building model that Site overview, AI Agents and Control read: its floors, areas and what is placed in them.',
     floors: '{n} floors',
     area: 'Area',
     size: 'Size',

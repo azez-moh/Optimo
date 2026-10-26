@@ -3,7 +3,7 @@ export const en = {
   title: 'Crowd heatmap',
   lead: '{gym}. How full each area is, as a share of its comfortable capacity.',
   planNote: 'Layout from the as-built floor plans (Compass Contracting)',
-  info: 'Each area is coloured by the people in it as a share of its comfortable capacity. People per area come from the people counted in the gym and each area\'s usual share, the same figures as BMS Overview. Only the rooms members use are shown; the layout follows the as-built floor plans.',
+  info: 'Each area is coloured by the people in it as a share of its comfortable capacity. People per area come from the people counted in the gym and each area\'s usual share, the same figures as Site overview. Only the rooms members use are shown; the layout follows the as-built floor plans.',
   floors: {
     label: 'Floor',
     ground: 'Ground floor',
@@ -91,7 +91,7 @@ export const ar: typeof en = {
   title: 'الخريطة الحرارية',
   lead: '{gym}. نسبة امتلاء كل منطقة من سعتها المريحة.',
   planNote: 'المخطط من مخططات الطوابق المنفذة (Compass Contracting)',
-  info: 'تلون كل منطقة حسب عدد الأشخاص فيها كنسبة من سعتها المريحة. يحسب عدد الأشخاص في كل منطقة من عدد الموجودين في النادي والحصة المعتادة لكل منطقة، وهي الأرقام نفسها في نظرة عامة على نظام إدارة المبنى. تظهر فقط المناطق التي يستخدمها الأعضاء، والمخطط مأخوذ من مخططات الطوابق المنفذة.',
+  info: 'تلون كل منطقة حسب عدد الأشخاص فيها كنسبة من سعتها المريحة. يحسب عدد الأشخاص في كل منطقة من عدد الموجودين في الصالة الرياضية والحصة المعتادة لكل منطقة، وهي الأرقام نفسها في نظرة عامة على الموقع. تظهر فقط المناطق التي يستخدمها الأعضاء، والمخطط مأخوذ من مخططات الطوابق المنفذة.',
   floors: {
     label: 'الطابق',
     ground: 'الطابق الأرضي',
@@ -101,8 +101,8 @@ export const ar: typeof en = {
   kpi: {
     people: 'الموجودون',
     peopleOf: 'من {cap}',
-    peopleFull: '{pct}% من سعة النادي',
-    peopleInfo: 'عدد الأشخاص داخل النادي في الوقت المحدد مقارنة بسعة النادي. الرقم نفسه في النظرة العامة.',
+    peopleFull: '{pct}% من سعة الصالة الرياضية',
+    peopleInfo: 'عدد الأشخاص داخل الصالة الرياضية في الوقت المحدد مقارنة بسعة الصالة الرياضية. الرقم نفسه في النظرة العامة.',
     busiest: 'أكثر منطقة ازدحامًا',
     busiestHint: '{people}، ممتلئة بنسبة {pct}%',
     busiestNone: 'لا يوجد أحد بعد',

@@ -23,7 +23,7 @@ export const en = {
   },
   context: {
     title: 'Building in view',
-    info: 'BMS Core and AI Vision pages show one building. With a wider scope they show Al Malqa Men when it is inside it. Change the scope here or in Branches.',
+    info: 'Site Control and AI Vision pages show one building. With a wider scope they show Al Malqa Men when it is inside it. Change the scope here or in Branches.',
     scope: 'Scope',
     building: 'Building shown on BMS and AI Vision pages',
     allBranches: 'All branches',
@@ -44,7 +44,7 @@ export const en = {
   },
   more: {
     title: 'More pages',
-    info: 'Pages outside the BMS Core and AI Vision menus. Each opens on its own address. Cameras and machines entries open the same pages as their AI Vision namesakes.',
+    info: 'Pages outside the Site Control and AI Vision menus. Each opens on its own address. Cameras and machines entries open the same pages as their AI Vision namesakes.',
     search: 'Search pages',
     searchPlaceholder: 'Search in English or Arabic',
     none: 'No page matches that search.',
@@ -277,7 +277,7 @@ export const ar: typeof en = {
   },
   context: {
     title: 'المبنى المعروض',
-    info: 'تعرض صفحات نظام إدارة المبنى والرؤية الذكية مبنى واحدًا. عند اختيار نطاق أوسع تعرض الملقا رجال إن كان ضمنه. غيّر النطاق هنا أو من صفحة الفروع.',
+    info: 'تعرض صفحات التحكم بالموقع والرؤية الذكية مبنى واحدًا. عند اختيار نطاق أوسع تعرض الملقا رجال إن كان ضمنه. غيّر النطاق هنا أو من صفحة الفروع.',
     scope: 'النطاق',
     building: 'المبنى المعروض في صفحات إدارة المبنى والرؤية الذكية',
     allBranches: 'جميع الفروع',
@@ -298,7 +298,7 @@ export const ar: typeof en = {
   },
   more: {
     title: 'صفحات إضافية',
-    info: 'صفحات خارج قائمتي نظام إدارة المبنى والرؤية الذكية، لكل منها عنوان خاص. عناصر الكاميرات والأجهزة تفتح الصفحات نفسها الموجودة في الرؤية الذكية.',
+    info: 'صفحات خارج قائمتي التحكم بالموقع والرؤية الذكية، لكل منها عنوان خاص. عناصر الكاميرات والأجهزة تفتح الصفحات نفسها الموجودة في الرؤية الذكية.',
     search: 'البحث في الصفحات',
     searchPlaceholder: 'ابحث بالعربية أو الإنجليزية',
     none: 'لا توجد صفحة تطابق البحث.',

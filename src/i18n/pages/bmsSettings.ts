@@ -38,7 +38,7 @@ export const en = {
   // building
   hoursTitle: 'Building hours (BMS)',
   hoursInfo: 'When the building is open. Nothing is switched by these; they are what the BMS reports and the agents are read against.',
-  hoursUsedBy: 'Used by BMS Overview, AI Agents and Control.',
+  hoursUsedBy: 'Used by Site overview, AI Agents and Control.',
   weekTotal: '{h} hours a week',
   weekTotalInfo: 'The sum of each open day from its start to its end. An end earlier than the start runs past midnight, so 06:00 to 01:00 counts as 19 hours.',
   open: 'Open',
