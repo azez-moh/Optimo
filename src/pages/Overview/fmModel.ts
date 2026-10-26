@@ -43,7 +43,7 @@ const LOG_MAX = 30;
 
 export const areaKey = (a: Pick<Area, 'id'>) => a.id.slice(a.id.lastIndexOf(':') + 1);
 /** Normal setpoint of an area (same rule as the live data: 22 °C on the training floors, 23 °C elsewhere). */
-export const normalSetpoint = (a: Pick<Area, 'id'>) => (['cardio', 'weights'].includes(areaKey(a)) ? 22 : 23);
+export const normalSetpoint = (a: Pick<Area, 'id'>) => (['gym', 'cardio', 'functional', 'boxing', 'freestyle', 'performance', 'pt'].includes(areaKey(a)) ? 22 : 23);
 export const clampSp = (v: number) => Math.max(SP_MIN, Math.min(SP_MAX, Math.round(v * 2) / 2));
 
 export interface ZoneRow {

@@ -1,6 +1,7 @@
 import type { AcLive, Area, Club, Integration } from '../../data/types';
 import type { AcRow, LightRow } from '../../data/selectors';
 import { localParts } from '../../data/time';
+import { templateRectOf } from '../../data/floors';
 
 /*
   Local BMS helpers shared by BMS Overview, HVAC, Lights and AI Agents (all owned by the same page agent).
@@ -37,29 +38,19 @@ export function floorsOf(areas: Area[]): FloorDef[] {
   return [...map.values()].sort((x, y) => x.index - y.index);
 }
 
-/** Footprint of the procedural building in metres (Live Floor slab is about 30.6 x 16 m). */
-export const BUILDING = { w: 30, d: 16, floorH: 4.2 };
-
-/** Rectangle of each area on its floor, in metres from the north-west corner: [x, z, w, d]. */
-const LAYOUT: Record<string, [number, number, number, number]> = {
-  cardio: [0, 0, 12, 9],
-  weights: [12, 0, 12, 9],
-  strength: [24, 0, 6, 9],
-  lockers: [0, 9, 10, 7],
-  reception: [10, 9, 12, 7],
-  staff: [22, 9, 8, 7],
-  studio1: [0, 0, 15, 10],
-  studio2: [15, 0, 15, 10],
-};
+/** Footprint of the building in metres, from the as-built floor plans of Al Malqa Men (floors.ts). */
+export const BUILDING = { w: 47, d: 43, floorH: 4.2 };
 
 export function areaKey(a: Area): string {
   return a.id.slice(a.id.lastIndexOf(':') + 1);
 }
 
-/** Rectangle for an area; unknown areas are laid out in a simple grid on their floor. */
+/** Rectangle of an area on its floor ([x, z, w, d], metres from the north-west corner), from the floor plan. */
 export function areaRect(a: Area, indexOnFloor: number): [number, number, number, number] {
-  const r = LAYOUT[areaKey(a)];
+  const r = templateRectOf(areaKey(a))?.rect;
   if (r) return r;
+  // rooms not drawn on the member plan (staff area): a small block by the south-east stair
+  if (areaKey(a) === 'staff') return [40.6, 34.6, 4.6, 3.2];
   const col = indexOnFloor % 4;
   const row = Math.floor(indexOnFloor / 4);
   return [col * 7.5, row * 8, 7.5, 8];

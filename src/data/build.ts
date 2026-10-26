@@ -14,33 +14,51 @@ import { demandShare, LIVE_SESSION_MIN, REQUIRED_TYPES, SERVICE_INTERVAL_H, SESS
 
 /** The 16 cameras of Al Malqa Men (Build 8.7 Camera List order), with human names. */
 const MALQA_CAMERAS: { key: string; en: string; ar: string; areaEn: string; areaAr: string; kind: Camera['kind']; test?: boolean; online?: boolean }[] = [
-  { key: 'fe1-nw', en: 'Cardio fisheye 1, north-west', ar: 'كاميرا الكارديو 1، الشمال الغربي', areaEn: 'Cardio floor', areaAr: 'صالة الكارديو', kind: 'fisheye' },
-  { key: 'fe1-ne', en: 'Cardio fisheye 1, north-east', ar: 'كاميرا الكارديو 1، الشمال الشرقي', areaEn: 'Cardio floor', areaAr: 'صالة الكارديو', kind: 'fisheye' },
-  { key: 'fe1-se', en: 'Cardio fisheye 1, south-east', ar: 'كاميرا الكارديو 1، الجنوب الشرقي', areaEn: 'Cardio floor', areaAr: 'صالة الكارديو', kind: 'fisheye' },
-  { key: 'fe1-sw', en: 'Cardio fisheye 1, south-west', ar: 'كاميرا الكارديو 1، الجنوب الغربي', areaEn: 'Cardio floor', areaAr: 'صالة الكارديو', kind: 'fisheye' },
-  { key: 'fe2-nw', en: 'Cardio fisheye 2, north-west', ar: 'كاميرا الكارديو 2، الشمال الغربي', areaEn: 'Cardio floor', areaAr: 'صالة الكارديو', kind: 'fisheye' },
-  { key: 'fe2-sw', en: 'Cardio fisheye 2, south-west', ar: 'كاميرا الكارديو 2، الجنوب الغربي', areaEn: 'Cardio floor', areaAr: 'صالة الكارديو', kind: 'fisheye' },
-  { key: 'fe2-ne', en: 'Cardio fisheye 2, north-east', ar: 'كاميرا الكارديو 2، الشمال الشرقي', areaEn: 'Cardio floor', areaAr: 'صالة الكارديو', kind: 'fisheye' },
-  { key: 'fe2-se', en: 'Cardio fisheye 2, south-east', ar: 'كاميرا الكارديو 2، الجنوب الشرقي', areaEn: 'Cardio floor', areaAr: 'صالة الكارديو', kind: 'fisheye' },
-  { key: 'n9-ch13', en: 'Strength corner, camera 13', ar: 'ركن القوة، الكاميرا 13', areaEn: 'Strength corner', areaAr: 'ركن القوة', kind: 'nvr' },
-  { key: 'n9-ch14', en: 'Front treadmills, camera 14', ar: 'المشايات الأمامية، الكاميرا 14', areaEn: 'Cardio floor', areaAr: 'صالة الكارديو', kind: 'nvr' },
-  { key: 'n8-ch3', en: 'Treadmill row west, camera 3', ar: 'صف المشايات الغربي، الكاميرا 3', areaEn: 'Cardio floor', areaAr: 'صالة الكارديو', kind: 'nvr' },
-  { key: 'n8-ch4', en: 'Elliptical row west, camera 4', ar: 'صف الأجهزة الإهليلجية الغربي، الكاميرا 4', areaEn: 'Cardio floor', areaAr: 'صالة الكارديو', kind: 'nvr' },
-  { key: 'n5-ch16', en: 'Weights area, camera 16', ar: 'منطقة الأوزان، الكاميرا 16', areaEn: 'Weights area', areaAr: 'منطقة الأوزان', kind: 'nvr' },
-  { key: 'n8-ch14', en: 'Studio entrance, camera 14', ar: 'مدخل الاستوديو، الكاميرا 14', areaEn: 'Studio 1', areaAr: 'الاستوديو 1', kind: 'nvr' },
-  { key: 'n9-ch13b', en: 'Strength corner, camera 13 (new)', ar: 'ركن القوة، الكاميرا 13 (جديدة)', areaEn: 'Strength corner', areaAr: 'ركن القوة', kind: 'nvr' },
+  { key: 'fe1-nw', en: 'Cardio fisheye 1, north-west', ar: 'كاميرا الكارديو 1، الشمال الغربي', areaEn: 'Cardio area', areaAr: 'منطقة الكارديو', kind: 'fisheye' },
+  { key: 'fe1-ne', en: 'Cardio fisheye 1, north-east', ar: 'كاميرا الكارديو 1، الشمال الشرقي', areaEn: 'Cardio area', areaAr: 'منطقة الكارديو', kind: 'fisheye' },
+  { key: 'fe1-se', en: 'Cardio fisheye 1, south-east', ar: 'كاميرا الكارديو 1، الجنوب الشرقي', areaEn: 'Cardio area', areaAr: 'منطقة الكارديو', kind: 'fisheye' },
+  { key: 'fe1-sw', en: 'Cardio fisheye 1, south-west', ar: 'كاميرا الكارديو 1، الجنوب الغربي', areaEn: 'Cardio area', areaAr: 'منطقة الكارديو', kind: 'fisheye' },
+  { key: 'fe2-nw', en: 'Cardio fisheye 2, north-west', ar: 'كاميرا الكارديو 2، الشمال الغربي', areaEn: 'Cardio area', areaAr: 'منطقة الكارديو', kind: 'fisheye' },
+  { key: 'fe2-sw', en: 'Cardio fisheye 2, south-west', ar: 'كاميرا الكارديو 2، الجنوب الغربي', areaEn: 'Cardio area', areaAr: 'منطقة الكارديو', kind: 'fisheye' },
+  { key: 'fe2-ne', en: 'Cardio fisheye 2, north-east', ar: 'كاميرا الكارديو 2، الشمال الشرقي', areaEn: 'Cardio area', areaAr: 'منطقة الكارديو', kind: 'fisheye' },
+  { key: 'fe2-se', en: 'Cardio fisheye 2, south-east', ar: 'كاميرا الكارديو 2، الجنوب الشرقي', areaEn: 'Cardio area', areaAr: 'منطقة الكارديو', kind: 'fisheye' },
+  { key: 'n9-ch13', en: 'Benches, camera 13', ar: 'المقاعد، الكاميرا 13', areaEn: 'Cardio area', areaAr: 'منطقة الكارديو', kind: 'nvr' },
+  { key: 'n9-ch14', en: 'Front treadmills, camera 14', ar: 'المشايات الأمامية، الكاميرا 14', areaEn: 'Cardio area', areaAr: 'منطقة الكارديو', kind: 'nvr' },
+  { key: 'n8-ch3', en: 'Treadmill row west, camera 3', ar: 'صف المشايات الغربي، الكاميرا 3', areaEn: 'Cardio area', areaAr: 'منطقة الكارديو', kind: 'nvr' },
+  { key: 'n8-ch4', en: 'Elliptical row west, camera 4', ar: 'صف الأجهزة الإهليلجية الغربي، الكاميرا 4', areaEn: 'Cardio area', areaAr: 'منطقة الكارديو', kind: 'nvr' },
+  { key: 'n5-ch16', en: 'Gym area, camera 16', ar: 'صالة التمارين، الكاميرا 16', areaEn: 'Gym area', areaAr: 'صالة التمارين', kind: 'nvr' },
+  { key: 'n8-ch14', en: 'Functional entrance, camera 14', ar: 'مدخل منطقة التمارين الوظيفية، الكاميرا 14', areaEn: 'Functional', areaAr: 'منطقة التمارين الوظيفية', kind: 'nvr' },
+  { key: 'n9-ch13b', en: 'Benches, camera 13 (new)', ar: 'المقاعد، الكاميرا 13 (جديدة)', areaEn: 'Cardio area', areaAr: 'منطقة الكارديو', kind: 'nvr' },
   { key: 'test', en: 'Test camera', ar: 'كاميرا الاختبار', areaEn: 'Workshop', areaAr: 'الورشة', kind: 'nvr', test: true, online: false },
 ];
 
+/**
+ * BMS areas of every gym, from the as-built floor plans of Al Malqa Men (floors.ts): the rooms members use plus the
+ * staff area (it has its own AC and lights). m2 is the Al Malqa floor area of each room (scaled to the other gym's
+ * size); share is the usual share of the people in the gym found in the area (most on the first floor training
+ * areas, pool and spa moderate, lounges light).
+ */
 const AREA_TEMPLATE: { key: string; en: string; ar: string; floorEn: string; floorAr: string; share: number; m2: number }[] = [
-  { key: 'cardio', en: 'Cardio floor', ar: 'صالة الكارديو', floorEn: 'Ground floor', floorAr: 'الطابق الأرضي', share: 0.34, m2: 0.132 },
-  { key: 'weights', en: 'Weights area', ar: 'منطقة الأوزان', floorEn: 'Ground floor', floorAr: 'الطابق الأرضي', share: 0.3, m2: 0.199 },
-  { key: 'strength', en: 'Strength corner', ar: 'ركن القوة', floorEn: 'Ground floor', floorAr: 'الطابق الأرضي', share: 0.08, m2: 0.061 },
-  { key: 'studio1', en: 'Studio 1', ar: 'الاستوديو 1', floorEn: 'First floor', floorAr: 'الطابق الأول', share: 0.1, m2: 0.08 },
-  { key: 'studio2', en: 'Studio 2', ar: 'الاستوديو 2', floorEn: 'First floor', floorAr: 'الطابق الأول', share: 0.06, m2: 0.06 },
-  { key: 'lockers', en: 'Changing rooms', ar: 'غرف تبديل الملابس', floorEn: 'Ground floor', floorAr: 'الطابق الأرضي', share: 0.08, m2: 0.121 },
-  { key: 'reception', en: 'Reception and lounge', ar: 'الاستقبال والاستراحة', floorEn: 'Ground floor', floorAr: 'الطابق الأرضي', share: 0.03, m2: 0.095 },
-  { key: 'staff', en: 'Staff area', ar: 'منطقة الموظفين', floorEn: 'Ground floor', floorAr: 'الطابق الأرضي', share: 0.01, m2: 0.038 },
+  { key: 'gym', en: 'Gym area', ar: 'صالة التمارين', floorEn: 'First floor', floorAr: 'الطابق الأول', share: 0.29, m2: 467 },
+  { key: 'cardio', en: 'Cardio area', ar: 'منطقة الكارديو', floorEn: 'First floor', floorAr: 'الطابق الأول', share: 0.15, m2: 187 },
+  { key: 'functional', en: 'Functional', ar: 'منطقة التمارين الوظيفية', floorEn: 'First floor', floorAr: 'الطابق الأول', share: 0.06, m2: 126 },
+  { key: 'pt', en: 'PT zones', ar: 'مناطق التدريب الشخصي', floorEn: 'First floor', floorAr: 'الطابق الأول', share: 0.04, m2: 57 },
+  { key: 'track', en: 'Running track', ar: 'مضمار الجري', floorEn: 'First floor', floorAr: 'الطابق الأول', share: 0.03, m2: 152 },
+  { key: 'boxing', en: 'Boxing', ar: 'منطقة الملاكمة', floorEn: 'First floor', floorAr: 'الطابق الأول', share: 0.04, m2: 96 },
+  { key: 'performance', en: 'Performance zone', ar: 'منطقة الأداء', floorEn: 'First floor', floorAr: 'الطابق الأول', share: 0.02, m2: 34 },
+  { key: 'relaxing', en: 'Relaxing room', ar: 'غرفة الاسترخاء', floorEn: 'First floor', floorAr: 'الطابق الأول', share: 0.02, m2: 90 },
+  { key: 'freestyle', en: 'Freestyle', ar: 'منطقة التمارين الحرة', floorEn: 'Ground floor', floorAr: 'الطابق الأرضي', share: 0.07, m2: 197 },
+  { key: 'pool', en: 'Swimming pool', ar: 'المسبح', floorEn: 'Ground floor', floorAr: 'الطابق الأرضي', share: 0.06, m2: 378 },
+  { key: 'spa', en: 'Spa', ar: 'السبا', floorEn: 'Ground floor', floorAr: 'الطابق الأرضي', share: 0.04, m2: 125 },
+  { key: 'massage', en: 'Massage area', ar: 'منطقة المساج', floorEn: 'Ground floor', floorAr: 'الطابق الأرضي', share: 0.005, m2: 11 },
+  { key: 'lockers', en: 'Locker rooms', ar: 'غرف الخزائن', floorEn: 'Ground floor', floorAr: 'الطابق الأرضي', share: 0.08, m2: 264 },
+  { key: 'reception', en: 'Reception and entrance', ar: 'الاستقبال والمدخل', floorEn: 'Ground floor', floorAr: 'الطابق الأرضي', share: 0.025, m2: 55 },
+  { key: 'retail', en: 'Retail area', ar: 'منطقة البيع', floorEn: 'Ground floor', floorAr: 'الطابق الأرضي', share: 0.005, m2: 45 },
+  { key: 'lounge', en: 'Lounge area', ar: 'منطقة الاستراحة', floorEn: 'Ground floor', floorAr: 'الطابق الأرضي', share: 0.02, m2: 48 },
+  { key: 'atrium', en: 'Atrium lounge', ar: 'استراحة البهو', floorEn: 'Ground floor', floorAr: 'الطابق الأرضي', share: 0.01, m2: 109 },
+  { key: 'smoothie', en: 'Smoothie bar', ar: 'ركن العصائر', floorEn: 'Ground floor', floorAr: 'الطابق الأرضي', share: 0.01, m2: 17 },
+  { key: 'prayer', en: 'Prayer room', ar: 'المصلى', floorEn: 'Ground floor', floorAr: 'الطابق الأرضي', share: 0.015, m2: 48 },
+  { key: 'staff', en: 'Staff area', ar: 'منطقة الموظفين', floorEn: 'Ground floor', floorAr: 'الطابق الأرضي', share: 0.01, m2: 14 },
 ];
 
 export const AGENTS: AgentDef[] = [
@@ -166,7 +184,7 @@ function clubBms(club: Club) {
   const r = rngFor(club.id, 'bms');
   const areas: Area[] = AREA_TEMPLATE.map((a) => ({
     id: `${club.id}:${a.key}`, clubId: club.id, nameEn: a.en, nameAr: a.ar, floorEn: a.floorEn, floorAr: a.floorAr,
-    m2: Math.round(club.areaM2 * a.m2), share: a.share,
+    m2: Math.round((club.areaM2 / 3700) * a.m2), share: a.share,
   }));
   const acUnits: AcUnit[] = [];
   const lights: LightCircuit[] = [];

@@ -37,8 +37,8 @@ export interface Source { entity?: string; sim?: boolean; pattern?: 'hours' | 'o
 export interface Op { coll: PatchCollection; id: string; before: Record<string, unknown>; after: Record<string, unknown> }
 export interface HistoryEntry { label: string; ops: Op[] }
 
-const AREA_FANS: Record<string, number> = { lockers: 2, staff: 1, studio1: 1, studio2: 1 };
-const AREA_SOCKETS: Record<string, number> = { cardio: 3, weights: 2, strength: 1, studio1: 1, studio2: 1, lockers: 1, reception: 1, staff: 1 };
+const AREA_FANS: Record<string, number> = { lockers: 2, spa: 1, pool: 2, staff: 1, boxing: 1, functional: 1 };
+const AREA_SOCKETS: Record<string, number> = { cardio: 3, gym: 2, functional: 1, boxing: 1, freestyle: 1, lockers: 1, reception: 1, smoothie: 1, staff: 1 };
 
 const keyOf = (a: Area) => a.id.split(':').pop() ?? a.id;
 const slug = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '');

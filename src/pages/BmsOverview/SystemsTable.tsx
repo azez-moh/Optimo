@@ -159,7 +159,7 @@ export function SystemsTable({ zones, ac, lights, tab, onTab, selected, onClearS
   );
 }
 
-/** "Cardio floor, AC unit 1" shown as "AC unit 1" with the area as a quiet second line. */
+/** "Cardio area, AC unit 1" shown as "AC unit 1" with the area as a quiet second line. */
 export function UnitName({ full }: { full: string }) {
   const i = Math.max(full.lastIndexOf(', '), full.lastIndexOf('، '));
   if (i < 0) return <span className="sys-name">{full}</span>;

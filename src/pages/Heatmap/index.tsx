@@ -7,7 +7,7 @@ import { useScope } from '../../layout/filters';
 import { useTheme } from '../../theme/theme';
 import { focusClub, useDemo } from '../../data';
 import {
-  areaPeaks, climateAt, floorPlanOf, liveClimate, machinesOnPlan, occupancyToday,
+  areaPeaks, climateAt, floorPlanOf, liveClimate, occupancyToday,
   type AreaClimate, type AreaOccupancy, type FloorId, type PlanArea,
 } from '../../data/floors';
 import { PlanSvg } from './PlanSvg';
@@ -112,7 +112,6 @@ function HeatmapView() {
 
   // ---------- figures at the selected time ----------
   const occ = useMemo(() => new Map(step.areas.map((a) => [a.areaId, a])), [step]);
-  const machines = useMemo(() => machinesOnPlan(data, club.id, step.live ? undefined : step.ms), [data, club.id, step]);
   const climate = useMemo<Map<string, AreaClimate>>(
     () => (step.live ? liveClimate(data, club.id) : climateAt(data, club.id, step.ms)), [data, club.id, step]);
   const peaks = useMemo(() => areaPeaks(steps), [steps]);
@@ -213,7 +212,7 @@ function HeatmapView() {
             </span>
           </div>
           <div className="hm-plans">
-            <PlanSvg plan={plan} floors={floors} occ={occ} theme={theme} machines={machines} crop={!wide}
+            <PlanSvg plan={plan} floors={floors} occ={occ} theme={theme} crop={!wide}
               selected={selected} onSelect={select} tooltip={tooltip} />
           </div>
           <div className="hm-legend">
@@ -227,13 +226,6 @@ function HeatmapView() {
                 <span style={{ insetInlineStart: '100%' }}>100%</span>
               </span>
             </span>
-            <span className="hm-legend__item"><span className="hm-swatch hm-swatch--hatch" />{t('heatmap.legend.notCounted')}</span>
-            {floors.some((f) => f.id === 'ground') && (
-              <>
-                <span className="hm-legend__item"><span className="hm-swatch hm-swatch--use" />{t('heatmap.legend.inUse')}</span>
-                <span className="hm-legend__item"><span className="hm-swatch hm-swatch--free" />{t('heatmap.legend.idle')}</span>
-              </>
-            )}
             <span className="hm-legend__note">{t('heatmap.planNote')}</span>
           </div>
         </section>
@@ -241,7 +233,6 @@ function HeatmapView() {
         <aside className="card hm-side">
           {selOcc ? (
             <AreaDetail o={selOcc} climate={climate.get(selOcc.areaId)} peak={peaks.get(selOcc.areaId)} steps={steps}
-              machines={selOcc.area.key === 'cardio' ? machines : undefined}
               onBack={() => setSelected(null)} pctTxt={pctTxt} comfortTxt={comfortTxt} deg={deg} timeOf={timeOf} floorName={floorName} />
           ) : (
             <>
@@ -289,12 +280,11 @@ function HeatmapView() {
   );
 }
 
-function AreaDetail({ o, climate, peak, steps, machines, onBack, pctTxt, comfortTxt, deg, timeOf, floorName }: {
+function AreaDetail({ o, climate, peak, steps, onBack, pctTxt, comfortTxt, deg, timeOf, floorName }: {
   o: AreaOccupancy;
   climate?: AreaClimate;
   peak?: { people: number; minute: number };
   steps: ReturnType<typeof occupancyToday>;
-  machines?: ReturnType<typeof machinesOnPlan>;
   onBack: () => void;
   pctTxt: (r: number) => string;
   comfortTxt: (c?: AreaClimate) => string;
@@ -306,7 +296,6 @@ function AreaDetail({ o, climate, peak, steps, machines, onBack, pctTxt, comfort
   const ppl = usePeopleText();
   const { theme } = useTheme();
   const series = steps.map((s) => s.areas.find((a) => a.areaId === o.areaId)?.ratio ?? 0).map((r) => Math.round(r * 100));
-  const inUse = machines?.filter((m) => m.inUse).length ?? 0;
   const tone = climate?.comfort === 'hot' ? 'txt-danger' : climate?.comfort === 'warm' ? 'txt-warning' : '';
   return (
     <div className="hm-detail">
@@ -331,7 +320,6 @@ function AreaDetail({ o, climate, peak, steps, machines, onBack, pctTxt, comfort
         <div><dt>{t('heatmap.area.comfort')}</dt><dd className={tone}>{comfortTxt(climate)}</dd></div>
         <div><dt>{t('heatmap.area.capacity')}</dt><dd>{t('heatmap.area.capacityVal', { n: fmtNumber(o.area.capacity) })}</dd></div>
         <div><dt>{t('heatmap.area.size')}</dt><dd className="num">{t('heatmap.area.m2', { n: fmtNumber(Math.round(o.area.m2)) })}</dd></div>
-        {machines && <div><dt>{t('heatmap.legend.inUse')}</dt><dd>{t('heatmap.area.machinesUse', { n: fmtNumber(inUse), m: fmtNumber(machines.length) })}</dd></div>}
       </dl>
       {series.length > 1 && (
         <div className="hm-detail__spark">
@@ -341,7 +329,7 @@ function AreaDetail({ o, climate, peak, steps, machines, onBack, pctTxt, comfort
       )}
       <div className="hm-detail__links">
         <Link className="btn btn--sm" to="/bms-overview">{t('heatmap.area.climate')}</Link>
-        {machines && <Link className="btn btn--sm" to="/live-floor">{t('heatmap.area.machines')}</Link>}
+        {o.area.key === 'cardio' && <Link className="btn btn--sm" to="/live-floor">{t('heatmap.area.machines')}</Link>}
       </div>
     </div>
   );

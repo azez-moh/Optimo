@@ -1,5 +1,5 @@
 import { useEffect, useId, useMemo, useRef, useState, type ReactNode } from 'react';
-import { polyBox, polyCentroid, type AreaOccupancy, type FloorPlan, type GymPlan, type PlanArea, type PlanMachine, type Pt } from '../../data/floors';
+import { inPoly, polyBox, polyCentroid, type AreaOccupancy, type FloorPlan, type GymPlan, type PlanArea, type Pt } from '../../data/floors';
 import { useI18n } from '../../i18n';
 import type { ThemeName } from '../../theme/chartTokens';
 import { heatColor, inkOn } from './scale';
@@ -17,9 +17,7 @@ export interface PlanSvgProps {
   /** Occupancy by BMS area id. */
   occ: Map<string, AreaOccupancy>;
   theme: ThemeName;
-  /** Machines of the Live Floor (drawn on the ground floor). */
-  machines?: PlanMachine[];
-  /** Small version: no labels on the plan (names on hover), no machines, no scale bar. */
+  /** Small version: no labels on the plan (names on hover), no scale bar. */
   compact?: boolean;
   selected?: string | null;
   onSelect?: (key: string) => void;
@@ -42,13 +40,18 @@ function clusterPoints(a: PlanArea, n: number): Pt[] {
   const [x0, y0, x1, y1] = polyBox(a.points);
   const inset = Math.min(x1 - x0, y1 - y0) * 0.18;
   const out: Pt[] = [];
-  for (let i = 0; i < n; i++) out.push([x0 + inset + rnd() * (x1 - x0 - 2 * inset), y0 + inset + rnd() * (y1 - y0 - 2 * inset)]);
+  // keep only points inside the shape (L-shapes and the running track ring)
+  for (let tries = 0; out.length < n && tries < n * 30; tries++) {
+    const q: Pt = [x0 + inset + rnd() * (x1 - x0 - 2 * inset), y0 + inset + rnd() * (y1 - y0 - 2 * inset)];
+    if (inPoly(q, a.points)) out.push(q);
+  }
+  if (!out.length) out.push(a.labelAt ?? polyCentroid(a.points));
   return out;
 }
 
 interface Frame { floor: FloorPlan; dx: number; dy: number; ghost: boolean }
 
-export function PlanSvg({ plan, floors, occ, theme, machines, compact, selected, onSelect, tooltip, crop, className = '' }: PlanSvgProps) {
+export function PlanSvg({ plan, floors, occ, theme, compact, selected, onSelect, tooltip, crop, className = '' }: PlanSvgProps) {
   const { pick, fmtNumber, t } = useI18n();
   const ppl = usePeopleText();
   const uid = useId().replace(/[^a-zA-Z0-9]/g, '');
@@ -105,8 +108,8 @@ export function PlanSvg({ plan, floors, occ, theme, machines, compact, selected,
 
   const areaOcc = (a: PlanArea) => occ.get(`${plan.clubId}:${a.key}`);
 
-  // glow blobs: in-use machines on the cardio floor, seeded clusters elsewhere, sized by crowding
-  const blobsFor = (floor: FloorPlan, ms?: PlanMachine[]) => {
+  // glow blobs: seeded clusters inside each area, sized by crowding
+  const blobsFor = (floor: FloorPlan) => {
     const out: { key: string; x: number; y: number; r: number; o: number }[] = [];
     for (const a of floor.areas) {
       const o = areaOcc(a);
@@ -116,13 +119,9 @@ export function PlanSvg({ plan, floors, occ, theme, machines, compact, selected,
       const span = Math.sqrt((x1 - x0) * (y1 - y0));
       const c = a.labelAt ?? polyCentroid(a.points);
       if (ratio > 0.35) out.push({ key: a.key, x: c[0], y: c[1], r: span * (0.35 + ratio * 0.3), o: 0.25 + ratio * 0.45 });
-      const inArea = (ms ?? []).filter((m) => m.inUse && m.x >= x0 && m.x <= x1 && m.y >= y0 && m.y <= y1);
-      if (inArea.length) {
-        for (const m of inArea) out.push({ key: a.key, x: m.x, y: m.y, r: 2.8, o: 0.35 + ratio * 0.45 });
-      } else {
-        const n = Math.min(10, Math.max(1, Math.round((o.people / Math.max(1, a.capacity)) * 8)));
-        for (const [x, y] of clusterPoints(a, n)) out.push({ key: a.key, x, y, r: Math.max(2.2, Math.min(5, span / 4.5)), o: 0.25 + ratio * 0.5 });
-      }
+      const n = Math.min(10, Math.max(1, Math.round((o.people / Math.max(1, a.capacity)) * 8)));
+      const thin = Math.min(x1 - x0, y1 - y0);
+      for (const [x, y] of clusterPoints(a, n)) out.push({ key: a.key, x, y, r: Math.max(1.4, Math.min(5, span / 4.5, thin * 0.9)), o: 0.25 + ratio * 0.5 });
     }
     return out;
   };
@@ -170,8 +169,7 @@ export function PlanSvg({ plan, floors, occ, theme, machines, compact, selected,
         </defs>
 
         {frames.map(({ floor, dx, dy, ghost }) => {
-          const ms = floor.id === 'ground' ? machines : undefined;
-          const blobs = blobsFor(floor, ms);
+          const blobs = blobsFor(floor);
           const [fx0, fy0] = polyBox(floor.outline);
           return (
             <g key={floor.id} transform={`translate(${dx} ${dy})`}>
@@ -196,33 +194,33 @@ export function PlanSvg({ plan, floors, occ, theme, machines, compact, selected,
                 );
               })}
 
+              {floor.areas.filter((a) => a.detail).map((a) => (
+                <polygon key={`d-${a.key}`} points={pts(a.detail!)} fill="none" stroke={thin} strokeOpacity={0.7} strokeWidth={px(1)}
+                  strokeDasharray={`${px(4)} ${px(3)}`} style={{ pointerEvents: 'none' }} />
+              ))}
+
               <g clipPath={`url(#clip-${uid}-${floor.id})`} style={{ mixBlendMode: theme === 'dark' ? 'screen' : 'multiply', pointerEvents: 'none' }}>
                 {blobs.map((b, i) => (
                   <circle key={`${b.key}-${i}`} cx={b.x} cy={b.y} r={b.r} fill={`url(#glow-${uid}-${b.key})`} opacity={b.o} />
                 ))}
               </g>
 
-              {!compact && ms && ppm > 5 && (
-                <g style={{ pointerEvents: 'none' }}>
-                  {ms.map((m) => (
-                    <rect key={m.id} x={m.x - 0.35} y={m.y - 0.7} width={0.7} height={1.4} transform={`rotate(${-m.rot} ${m.x} ${m.y})`}
-                      fill={m.inUse ? '#020c0a' : 'none'} fillOpacity={m.inUse ? 0.6 : 0} stroke="#020c0a" strokeOpacity={m.inUse ? 0.6 : 0.3} strokeWidth={px(1)} />
-                  ))}
-                </g>
-              )}
-
               <polygon points={pts(floor.outline)} fill="none" stroke={wall} strokeWidth={px(compact ? 1.5 : 2.5)} style={{ pointerEvents: 'none' }} />
-              {floor.entrance && (
-                <g style={{ pointerEvents: 'none' }}>
-                  <line x1={floor.entrance.at[0] - floor.entrance.width / 2} y1={floor.entrance.at[1]} x2={floor.entrance.at[0] + floor.entrance.width / 2} y2={floor.entrance.at[1]}
-                    stroke={theme === 'dark' ? '#fcea10' : '#020c0a'} strokeWidth={px(compact ? 3 : 5)} />
-                  {!compact && (
-                    <text x={floor.entrance.at[0]} y={floor.entrance.at[1] + px(15)} textAnchor="middle" fontSize={px(11)} fill={muted} fontFamily={font}>
-                      {t('heatmap.legend.entrance')}
-                    </text>
-                  )}
-                </g>
-              )}
+              {floor.entrance && (() => {
+                const e = floor.entrance;
+                const [ex, ey] = e.at;
+                const h = e.width / 2;
+                const col = theme === 'dark' ? '#fcea10' : '#020c0a';
+                return (
+                  <g style={{ pointerEvents: 'none' }}>
+                    <line x1={e.vertical ? ex : ex - h} y1={e.vertical ? ey - h : ey} x2={e.vertical ? ex : ex + h} y2={e.vertical ? ey + h : ey}
+                      stroke={col} strokeWidth={px(compact ? 3 : 5)} />
+                    {!compact && (e.vertical
+                      ? <text x={ex} y={ey - h - px(7)} textAnchor="end" fontSize={px(11)} fill={muted} fontFamily={font}>{t('heatmap.legend.entrance')}</text>
+                      : <text x={ex} y={ey + px(15)} textAnchor="middle" fontSize={px(11)} fill={muted} fontFamily={font}>{t('heatmap.legend.entrance')}</text>)}
+                  </g>
+                );
+              })()}
 
               {floor.areas.filter((a) => a.key === selected || (compact && a.key === hover?.key)).map((a) => (
                 <polygon key={`sel-${a.key}`} points={pts(a.points)} fill="none" stroke={ink} strokeWidth={px(3)} style={{ pointerEvents: 'none' }} />
@@ -230,8 +228,9 @@ export function PlanSvg({ plan, floors, occ, theme, machines, compact, selected,
 
               {!compact && floor.areas.map((a) => {
                 const [x0, y0, x1, y1] = polyBox(a.points);
-                const wPx = (x1 - x0) * ppm;
-                const hPx = (y1 - y0) * ppm;
+                const [bw, bh] = a.labelBox ?? [x1 - x0, y1 - y0];
+                const wPx = bw * ppm;
+                const hPx = bh * ppm;
                 const [cx, cy] = a.labelAt ?? polyCentroid(a.points);
                 const name = pick(a.nameEn, a.nameAr);
                 if (!a.monitored) {
@@ -257,20 +256,15 @@ export function PlanSvg({ plan, floors, occ, theme, machines, compact, selected,
                     <text key={`l-${a.key}`} x={cx} y={cy} textAnchor="middle" dominantBaseline="middle" fontSize={px(12)} fill={col} fontFamily="var(--font-num)" style={{ pointerEvents: 'none' }} {...haloProps}>{pct}</text>
                   );
                 }
-                const fsName = big ? 13 : 11;
+                const fsBase = big ? 13 : 11;
+                // shrink a long name down to 9 px before cutting it
+                const fsName = Math.max(9, Math.min(fsBase, (wPx - 8) / (name.length * 0.55)));
                 const fsPct = big ? 26 : 17;
                 const fsPeople = big ? 12 : 10;
                 const maxChars = Math.floor((wPx - 8) / (fsName * 0.55));
                 const shown = name.length > maxChars ? `${name.slice(0, Math.max(3, maxChars - 1))}…` : name;
-                // a plate behind the label where machines are drawn underneath
-                const hasMachines = !!ms?.some((m) => m.x >= x0 && m.x <= x1 && m.y >= y0 && m.y <= y1);
-                const plateW = px(Math.max(shown.length * fsName * 0.56, pct.length * fsPct * 0.6, 70) + 16);
-                const plateH = px(fsName + fsPct + fsPeople + 22);
                 return (
                   <g key={`l-${a.key}`} style={{ pointerEvents: 'none' }}>
-                    {hasMachines && (
-                      <rect x={cx - plateW / 2} y={cy - px(fsPct * 0.62 + 2 + fsName + 4)} width={plateW} height={plateH} fill={halo} fillOpacity={0.88} />
-                    )}
                   <g fill={col} {...haloProps}>
                     <text x={cx} y={cy - px(fsPct * 0.62 + 2)} textAnchor="middle" fontSize={px(fsName)} fontFamily={font}>{shown}</text>
                     <text x={cx} y={cy + px(fsPct * 0.36)} textAnchor="middle" fontSize={px(fsPct)} fontFamily="var(--font-display)">{pct}</text>

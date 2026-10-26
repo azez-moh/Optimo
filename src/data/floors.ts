@@ -1,19 +1,21 @@
 import type { Club, DemoContextValue, LiveData, StaticData } from './types';
 import { LIVE_CLUB_ID } from './clubs';
-import { FLOOR_SIZE_M } from './floorData';
-import { buildLive, isOpenAt, machineLiveAt, peopleInAt } from './dynamics';
+import { buildLive, isOpenAt, peopleInAt } from './dynamics';
 import { acOf, areasOf, presenceOf } from './selectors';
 import { msAt } from './time';
 
 /*
   Floor plans and crowd occupancy per area (Crowd heatmap page and the compact Overview card).
 
-  ILLUSTRATIVE LAYOUT: the plans below are a believable 2D layout of OPTIMO Al Malqa (Men), built from the BMS
-  areas in build.ts, to be replaced by the official floor plans when the client shares them. Units are metres,
-  x to the east, y to the south, origin at the north-west corner of the building.
-  - Ground floor: 64 x 42 m (2,688 m²). The cardio floor is the Live Floor slab (30.6 x 16 m).
-  - First floor: 38 x 26 m (988 m²) over the west and south part, reached by the stairs and lift core.
-  - Total about 3,676 m² over two floors (published gym area 3,700 m²).
+  LAYOUT FROM THE AS-BUILT FLOOR PLANS of OPTIMO Al Malqa (Men), project "OPETIMO.2.MEN" by Compass Contracting
+  (sheets CC-OPT-GF-AS-MS-124-106-02 and CC-OPT-FF-AS-MS-124-109-01). Rooms are simplified to rectangles and
+  polygons traced from the drawings at their dimension strings (millimetres), so position and proportion follow the
+  plans. Units are metres, x to the east, y to the south, origin at the north-west corner of each floor.
+  - Ground floor (swimming pool): 46.9 x 42.8 m drawn, about 1,780 m² inside the walls (the sheet states
+    2,660 m², which includes the external drop-off and ramps).
+  - First floor: 46.7 x 40.9 m, about 1,910 m² (sheet: 1,926 m²).
+  - Only the rooms a member can use are drawn and counted. Back-of-house rooms (server, meter and electrical rooms,
+    janitor, stores, laundry, staff area, offices, shafts) and the circulation are left as plain floor.
 
   Occupancy uses the same model as every other page: people in the gym (data.live.clubs[id].peopleIn, the KPI on
   the Overview) x the area share (presenceOf in selectors.ts, used by BMS Overview, the FM overview, Control).
@@ -39,8 +41,12 @@ export interface PlanArea {
   capacity: number;
   /** False for circulation and service spaces, which are not counted. */
   monitored: boolean;
-  /** Label position when the centroid falls outside an L-shaped space. */
+  /** Label position when the centroid falls outside an L-shaped or ring-shaped space. */
   labelAt?: Pt;
+  /** Room for the label [width, depth] in metres when the bounding box overstates it (L-shapes, rings). */
+  labelBox?: Pt;
+  /** Thin outline drawn inside the area for orientation (the pool water). */
+  detail?: Pt[];
 }
 
 export interface FloorPlan {
@@ -52,8 +58,8 @@ export interface FloorPlan {
   /** Outline of the floor below or the building footprint, drawn dashed for orientation (first floor only). */
   ghost?: Pt[];
   areas: PlanArea[];
-  /** Entrance door on the outline: centre point and width along the wall (m). */
-  entrance?: { at: Pt; width: number };
+  /** Entrance door on the outline: centre point and width along the wall (m); vertical for an east or west wall. */
+  entrance?: { at: Pt; width: number; vertical?: boolean };
 }
 
 export interface GymPlan {
@@ -62,13 +68,12 @@ export interface GymPlan {
   width: number;
   depth: number;
   floors: FloorPlan[];
-  /** Top-left corner of the Live Floor slab on the ground floor plan (Live Floor x, z map to plan x, y). */
-  liveFloorOrigin: Pt;
 }
 
 const rect = (x: number, y: number, w: number, d: number): Pt[] => [[x, y], [x + w, y], [x + w, y + d], [x, y + d]];
+const box = (x0: number, y0: number, x1: number, y1: number): Pt[] => rect(x0, y0, x1 - x0, y1 - y0);
 
-/** Shoelace area of a polygon, m². */
+/** Shoelace area of a polygon, m² (a ring traced outer then inner gives the ring area). */
 export function polyArea(p: Pt[]): number {
   let s = 0;
   for (let i = 0; i < p.length; i++) {
@@ -99,63 +104,102 @@ export function polyBox(p: Pt[]): [number, number, number, number] {
   return [Math.min(...xs), Math.min(...ys), Math.max(...xs), Math.max(...ys)];
 }
 
-/**
- * m² per person behind each comfortable capacity (assumption: the crowd level at which members start to wait
- * for machines or space, including circulation and clearances). Replace with the operator's own figures.
- */
-const M2_PER_PERSON: Record<string, number> = {
-  cardio: 14, weights: 22, strength: 22, lockers: 45, reception: 55, staff: 45, studio1: 30, studio2: 30,
-};
-
-type Seed = Omit<PlanArea, 'm2' | 'capacity'>;
-
-function finish(a: Seed): PlanArea {
-  const m2 = Math.round(polyArea(a.points) * 10) / 10;
-  const per = M2_PER_PERSON[a.key];
-  return { ...a, m2, capacity: a.monitored && per ? Math.max(2, Math.round(m2 / per)) : 0 };
+/** Even-odd point in polygon test (rings count their hole as outside). */
+export function inPoly([x, y]: Pt, p: Pt[]): boolean {
+  let inside = false;
+  for (let i = 0, j = p.length - 1; i < p.length; j = i++) {
+    const [xi, yi] = p[i];
+    const [xj, yj] = p[j];
+    if ((yi > y) !== (yj > y) && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi) inside = !inside;
+  }
+  return inside;
 }
 
-const LIVE_W = FLOOR_SIZE_M.width; // 30.6
-const LIVE_D = FLOOR_SIZE_M.depth; // 16
+/**
+ * Comfortable capacity per area type (assumptions, replace with the operator's own figures): m² per person at
+ * the crowd level where members start to wait for equipment or space, circulation and clearances included.
+ * - Gym area 12, Functional 12, Boxing 12, Cardio area 8 (one machine and its clearance), Performance zone 8,
+ *   PT zones 7 (trainer and member per bay), Running track 25 (runners keep their distance), Relaxing room 15.
+ * - Freestyle 16, Spa (steam, sauna, jacuzzi and showers) 12, Locker rooms 20, Reception and entrance 14,
+ *   Retail area 20, Lounge area 10, Atrium lounge 20, Smoothie bar 5.
+ * - Fixed: Swimming pool 14 (5 lanes of 2.25 m with 2 swimmers each, plus 4 on the deck), Massage area 2 (two
+ *   chairs), Prayer room 24 (the places shown on the drawing).
+ * Total 198 places, 174 without the prayer room, in line with the gym capacity of 160 people (not every area is
+ * full at the same time).
+ */
+const M2_PER_PERSON: Record<string, number> = {
+  gym: 12, functional: 12, boxing: 12, cardio: 8, performance: 8, pt: 7, track: 25, relaxing: 15,
+  freestyle: 16, spa: 12, lockers: 20, reception: 14, retail: 20, lounge: 10, atrium: 20, smoothie: 5,
+};
+const FIXED_CAPACITY: Record<string, number> = { pool: 14, massage: 2, prayer: 24 };
 
+type Seed = Omit<PlanArea, 'm2' | 'capacity' | 'monitored' | 'floor'>;
+
+function finish(floor: FloorId) {
+  return (a: Seed): PlanArea => {
+    const m2 = Math.round(polyArea(a.points) * 10) / 10;
+    const capacity = FIXED_CAPACITY[a.key] ?? Math.max(2, Math.round(m2 / (M2_PER_PERSON[a.key] ?? 15)));
+    return { ...a, floor, m2, capacity, monitored: true };
+  };
+}
+
+/** Ground floor (the one with the swimming pool), sheet CC-OPT-GF-AS-MS-124-106-02. */
 const GROUND: Seed[] = [
-  { key: 'cardio', floor: 'ground', nameEn: 'Cardio floor', nameAr: 'صالة الكارديو', points: rect(0, 0, LIVE_W, LIVE_D), monitored: true },
-  { key: 'weights', floor: 'ground', nameEn: 'Weights area', nameAr: 'منطقة الأوزان', points: rect(LIVE_W, 0, 64 - LIVE_W, 22), monitored: true },
-  { key: 'strength', floor: 'ground', nameEn: 'Strength corner', nameAr: 'ركن القوة', points: rect(0, 16, 14, 16), monitored: true },
-  { key: 'staff', floor: 'ground', nameEn: 'Staff area', nameAr: 'منطقة الموظفين', points: rect(0, 32, 14, 10), monitored: true },
-  { key: 'reception', floor: 'ground', nameEn: 'Reception and lounge', nameAr: 'الاستقبال والاستراحة', points: rect(14, 26, 22, 16), monitored: true },
-  { key: 'lockers', floor: 'ground', nameEn: 'Changing rooms', nameAr: 'غرف تبديل الملابس', points: rect(36, 26, 28, 16), monitored: true },
-  { key: 'core', floor: 'ground', nameEn: 'Stairs and lift', nameAr: 'الدرج والمصعد', points: rect(22, 16, LIVE_W - 22, 6), monitored: false },
+  { key: 'lockers', nameEn: 'Locker rooms', nameAr: 'غرف الخزائن', points: box(1.6, 4.7, 32.3, 13.3) },
   {
-    key: 'corridor', floor: 'ground', nameEn: 'Corridor', nameAr: 'الممر', monitored: false, labelAt: [47, 24],
-    points: [[14, 16], [22, 16], [22, 22], [64, 22], [64, 26], [14, 26]],
+    key: 'spa', nameEn: 'Spa', nameAr: 'السبا', labelAt: [7.3, 25.7], labelBox: [6.2, 16.4],
+    points: [[4.2, 17.5], [4.2, 33.9], [10.4, 33.9], [10.4, 17.5], [17.5, 17.5], [17.5, 15.3], [6.7, 15.3], [6.7, 17.5]],
   },
+  { key: 'massage', nameEn: 'Massage area', nameAr: 'منطقة المساج', points: box(20.9, 15.3, 25.7, 17.5) },
+  { key: 'pool', nameEn: 'Swimming pool', nameAr: 'المسبح', points: box(10.4, 17.5, 33.3, 34), detail: box(12.4, 19.2, 32.1, 30.6) },
+  { key: 'freestyle', nameEn: 'Freestyle', nameAr: 'منطقة التمارين الحرة', points: box(3.9, 34, 26.3, 42.8) },
+  { key: 'prayer', nameEn: 'Prayer room', nameAr: 'المصلى', points: box(29.5, 36.5, 37.4, 42.6) },
+  {
+    key: 'reception', nameEn: 'Reception and entrance', nameAr: 'الاستقبال والمدخل', labelAt: [38.5, 10.6], labelBox: [4.4, 9.9],
+    points: [[36.4, 5.3], [46.2, 5.3], [46.2, 7.6], [40.6, 7.6], [40.6, 15.2], [36.4, 15.2]],
+  },
+  {
+    key: 'retail', nameEn: 'Retail area', nameAr: 'منطقة البيع', labelAt: [43.75, 12.3], labelBox: [6.3, 5.8],
+    points: [[40.6, 7.6], [45.3, 7.6], [45.3, 9.4], [46.9, 9.4], [46.9, 15.2], [40.6, 15.2]],
+  },
+  { key: 'lounge', nameEn: 'Lounge area', nameAr: 'منطقة الاستراحة', points: box(36.5, 15.3, 46.9, 19.9) },
+  { key: 'atrium', nameEn: 'Atrium lounge', nameAr: 'استراحة البهو', points: box(36.4, 19.9, 46.9, 30.3) },
+  { key: 'smoothie', nameEn: 'Smoothie bar', nameAr: 'ركن العصائر', points: box(40.5, 30.3, 46.9, 32.9) },
 ];
 
+/** First floor, sheet CC-OPT-FF-AS-MS-124-109-01. The running track rings the void over the pool. */
 const FIRST: Seed[] = [
-  { key: 'studio1', floor: 'first', nameEn: 'Studio 1', nameAr: 'الاستوديو 1', points: rect(0, 26, 18.5, 16), monitored: true },
-  { key: 'studio2', floor: 'first', nameEn: 'Studio 2', nameAr: 'الاستوديو 2', points: rect(24.1, 26, 13.9, 16), monitored: true },
-  { key: 'core-1', floor: 'first', nameEn: 'Stairs and lift', nameAr: 'الدرج والمصعد', points: rect(22, 16, LIVE_W - 22, 6), monitored: false },
-  { key: 'wc-1', floor: 'first', nameEn: 'Toilets', nameAr: 'دورات المياه', points: rect(18.5, 30, 5.6, 12), monitored: false },
+  { key: 'gym', nameEn: 'Gym area', nameAr: 'صالة التمارين', points: box(0.4, 0.4, 36.3, 13.4) },
+  { key: 'functional', nameEn: 'Functional', nameAr: 'منطقة التمارين الوظيفية', points: box(36.4, 0.4, 46.3, 13.1) },
+  { key: 'pt', nameEn: 'PT zones', nameAr: 'مناطق التدريب الشخصي', points: box(4.4, 15.6, 8.2, 30.6) },
   {
-    key: 'lounge-1', floor: 'first', nameEn: 'Corridor and lounge', nameAr: 'الممر والاستراحة', monitored: false, labelAt: [11, 21],
-    points: [[0, 16], [22, 16], [22, 22], [LIVE_W, 22], [LIVE_W, 16], [38, 16], [38, 26], [24.1, 26], [24.1, 30], [18.5, 30], [18.5, 26], [0, 26]],
+    key: 'track', nameEn: 'Running track', nameAr: 'مضمار الجري', labelAt: [22.15, 23.2], labelBox: [17.3, 9.2],
+    points: [[11.2, 16.2], [11.2, 30.4], [33.1, 30.4], [33.1, 16.2], [13.5, 16.2], [13.5, 18.6], [30.8, 18.6], [30.8, 27.8], [13.5, 27.8], [13.5, 16.2]],
   },
+  { key: 'boxing', nameEn: 'Boxing', nameAr: 'منطقة الملاكمة', points: box(36.4, 28.2, 46.3, 37.9) },
+  { key: 'performance', nameEn: 'Performance zone', nameAr: 'منطقة الأداء', points: box(20.9, 31.9, 28.8, 36.2) },
+  {
+    key: 'cardio', nameEn: 'Cardio area', nameAr: 'منطقة الكارديو', labelAt: [16.05, 36.3], labelBox: [9.7, 8.8],
+    points: [[11.2, 31.9], [20.9, 31.9], [20.9, 36.2], [28.8, 36.2], [28.8, 31.9], [36.3, 31.9], [36.3, 40.7], [11.2, 40.7]],
+  },
+  { key: 'relaxing', nameEn: 'Relaxing room', nameAr: 'غرفة الاسترخاء', points: box(0.4, 32.2, 11, 40.7) },
 ];
 
 const MALQA_PLAN: GymPlan = {
   clubId: LIVE_CLUB_ID,
-  width: 64,
-  depth: 42,
-  liveFloorOrigin: [0, 0],
+  width: 46.9,
+  depth: 42.8,
   floors: [
     {
       id: 'ground', nameEn: 'Ground floor', nameAr: 'الطابق الأرضي',
-      outline: rect(0, 0, 64, 42), areas: GROUND.map(finish), entrance: { at: [25, 42], width: 4 },
+      outline: [[0, 0], [11.5, 0], [11.5, 4.7], [39, 4.7], [39, 5.3], [46.9, 5.3], [46.9, 42.8], [3.9, 42.8], [3.9, 28.1], [0, 28.1]],
+      areas: GROUND.map(finish('ground')),
+      entrance: { at: [46.9, 6.45], width: 2.3, vertical: true },
     },
     {
       id: 'first', nameEn: 'First floor', nameAr: 'الطابق الأول',
-      outline: rect(0, 16, 38, 26), ghost: rect(0, 0, 64, 42), areas: FIRST.map(finish),
+      outline: rect(0, 0, 46.7, 40.9),
+      areas: FIRST.map(finish('first')),
     },
   ],
 };
@@ -165,6 +209,21 @@ const PLANS: Record<string, GymPlan> = { [LIVE_CLUB_ID]: MALQA_PLAN };
 /** The floor plan of a gym, or undefined when it has not been loaded yet (only Al Malqa Men has one). */
 export function floorPlanOf(clubId: string): GymPlan | undefined {
   return PLANS[clubId];
+}
+
+/**
+ * Bounding box [x, y, width, depth] of an area key on the Al Malqa plan (BMS 3D building template; the other gym
+ * reuses the same areas), or undefined for an area that is not drawn (staff area).
+ */
+export function templateRectOf(key: string): { floor: FloorId; rect: [number, number, number, number] } | undefined {
+  for (const f of MALQA_PLAN.floors) {
+    const a = f.areas.find((x) => x.key === key);
+    if (a) {
+      const [x0, y0, x1, y1] = polyBox(a.points);
+      return { floor: f.id, rect: [x0, y0, x1 - x0, y1 - y0] };
+    }
+  }
+  return undefined;
 }
 
 /** Total floor area of a plan (all floors), m². */
@@ -321,23 +380,4 @@ export function climateAt(s: StaticData, clubId: string, ms: number): Map<string
     a.id,
     climateFrom(s.acUnits.filter((u) => u.areaId === a.id).map((u) => live!.ac[u.id]).filter(Boolean).map((x) => ({ on: x.on, reading: x.reading, setpoint: x.setpoint }))),
   ]));
-}
-
-// ---------- machines on the cardio floor ----------
-
-export interface PlanMachine { id: string; x: number; y: number; rot: number; inUse: boolean; nameEn: string; nameAr: string }
-
-/** Live Floor machines placed on the plan (Live Floor x, z in metres offset to the cardio floor corner). */
-export function machinesOnPlan(d: Pick<D, 'machines' | 'clubs' | 'live'>, clubId: string, ms?: number): PlanMachine[] {
-  const plan = floorPlanOf(clubId);
-  const club = d.clubs.find((c) => c.id === clubId);
-  if (!plan || !club) return [];
-  const [ox, oy] = plan.liveFloorOrigin;
-  return d.machines.filter((m) => m.clubId === clubId && m.enabled).map((m) => {
-    const st = ms == null || ms === d.live.nowMs ? d.live.machines[m.id]?.state : machineLiveAt(m, club, ms).state;
-    return {
-      id: m.id, nameEn: m.nameEn, nameAr: m.nameAr, rot: m.rot, inUse: st === 'inUse',
-      x: ox + (m.x - FLOOR_SIZE_M.x[0]), y: oy + (m.z - FLOOR_SIZE_M.z[0]),
-    };
-  });
 }

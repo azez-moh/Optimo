@@ -2,8 +2,8 @@
 export const en = {
   title: 'Crowd heatmap',
   lead: '{gym}. How full each area is, as a share of its comfortable capacity.',
-  planNote: 'Illustrative layout, to be replaced by the official floor plans.',
-  info: 'Each area is coloured by the people in it as a share of its comfortable capacity. People per area come from the people counted in the gym and each area\'s usual share, the same figures as BMS Overview. The layout is illustrative and will be replaced by the official floor plans.',
+  planNote: 'Layout from the as-built floor plans (Compass Contracting)',
+  info: 'Each area is coloured by the people in it as a share of its comfortable capacity. People per area come from the people counted in the gym and each area\'s usual share, the same figures as BMS Overview. Only the rooms members use are shown; the layout follows the as-built floor plans.',
   floors: {
     label: 'Floor',
     ground: 'Ground floor',
@@ -81,7 +81,7 @@ export const en = {
   },
   card: {
     title: 'Crowd heatmap',
-    info: 'How full each area of the gym is, coloured by the share of its comfortable capacity. Hover an area for its name. The layout is illustrative.',
+    info: 'How full each area of the gym is, coloured by the share of its comfortable capacity. Hover an area for its name. Layout from the as-built floor plans.',
     busiest: 'Busiest areas',
     open: 'Open heatmap',
   },
@@ -90,8 +90,8 @@ export const en = {
 export const ar: typeof en = {
   title: 'الخريطة الحرارية',
   lead: '{gym}. نسبة امتلاء كل منطقة من سعتها المريحة.',
-  planNote: 'مخطط توضيحي يستبدل بالمخططات المعتمدة للطوابق.',
-  info: 'تلون كل منطقة حسب عدد الأشخاص فيها كنسبة من سعتها المريحة. يحسب عدد الأشخاص في كل منطقة من عدد الموجودين في النادي والحصة المعتادة لكل منطقة، وهي الأرقام نفسها في نظرة عامة على نظام إدارة المبنى. المخطط توضيحي ويستبدل بالمخططات المعتمدة للطوابق.',
+  planNote: 'المخطط من مخططات الطوابق المنفذة (Compass Contracting)',
+  info: 'تلون كل منطقة حسب عدد الأشخاص فيها كنسبة من سعتها المريحة. يحسب عدد الأشخاص في كل منطقة من عدد الموجودين في النادي والحصة المعتادة لكل منطقة، وهي الأرقام نفسها في نظرة عامة على نظام إدارة المبنى. تظهر فقط المناطق التي يستخدمها الأعضاء، والمخطط مأخوذ من مخططات الطوابق المنفذة.',
   floors: {
     label: 'الطابق',
     ground: 'الطابق الأرضي',
@@ -169,7 +169,7 @@ export const ar: typeof en = {
   },
   card: {
     title: 'الخريطة الحرارية',
-    info: 'نسبة امتلاء كل منطقة في النادي، ملونة حسب نسبتها من السعة المريحة. مرر المؤشر على منطقة لعرض اسمها. المخطط توضيحي.',
+    info: 'نسبة امتلاء كل منطقة في النادي، ملونة حسب نسبتها من السعة المريحة. مرر المؤشر على منطقة لعرض اسمها. المخطط من مخططات الطوابق المنفذة.',
     busiest: 'أكثر المناطق ازدحامًا',
     open: 'فتح الخريطة',
   },

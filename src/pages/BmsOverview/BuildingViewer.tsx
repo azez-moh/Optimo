@@ -76,6 +76,11 @@ function zoneColor(z: ZoneInfo, colorBy: ColorBy, pal: Pal, maxPeople: number): 
 }
 
 const CENTER = { x: BUILDING.w / 2, z: BUILDING.d / 2 };
+/** Structural grid, about 7.8 m bays across the building. */
+const COL_X = Array.from({ length: 7 }, (_, i) => (i * BUILDING.w) / 6);
+const COL_Z = Array.from({ length: 6 }, (_, i) => (i * BUILDING.d) / 5);
+/** On-screen size relative to the 30 m procedural block the zoom was tuned for. */
+const SIZE_K = (Math.max(BUILDING.w, BUILDING.d) / 30) * 1.2;
 const VIEW_POS: Record<ViewMode, [number, number, number]> = {
   iso: [34, 34, 34],
   top: [0.001, 60, 0.01],
@@ -153,7 +158,7 @@ function Building({ zones, floors, layers, spread, colorBy, selected, onSelect, 
                 ))}
               </group>
             )}
-            {layers.has('columns') && [0, 7.5, 15, 22.5, 30].flatMap((x) => [0, 8, 16].map((z) => (
+            {layers.has('columns') && COL_X.flatMap((x) => COL_Z.map((z) => (
               <mesh key={`${x}:${z}`} position={[x, 1.2, z]}>
                 <boxGeometry args={[0.35, 2.4, 0.35]} />
                 <meshStandardMaterial color={pal.column} />
@@ -233,7 +238,7 @@ export function BuildingViewer(props: BuildingViewerProps) {
     ro.observe(el);
     return () => ro.disconnect();
   }, []);
-  const baseZoom = useMemo(() => Math.max(6, Math.min(22, w / (props.compact ? 40 : 38))), [w, props.compact]);
+  const baseZoom = useMemo(() => Math.max(4, Math.min(22, w / ((props.compact ? 40 : 38) * SIZE_K))), [w, props.compact]);
 
   return (
     <div ref={wrap} className={`bv ${props.compact ? 'bv--compact' : ''}`} style={{ height: props.height, background: pal.bg }} role="img" aria-label={props.ariaLabel}>

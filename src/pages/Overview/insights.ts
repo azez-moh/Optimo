@@ -270,11 +270,11 @@ function serviceInsights(d: Data, skip: Set<string>): Insight[] {
   return out;
 }
 
-/** AC running in closed hours and studio zones with nobody in them during open hours, over the window. */
+/** AC running in closed hours and the boxing and functional rooms with nobody in them during open hours, over the window. */
 function emptyZoneWaste(d: Data, club: Club, w: Window) {
   const areas = d.areas.filter((a) => a.clubId === club.id);
-  const big = new Set(areas.filter((a) => a.share > 0.2).map((a) => a.id));
-  const studios = areas.filter((a) => /:studio\d$/.test(a.id));
+  const big = new Set(areas.filter((a) => a.share > 0.12).map((a) => a.id));
+  const studios = areas.filter((a) => /:(boxing|functional)$/.test(a.id));
   const units = d.acUnits.filter((u) => u.clubId === club.id);
   const lights = d.lights.filter((l) => l.clubId === club.id);
   let acH = 0, emptyH = 0, kwh = 0;
