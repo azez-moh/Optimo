@@ -3,6 +3,7 @@ import { addDays, arrivalsByHour, dateRange, energyDay, isOpenAt, typeUsage, TAR
 import { MOVE_COST_SAR, PRICE_SAR, RESALE_SHARE, SERVICE_INTERVAL_H } from '../../data/fleet';
 import { rngFor } from '../../data/rng';
 import { slotFullPct, SLOT_HOURS } from './metrics';
+import { branchConfig, branchSignature } from '../../data/branchConfig';
 
 /*
   Recommended actions for the COO (pure functions over the demo store).
@@ -92,8 +93,12 @@ function usageMap(d: Data, w: Window): Map<string, Map<MachineType, TypeUsage>> 
   return out;
 }
 
-const isHigh = (u?: TypeUsage) => !!u && (u.utilPct > HIGH_PCT || u.peakFullPct > PEAK_FULL_PCT);
-const isLow = (u?: TypeUsage) => !!u && u.utilPct < LOW_PCT && u.peakFullPct < 5;
+// Per gym thresholds from Branch settings (defaults LOW_PCT, HIGH_PCT and CROWD_PCT).
+const lowOf = (clubId: string) => branchConfig(clubId).idlePct;
+const highOf = (clubId: string) => branchConfig(clubId).overusedPct;
+const crowdOf = (clubId: string) => branchConfig(clubId).crowdPct;
+const isHigh = (u: TypeUsage | undefined, clubId: string) => !!u && (u.utilPct > highOf(clubId) || u.peakFullPct > PEAK_FULL_PCT);
+const isLow = (u: TypeUsage | undefined, clubId: string) => !!u && u.utilPct < lowOf(clubId) && u.peakFullPct < 5;
 
 function confidenceOf(held: number, of: number): 'high' | 'medium' {
   return held >= of - 1 ? 'high' : 'medium';
@@ -158,9 +163,9 @@ function moveInsights(d: Data, w4: Map<string, Map<MachineType, TypeUsage>>, wee
   for (const m of w4.values()) for (const t of m.keys()) types.add(t);
   for (const type of types) {
     const rows = d.clubs.map((c) => ({ c, u: w4.get(c.id)?.get(type) })).filter((x) => x.u);
-    const highs = rows.filter((x) => isHigh(x.u)).sort((a, b) => b.u!.utilPct - a.u!.utilPct);
+    const highs = rows.filter((x) => isHigh(x.u, x.c.id)).sort((a, b) => b.u!.utilPct - a.u!.utilPct);
     // spare units at low-use gyms: keep enough to stay under 30% use, never fewer than 1
-    const spare = new Map(rows.filter((x) => isLow(x.u)).map((x) => [x.c.id, x.u!.units - Math.max(1, Math.ceil((x.u!.units * x.u!.utilPct) / 30))]));
+    const spare = new Map(rows.filter((x) => isLow(x.u, x.c.id)).map((x) => [x.c.id, x.u!.units - Math.max(1, Math.ceil((x.u!.units * x.u!.utilPct) / 30))]));
     for (const hi of highs) {
       const u = hi.u!;
       const need = Math.max(1, Math.ceil((u.units * u.utilPct) / TARGET_PCT - u.units));
@@ -172,7 +177,7 @@ function moveInsights(d: Data, w4: Map<string, Map<MachineType, TypeUsage>>, wee
       spare.set(src.c.id, spare.get(src.c.id)! - n);
       const su = src.u!;
       let held = 0;
-      for (const wk of weeks) if (isHigh(wk.get(hi.c.id)?.get(type)) && (wk.get(src.c.id)?.get(type)?.utilPct ?? 100) < LOW_PCT) held++;
+      for (const wk of weeks) if (isHigh(wk.get(hi.c.id)?.get(type), hi.c.id) && (wk.get(src.c.id)?.get(type)?.utilPct ?? 100) < lowOf(src.c.id)) held++;
       const days = 28;
       const cost = n * MOVE_COST_SAR;
       const avoided = n * PRICE_SAR[type];
@@ -198,9 +203,9 @@ function buyInsights(d: Data, w4: Map<string, Map<MachineType, TypeUsage>>, week
   for (const m of w4.values()) for (const t of m.keys()) types.add(t);
   for (const type of types) {
     const rows = d.clubs.map((c) => ({ c, u: w4.get(c.id)?.get(type) })).filter((x) => x.u);
-    const highs = rows.filter((x) => x.u!.utilPct > HIGH_PCT && x.u!.peakFullPct > PEAK_FULL_PCT);
+    const highs = rows.filter((x) => x.u!.utilPct > highOf(x.c.id) && x.u!.peakFullPct > PEAK_FULL_PCT);
     if (rows.length < 2 || highs.length * 2 <= rows.length) continue;
-    if (rows.some((x) => isLow(x.u))) continue; // a low-use gym exists: moving comes first
+    if (rows.some((x) => isLow(x.u, x.c.id))) continue; // a low-use gym exists: moving comes first
     const perGym = highs.map((x) => {
       const n = Math.max(1, Math.ceil((x.u!.units * x.u!.utilPct) / TARGET_PCT - x.u!.units));
       return { clubId: x.c.id, n, units: x.u!.units, util: x.u!.utilPct, peakFull: x.u!.peakFullPct, after: r1((x.u!.utilPct * x.u!.units) / (x.u!.units + n)) };
@@ -208,7 +213,7 @@ function buyInsights(d: Data, w4: Map<string, Map<MachineType, TypeUsage>>, week
     const total = perGym.reduce((a, g) => a + g.n, 0);
     let held = 0;
     for (const wk of weeks) {
-      const h = rows.filter((x) => { const u = wk.get(x.c.id)?.get(type); return !!u && u.utilPct > HIGH_PCT; }).length;
+      const h = rows.filter((x) => { const u = wk.get(x.c.id)?.get(type); return !!u && u.utilPct > highOf(x.c.id); }).length;
       if (h * 2 > rows.length) held++;
     }
     out.push({
@@ -231,12 +236,12 @@ function retireInsights(d: Data, w8: Map<string, Map<MachineType, TypeUsage>>, w
     const used = rows.reduce((a, x) => a + x.u!.usedMin, 0);
     const open = rows.reduce((a, x) => a + x.u!.openMin, 0);
     const net = open ? (used / open) * 100 : 0;
-    if (net >= IDLE_PCT || rows.some((x) => x.u!.utilPct >= LOW_PCT || x.u!.peakFullPct >= 5)) continue;
+    if (net >= IDLE_PCT || rows.some((x) => x.u!.utilPct >= lowOf(x.c.id) || x.u!.peakFullPct >= 5)) continue;
     let held = 0;
     for (const wk of weeks) {
-      const us = rows.map((x) => wk.get(x.c.id)?.get(type)).filter(Boolean) as TypeUsage[];
-      const n = us.reduce((a, u) => a + u.usedMin, 0) / Math.max(1, us.reduce((a, u) => a + u.openMin, 0)) * 100;
-      if (n < IDLE_PCT && us.every((u) => u.utilPct < LOW_PCT)) held++;
+      const ws = rows.map((x) => ({ id: x.c.id, u: wk.get(x.c.id)?.get(type) })).filter((x) => x.u) as { id: string; u: TypeUsage }[];
+      const n = ws.reduce((a, x) => a + x.u.usedMin, 0) / Math.max(1, ws.reduce((a, x) => a + x.u.openMin, 0)) * 100;
+      if (n < IDLE_PCT && ws.every((x) => x.u.utilPct < lowOf(x.id))) held++;
     }
     if (held < weeks.length) continue; // idle for the full 8 weeks only
     const perGym = rows.map((x) => {
@@ -335,7 +340,7 @@ function capacityInsights(d: Data, w: Window, weeks: Window[]): Insight[] {
   const out: Insight[] = [];
   const dates = dateRange(w.from, w.to);
   for (const c of d.clubs) {
-    const daysOver = dates.filter((date) => SLOT_HOURS.some((h) => slotFullPct(c, date, h) >= CROWD_PCT));
+    const daysOver = dates.filter((date) => SLOT_HOURS.some((h) => slotFullPct(c, date, h) >= crowdOf(c.id)));
     if (daysOver.length < 3) continue;
     const avg = (h: number) => dates.reduce((a, date) => a + slotFullPct(c, date, h), 0) / dates.length;
     const slotH = SLOT_HOURS.reduce((b, h) => (avg(h) > avg(b) ? h : b), SLOT_HOURS[0]);
@@ -344,7 +349,7 @@ function capacityInsights(d: Data, w: Window, weeks: Window[]): Insight[] {
     const classes = Math.min(3, Math.max(1, Math.ceil(((peakPct - 75) / 100) * c.capacity / CLASS_SIZE)));
     const shift = (classes * CLASS_SIZE / c.capacity) * 100;
     let held = 0;
-    for (const wk of weeks.slice(0, 4)) if (dateRange(wk.from, wk.to).filter((date) => SLOT_HOURS.some((h) => slotFullPct(c, date, h) >= CROWD_PCT)).length >= 2) held++;
+    for (const wk of weeks.slice(0, 4)) if (dateRange(wk.from, wk.to).filter((date) => SLOT_HOURS.some((h) => slotFullPct(c, date, h) >= crowdOf(c.id))).length >= 2) held++;
     out.push({
       id: `capacity:${c.id}`, kind: 'capacity', clubIds: [c.id], confidence: confidenceOf(held, 4), weeksHeld: held, weeksOf: 4,
       score: 60_000 + daysOver.length * 1_000,
@@ -365,7 +370,7 @@ const cache = new Map<string, Insight[]>();
  */
 export function buildInsights(d: Data): Insight[] {
   const today = d.live.date;
-  const key = `${today}|${d.machines.map((m) => `${m.id}:${m.enabled ? 1 : 0}:${m.hoursSinceService}`).join(',')}`;
+  const key = `${today}|${branchSignature()}|${d.machines.map((m) => `${m.id}:${m.enabled ? 1 : 0}:${m.hoursSinceService}`).join(',')}`;
   const hit = cache.get(key);
   if (hit) return hit;
   const { w4, w8, weeks } = windows(today);

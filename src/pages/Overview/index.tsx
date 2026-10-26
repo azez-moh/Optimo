@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
+import type { Scope } from '../../data/types';
 import { Activity, Bell, Building2, Gauge, Leaf, Users, Zap } from 'lucide-react';
 import { KpiTile, PageHeader, Segmented, Tabs, type TabDef } from '../../components';
 import { useI18n } from '../../i18n';
@@ -22,17 +23,38 @@ import { CrowdHeatmapCard } from '../Heatmap/Compact';
 type Section = 'business' | 'energy' | 'bms';
 const SECTIONS: Section[] = ['business', 'energy', 'bms'];
 
-/** One route, role-specific content: the Facility Manager gets his gym's operations page. */
+/**
+ * Top-centre "Overview" (/overview): always the overview of all branches. Opening it sets the scope to All
+ * branches, so the branch name by the logo reads "All branches" and the left menu shows Map only.
+ * The Facility Manager is locked to his gym: his Overview is his gym's operations page.
+ * The single-gym overview is Branch overview (/branch, src/pages/Branch), the same component in 'branch' mode.
+ */
 export default function OverviewPage() {
   const { isFm } = useAccess();
-  return isFm ? <FmOverview /> : <ChainOverview />;
+  return isFm ? <FmOverview /> : <NetworkOverview />;
 }
 
-function ChainOverview() {
+function NetworkOverview() {
+  const { scope, setScope } = useScope();
+  useEffect(() => {
+    if (scope.level !== 'all') setScope({ level: 'all' });
+  }, [scope.level, setScope]);
+  return <ChainOverview mode="network" />;
+}
+
+const ALL: Scope = { level: 'all' };
+
+/** Overview content: all branches ('network', /overview) or the gym in scope ('branch', /branch). */
+// eslint-disable-next-line react-refresh/only-export-components
+export function ChainOverview({ mode }: { mode: 'network' | 'branch' }) {
   const i18n = useI18n();
   const { t, fmtNumber } = i18n;
   const data = useDemo();
-  const { scope, clubs, allClubs } = useScope();
+  const sc = useScope();
+  const scope = mode === 'network' ? ALL : sc.scope;
+  const clubs = mode === 'network' ? sc.allClubs : sc.clubs;
+  const allClubs = sc.allClubs;
+  const basePath = mode === 'network' ? '/overview' : '/branch';
   const [params, setParams] = useSearchParams();
   const mwh = useFmtMwh();
   const sarC = useFmtSarCompact();
@@ -49,7 +71,7 @@ function ChainOverview() {
     const n = new URLSearchParams(params);
     n.set(k, v);
     if (extra) for (const [a, b] of Object.entries(extra)) n.set(a, b);
-    return `/overview?${n.toString()}`;
+    return `${basePath}?${n.toString()}`;
   };
 
   const rows = useMemo(() => clubRows(data, clubs, period), [data, clubs, period]);
@@ -61,7 +83,8 @@ function ChainOverview() {
   // the 8-week analysis takes about a second the first time each day: paint the page first, then fill it in
   const [ready, setReady] = useState(false);
   useEffect(() => { const id = window.setTimeout(() => setReady(true), 30); return () => window.clearTimeout(id); }, []);
-  const insights = useMemo(() => (ready ? buildInsights(data) : []), [ready, date, data.machines, data.clubs, data.areas, data.acUnits, data.lights]);
+  const branchSig = JSON.stringify(data.patches.set.settings ?? {});
+  const insights = useMemo(() => (ready ? buildInsights(data) : []), [ready, date, data.machines, data.clubs, data.areas, data.acUnits, data.lights, branchSig]);
   const stats = useMemo(() => {
     if (!ready) return new Map<string, GymStats>();
     const w4 = windows(date).w4;
@@ -137,7 +160,7 @@ function ChainOverview() {
               options={PERIODS.map((p) => ({ value: p, label: t(`overview.period.${p}`) }))} />
           )}
         />
-        <AsAtLine />
+        <AsAtLine scope={scope} count={clubs.length} />
       </div>
 
       <div className="grid-kpi ov-kpis">

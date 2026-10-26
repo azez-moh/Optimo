@@ -131,10 +131,19 @@ export function MapExplorer() {
       return;
     }
     setScope({ level: 'club', clubId: c.id });
-    navigate('/overview');
+    navigate('/branch');
   }, [clubs, isConnected, setScope, navigate, setSel]);
+  // "All branches" (and "All of <region>") opens the overview of all branches; a district with one gym opens
+  // that gym's Branch overview.
   const openAll = () => {
-    setScope(scopeOfSelection(sel));
+    const s = scopeOfSelection(sel);
+    const inSel = clubsOfSelection(clubs, sel).filter(isConnected);
+    if (s.level === 'district' && inSel.length === 1) {
+      setScope({ level: 'club', clubId: inSel[0].id });
+      navigate('/branch');
+      return;
+    }
+    setScope({ level: 'all' });
     navigate('/overview');
   };
 

@@ -52,20 +52,20 @@ await step('/branches?view=map redirects to /map; Riyadh -> district -> fact car
   const txt = await card.innerText();
   if (/\bclubs?\b|women|demo/i.test(txt)) throw new Error(`card copy: ${txt.slice(0, 200)}`);
   await card.locator('.mapcard__cta').click(); await page.waitForTimeout(800);
-  if (!(await hash()).startsWith('#/overview')) throw new Error(`not on overview ${await hash()}`);
+  if (!(await hash()).startsWith('#/branch')) throw new Error(`not on Branch overview ${await hash()}`);
   results.push(`  -> landed on ${await hash()}`);
 });
-await step('gym level: same top menu; gym name by the logo; left menu Map + BMS Core (7) + AI Vision (12)', async () => {
+await step('gym level: same top menu; gym name by the logo; left menu Map, Branch overview, Branch settings + BMS Core (7) + AI Vision (13)', async () => {
   if ((await topItems()).join('|') !== TOP) throw new Error(`menu ${await topItems()}`);
   if (!/^OPTIMO /.test(await scopeName())) throw new Error(`scope ${await scopeName()}`);
-  if ((await sideMain()).join('|') !== 'Map') throw new Error(`side ${await sideMain()}`);
+  if ((await sideMain()).join('|') !== 'Map|Branch overview|Branch settings') throw new Error(`side ${await sideMain()}`);
   if ((await sideGroups()).join('|') !== 'BMS Core|AI Vision') throw new Error(`groups ${await sideGroups()}`);
   const bms = (await page.locator('#navgroup-bms .sidenav__text').allTextContents()).map((x) => x.trim());
   if (bms.join('|') !== 'BMS Overview|HVAC|Lights|AI Agents|Control|BMS Settings|Integration') throw new Error(`bms ${bms}`);
   const vis = (await page.locator('#navgroup-vision .sidenav__text').allTextContents()).map((x) => x.trim());
-  if (vis.length !== 12 || vis[1] !== 'Live Floor' || vis[2] !== 'Heatmap') throw new Error(`vision ${vis}`);
+  if (vis.length !== 13 || vis[0] !== 'AI Vision overview' || vis[2] !== 'Live Floor' || vis[3] !== 'Heatmap') throw new Error(`vision ${vis}`);
   const counts = (await page.locator('.shell__side .sidenav__groupcount').allTextContents()).map((x) => x.trim()).join(',');
-  if (counts !== '7,12') throw new Error(`counts ${counts}`);
+  if (counts !== '7,13') throw new Error(`counts ${counts}`);
 });
 await step('left menu: Heatmap opens and is highlighted; group collapses and expands', async () => {
   await page.locator('#navgroup-vision a', { hasText: 'Heatmap' }).click(); await page.waitForTimeout(1200);
@@ -120,13 +120,58 @@ await step('gym page at network scope switches to OPTIMO Al Malqa (Men)', async 
   if (!(await hash()).startsWith('#/hvac')) throw new Error(`at ${await hash()}`);
   if ((await scopeName()) !== 'OPTIMO Al Malqa (Men)') throw new Error(`scope ${await scopeName()}`);
 });
-await step('Branches: gym list only (no Map/List toggle); Open gym sets the gym and opens its overview', async () => {
+await step('Branches: gym list only (no Map/List toggle); Open gym sets the gym and opens its Branch overview', async () => {
   await page.locator('.topnav__link', { hasText: 'Branches' }).click(); await page.waitForTimeout(800);
   if (await page.locator('.br-view, .segmented').count()) throw new Error('view toggle still there');
   if ((await scopeName()) !== 'All branches') throw new Error(`scope ${await scopeName()}`);
   await page.locator('.br-card', { hasText: 'An Nakheel' }).locator('.br-card__btn--go').click(); await page.waitForTimeout(800);
-  if (!(await hash()).startsWith('#/overview')) throw new Error(`at ${await hash()}`);
+  if (!(await hash()).startsWith('#/branch')) throw new Error(`at ${await hash()}`);
   if (!/An Nakheel/.test(await scopeName())) throw new Error(`scope ${await scopeName()}`);
+});
+await step('pick Al Malqa from the switcher on Overview opens its Branch overview (This gym, gym heatmap)', async () => {
+  await page.locator('.topnav__link', { hasText: 'Overview' }).click(); await page.waitForTimeout(800);
+  await page.locator('.scopesw__btn').click(); await page.waitForTimeout(200);
+  await page.locator('.scopesw__item', { hasText: 'Al Malqa' }).click(); await page.waitForTimeout(1500);
+  if (!(await hash()).startsWith('#/branch')) throw new Error(`at ${await hash()}`);
+  if (!/Al Malqa/.test(await scopeName())) throw new Error(`scope ${await scopeName()}`);
+  await page.locator('.tg').waitFor({ timeout: 4000 });
+  const active = (await page.locator('.shell__side .sidenav__link.active').innerText()).trim();
+  if (active !== 'Branch overview') throw new Error(`active ${active}`);
+  if (!(await page.locator('.cmp__table tbody tr.is-scope', { hasText: 'Al Malqa' }).count())) throw new Error('this gym not highlighted');
+});
+await step('Branch settings: change crowding threshold to 30%, save with confirmation, Heatmap and AI Vision overview use it', async () => {
+  await page.locator('.shell__side a', { hasText: 'Branch settings' }).click(); await page.waitForTimeout(1000);
+  if (!(await hash()).startsWith('#/branch-settings')) throw new Error(`at ${await hash()}`);
+  const before = await page.locator('.bs-savebar__line').innerText();
+  if (!/Not saved yet/.test(before)) throw new Error(`line ${before}`);
+  const inp = page.locator('.bs-th__row[data-k=crowdPct] input'); await inp.fill('30');
+  await page.getByRole('button', { name: 'Save', exact: true }).click();
+  const dlg = page.getByRole('dialog'); await dlg.waitFor({ timeout: 2000 });
+  await dlg.getByRole('button', { name: 'Save changes' }).click(); await page.waitForTimeout(500);
+  const line = await page.locator('.bs-savebar__line').innerText();
+  if (!/Last saved by COO/.test(line)) throw new Error(`line ${line}`);
+  await page.goto(`${base}#/heatmap`); await page.waitForTimeout(1500);
+  if (!(await page.getByText('Areas above 30%').count())) throw new Error('Heatmap does not show 30%');
+});
+await step('AI Vision overview: 4 KPIs, heatmap, families, cameras, alerts (crowding at 30%), links; no scroll at 1440x900', async () => {
+  await page.locator('#navgroup-vision a', { hasText: 'AI Vision overview' }).click(); await page.waitForTimeout(800);
+  // fixed evening clock (Riyadh 18:30) so the busiest areas are above 30%
+  await page.goto(`${base}?now=${Date.UTC(2026, 9, 22, 15, 30)}#/vision-overview`); await page.waitForTimeout(1500);
+  if (!(await hash()).startsWith('#/vision-overview')) throw new Error(`at ${await hash()}`);
+  if ((await page.locator('.vo-kpis .kpi').count()) !== 4) throw new Error('not 4 KPIs');
+  for (const sel of ['.vo-heat', '.vo-fam', '.vo-health', '.vo-links']) if (!(await page.locator(sel).count())) throw new Error(`missing ${sel}`);
+  if (!(await page.locator('.vo-alerts', { hasText: 'Heatmap, above 30%' }).count())) throw new Error('no crowding alert at 30%');
+  const sc = await page.evaluate(() => document.scrollingElement.scrollHeight - window.innerHeight);
+  if (sc > 1) throw new Error(`page scrolls ${sc}`);
+});
+await step('top Overview after picking a gym: scope reads All branches, page shows all gyms, left menu Map only', async () => {
+  await page.locator('.topnav__link', { hasText: 'Overview' }).click(); await page.waitForTimeout(1500);
+  if (!(await hash()).startsWith('#/overview')) throw new Error(`at ${await hash()}`);
+  if ((await scopeName()) !== 'All branches') throw new Error(`scope ${await scopeName()}`);
+  await page.locator('.ov-asat', { hasText: '2 gyms' }).waitFor({ timeout: 4000 });
+  if (await page.locator('.tg').count()) throw new Error('This gym shown on network overview');
+  if ((await sideMain()).join('|') !== 'Map') throw new Error(`side ${await sideMain()}`);
+  if ((await sideGroups()).length) throw new Error('groups shown');
 });
 await step('Settings gear opens Settings', async () => {
   await page.locator('.topbar__gear').click(); await page.waitForTimeout(800);
@@ -134,7 +179,7 @@ await step('Settings gear opens Settings', async () => {
 });
 await step('phone: menu button opens the drawer with top items, Map and the gym groups', async () => {
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto(`${base}#/overview`); await page.waitForTimeout(800);
+  await page.goto(`${base}#/branch`); await page.waitForTimeout(800);
   if (await page.locator('.topnav').isVisible()) throw new Error('centre menu visible on phone');
   if (!(await page.locator('.scopesw__btn').isVisible())) throw new Error('branch name not visible on phone');
   const ov = await page.evaluate(() => document.scrollingElement.scrollWidth - window.innerWidth);

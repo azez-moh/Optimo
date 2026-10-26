@@ -1,18 +1,19 @@
 import { lazy, Suspense, useMemo, useState, type ComponentType } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { ChevronLeft, ChevronRight, ExternalLink, Search } from 'lucide-react';
-import { Card, EmptyState, InfoTip, PageHeader, Segmented, Select, TextField } from '../../components';
+import { Card, EmptyState, InfoTip, PageHeader, Segmented, TextField } from '../../components';
 import { useI18n } from '../../i18n';
 import { useTheme } from '../../theme/theme';
 import { useDemo, focusClub } from '../../data';
-import { useScope, REGIONS } from '../../layout/filters';
-import { scopeLabel } from '../../layout/scopeLabel';
-import type { RegionId, Scope } from '../../data/types';
+import { useScope } from '../../layout/filters';
 import { MORE_GROUPS, MORE_PAGES, morePageBySlug, type MorePage } from './morePages';
 import { MoreView } from './MoreViews';
 import './settings.css';
 
-/** Settings (inventory 3.3, shot 22): Appearance, building in view, camera counting hours, More pages directory. */
+/**
+ * Settings (gear in the top bar): app-wide settings only. Appearance (theme, language), a pointer to Branch settings
+ * (gym details, floor areas, operating hours, alert thresholds moved there) and the More pages directory.
+ */
 export default function SettingsPage() {
   const { t } = useI18n();
   return (
@@ -20,8 +21,7 @@ export default function SettingsPage() {
       <PageHeader title={<span className="st-title">{t('nav.settings')}<InfoTip text={t('settings.about')} /></span>} />
       <div className="st-top">
         <AppearanceCard />
-        <ContextCard />
-        <CountingHoursCard />
+        <BranchCard />
       </div>
       <MorePagesCard />
     </div>
@@ -47,66 +47,20 @@ function AppearanceCard() {
   );
 }
 
-const encodeScope = (s: Scope) => (s.level === 'all' ? 'all' : s.level === 'region' ? `region:${s.region}` : s.level === 'district' ? `district:${s.district}` : `club:${s.clubId}`);
-function decodeScope(v: string): Scope {
-  const [k, id] = v.split(':');
-  if (k === 'region') return { level: 'region', region: id as RegionId };
-  if (k === 'district') return { level: 'district', district: id };
-  if (k === 'club') return { level: 'club', clubId: id };
-  return { level: 'all' };
-}
-
-function ContextCard() {
-  const i18n = useI18n();
-  const { t, pick, fmtClubs } = i18n;
+/** Gym settings moved to Branch settings (left menu once a gym is picked); this card links there. */
+function BranchCard() {
+  const { t, pick } = useI18n();
   const data = useDemo();
-  const { scope, setScope, clubs } = useScope();
+  const { scope } = useScope();
   const club = focusClub(data, scope);
-  const options = [
-    { value: 'all', label: t('settings.context.allBranches') },
-    ...REGIONS.map((r) => ({ value: `region:${r}`, label: t('scope.allOf', { name: t(`region.${r}`) }) })),
-    ...(scope.level === 'district' ? [{ value: encodeScope(scope), label: scopeLabel(scope, i18n, data.clubs, data.districts) }] : []),
-    ...data.clubs.map((c) => ({ value: `club:${c.id}`, label: pick(c.nameEn, c.nameAr) })),
-  ];
+  const picked = scope.level === 'club';
   return (
-    <Card title={t('settings.context.title')} info={t('settings.context.info')}>
-      <div className="st-field">
-        <span className="st-field__label">{t('settings.context.scope')}</span>
-        <Select label={t('settings.context.scope')} value={encodeScope(scope)} options={options} onChange={(v) => setScope(decodeScope(v))} />
-      </div>
+    <Card title={t('settings.branch.title')} info={t('settings.branch.info')}>
+      <p className="st-note">{t('settings.branch.body')}</p>
       <div className="st-meta">
-        <div className="st-meta__row"><span>{t('settings.context.clubs')}</span><span className="num">{fmtClubs(clubs.length)}</span></div>
-        <div className="st-meta__row"><span>{t('settings.context.building')}</span><span>{pick(club.nameEn, club.nameAr)}</span></div>
-        <div className="st-meta__row"><span>{t('settings.context.hours')}</span><span className="num">{pick(club.hours.labelEn, club.hours.labelAr)}</span></div>
+        <div className="st-meta__row"><span>{t('settings.branch.gym')}</span><span>{picked ? pick(club.nameEn, club.nameAr) : t('settings.branch.noneYet', { gym: pick(club.nameEn, club.nameAr) })}</span></div>
       </div>
-      <p className="st-note"><Link className="st-link" to="/map">{t('settings.context.openMap')}<ChevronRight aria-hidden className="flip-rtl" /></Link></p>
-    </Card>
-  );
-}
-
-const DAY_KEYS = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
-const toMin = (s: string) => { const [h, m] = s.split(':').map(Number); return h * 60 + m; };
-
-function CountingHoursCard() {
-  const { t, fmtNumber } = useI18n();
-  const { settings } = useDemo();
-  const days = [...settings.workingHours].sort((a, b) => a.day - b.day);
-  const total = days.reduce((a, d) => {
-    if (!d.open) return a;
-    let span = toMin(d.to) - toMin(d.from);
-    if (span <= 0) span += 1440;
-    return a + span;
-  }, 0) / 60;
-  return (
-    <Card title={t('settings.hours.title')} info={t('settings.hours.info')} subtitle={`${t('settings.hours.readOnly')} · ${t('settings.hours.perWeek', { h: fmtNumber(total, { maximumFractionDigits: 1 }) })}`}>
-      <div className="st-week">
-        {days.map((d) => [
-          <div key={`${d.day}d`} className="st-week__day">{t(`days.${DAY_KEYS[d.day]}`)}</div>,
-          <div key={`${d.day}h`} className="num">{d.open ? <><bdi>{d.from}</bdi> {t('settings.hours.to')} <bdi>{d.to}</bdi></> : t('settings.hours.closed')}</div>,
-        ])}
-      </div>
-      <p className="st-note">{t('settings.hours.usedBy')} {t('settings.hours.buildingHours')}.</p>
-      <p className="st-note"><Link className="st-link" to="/bms-settings">{t('settings.hours.openBuilding')}<ChevronRight aria-hidden className="flip-rtl" /></Link></p>
+      <p className="st-note"><Link className="st-link" to="/branch-settings">{t('settings.branch.open')}<ChevronRight aria-hidden className="flip-rtl" /></Link></p>
     </Card>
   );
 }

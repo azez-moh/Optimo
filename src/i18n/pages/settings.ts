@@ -1,6 +1,14 @@
 // Page strings for "settings". Keys resolve as t('settings.<key>'). Only the agent that owns this page edits this file.
 export const en = {
-  about: 'Account and system-wide settings. A building\'s own configuration is under BMS Core, BMS Settings.',
+  about: 'App-wide settings: appearance and the More pages. A gym\'s own settings are in Branch settings, and its building configuration in BMS Settings.',
+  branch: {
+    title: 'Gym settings',
+    info: 'Gym details, floor areas and capacity, operating hours and alert thresholds are set per gym in Branch settings.',
+    body: 'Settings for one gym moved to Branch settings, in the left menu once a gym is picked.',
+    gym: 'Gym',
+    noneYet: 'All branches (opens {gym})',
+    open: 'Open Branch settings',
+  },
   appearance: {
     title: 'Appearance',
     info: 'Theme and language for this device. Both are remembered here and stay in step with the top bar.',
@@ -246,7 +254,15 @@ export const en = {
 };
 
 export const ar: typeof en = {
-  about: 'إعدادات الحساب والنظام بالكامل. إعدادات كل مبنى موجودة في نظام إدارة المبنى، إعدادات نظام إدارة المبنى.',
+  about: 'إعدادات التطبيق العامة: المظهر والصفحات الإضافية. إعدادات كل صالة رياضية في إعدادات الفرع، وإعداد مبناها في إعدادات نظام المبنى.',
+  branch: {
+    title: 'إعدادات الصالة الرياضية',
+    info: 'بيانات الصالة ومناطق الطوابق وسعتها وساعات التشغيل وحدود التنبيه تضبط لكل صالة رياضية في إعدادات الفرع.',
+    body: 'انتقلت إعدادات كل صالة رياضية إلى إعدادات الفرع، في القائمة الجانبية بعد اختيار الصالة.',
+    gym: 'الصالة الرياضية',
+    noneYet: 'جميع الفروع (تفتح {gym})',
+    open: 'فتح إعدادات الفرع',
+  },
   appearance: {
     title: 'المظهر',
     info: 'المظهر واللغة على هذا الجهاز. يُحفظ الاختيار هنا ويبقى متوافقًا مع الشريط العلوي.',

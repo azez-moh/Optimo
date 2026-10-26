@@ -5,7 +5,7 @@ import { Badge } from '../../components';
 import { useI18n, LOCALE } from '../../i18n';
 import { useScope } from '../../layout/filters';
 import { scopeLabel } from '../../layout/scopeLabel';
-import { useDemo, type Club, type ClubLive } from '../../data';
+import { useDemo, type Club, type ClubLive, type Scope } from '../../data';
 import './overview.css';
 
 /** "6 PM" / "6 م" for an hour of the day. */
@@ -53,9 +53,11 @@ export function useAsAt(): string {
 }
 
 /** "As at" line: live dot, date and time, scope, club count (CV-11). */
-export function AsAtLine() {
+export function AsAtLine({ scope: forced, count }: { scope?: Scope; count?: number } = {}) {
   const i18n = useI18n();
-  const { scope, clubs } = useScope();
+  const sc = useScope();
+  const scope = forced ?? sc.scope;
+  const clubs = { length: count ?? sc.clubs.length };
   const data = useDemo();
   const label = scopeLabel(scope, i18n, data.clubs, data.districts);
   const when = useAsAt();

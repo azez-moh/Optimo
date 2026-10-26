@@ -6,7 +6,9 @@ import { useAuth } from './auth';
 /*
   One place for what each role may open. Shell (top bar menu), routes (guard) and in-page links all read it.
   COO: every page, the Kingdom map, Branches and Settings, and may change the gym (branch switcher by the logo).
-  Facility Manager (fm): one gym (OPTIMO Al Malqa (Men)), a short menu and more building control.
+  Facility Manager (fm): one gym (OPTIMO Al Malqa (Men)), a short menu and more building control. He opens Branch
+  overview (his gym overview), Branch settings (only operating hours and alert thresholds editable, see
+  canEditBranch) and AI Vision overview (no camera images).
   Ask OPTIMO (assistant) is open to both; for the Facility Manager it answers about his gym only.
 */
 
@@ -16,9 +18,9 @@ export const FM_SCOPE: Scope = { level: 'club', clubId: FM_CLUB_ID };
 
 /** Page ids (route path without the slash) open to the Facility Manager. Everything else is COO only. */
 const FM_PAGES = new Set([
-  'overview', 'assistant',
+  'overview', 'assistant', 'branch', 'branch-settings',
   'bms-overview', 'hvac', 'lights', 'ai-agents', 'control', 'bms-settings',
-  'live-floor', 'heatmap', 'machines', 'reports',
+  'vision-overview', 'live-floor', 'heatmap', 'machines', 'reports',
 ]);
 
 /** True when the role may open the page with this id ('map', 'settings', 'hvac', ...). */
@@ -52,6 +54,12 @@ export function canSeeCameras(role: Role): boolean {
 /** Whether the role may edit layouts, delete or remove items and reset history. */
 export function canManage(role: Role): boolean {
   return role === 'coo';
+}
+
+/** Branch settings sections the role may edit: COO everything; Facility Manager operating hours and alert thresholds. */
+export function canEditBranch(role: Role, section: 'details' | 'floors' | 'hours' | 'thresholds'): boolean {
+  if (role === 'coo') return true;
+  return section === 'hours' || section === 'thresholds';
 }
 
 /** Hook for components: the signed-in role with the checks bound to it. */

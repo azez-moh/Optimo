@@ -8,6 +8,7 @@ import { useDemo, type Club } from '../../data';
 import { floorPlanOf, liveOccupancy, type PlanArea } from '../../data/floors';
 import { PlanSvg } from './PlanSvg';
 import { heatColor, legendGradient } from './scale';
+import { crowdRatio } from '../../data/branchConfig';
 import { usePeopleText } from './people';
 import './heatmap.css';
 
@@ -25,6 +26,7 @@ export function CrowdHeatmapCard({ club, title, className = '' }: { club: Club; 
   const occList = useMemo(() => (plan ? liveOccupancy(data, club.id) : []), [data, club.id, plan]);
   const occ = useMemo(() => new Map(occList.map((a) => [a.areaId, a])), [occList]);
   const top = [...occList].sort((a, b) => b.ratio - a.ratio || b.people - a.people).slice(0, 2);
+  const hotPct = Math.round(crowdRatio(club.id) * 100);
   const heading = <span className="ov-card-title">{title ?? t('heatmap.card.title')}</span>;
 
   if (!plan) {
@@ -62,7 +64,7 @@ export function CrowdHeatmapCard({ club, title, className = '' }: { club: Club; 
                   <span>{pick(a.area.nameEn, a.area.nameAr)}</span>
                   <span className="hm-row__sub">{t('heatmap.area.peopleOf', { n: fmtNumber(a.people), cap: fmtNumber(a.area.capacity) })}</span>
                 </span>
-                <span className={`num hm-row__pct ${a.ratio > 0.85 ? 'is-hot' : ''}`}>{fmtNumber(Math.round(a.ratio * 100))}%</span>
+                <span className={`num hm-row__pct ${a.ratio * 100 > hotPct ? 'is-hot' : ''}`}>{fmtNumber(Math.round(a.ratio * 100))}%</span>
               </li>
             ))}
           </ul>
@@ -71,7 +73,7 @@ export function CrowdHeatmapCard({ club, title, className = '' }: { club: Club; 
             <span className="hm-legend__bar" style={{ background: legendGradient(theme, isRtl ? 'to left' : 'to right') }} />
             <span className="hm-legend__ticks num hm-legend__ticks--c">
               <span style={{ insetInlineStart: '0%' }}>0%</span>
-              <span style={{ insetInlineStart: '85%' }}>85%</span>
+              <span className="hmc__hot" style={{ insetInlineStart: `${Math.min(100, hotPct)}%` }}>{fmtNumber(hotPct)}%</span>
             </span>
           </span>
           <div className="hmc__foot">

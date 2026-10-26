@@ -3,6 +3,7 @@ import { LIVE_CLUB_ID } from './clubs';
 import { buildLive, isOpenAt, peopleInAt } from './dynamics';
 import { acOf, areasOf, presenceOf } from './selectors';
 import { msAt } from './time';
+import { branchConfig, branchSignature } from './branchConfig';
 
 /*
   Floor plans and crowd occupancy per area (Crowd heatmap page and the compact Overview card).
@@ -209,8 +210,29 @@ const MALQA_PLAN: GymPlan = {
 
 const PLANS: Record<string, GymPlan> = { [LIVE_CLUB_ID]: MALQA_PLAN };
 
-/** The floor plan of a gym, or undefined when it has not been loaded yet (only Al Malqa Men has one). */
+const withCaps = new Map<string, GymPlan>();
+
+/**
+ * The floor plan of a gym, or undefined when it has not been loaded yet (only Al Malqa Men has one).
+ * Comfortable capacities saved on Branch settings replace the defaults (same object while they do not change).
+ */
 export function floorPlanOf(clubId: string): GymPlan | undefined {
+  const base = PLANS[clubId];
+  if (!base) return undefined;
+  const caps = branchConfig(clubId).capacity;
+  if (!Object.keys(caps).length) return base;
+  const key = `${clubId}|${branchSignature()}`;
+  let p = withCaps.get(key);
+  if (!p) {
+    p = { ...base, floors: base.floors.map((f) => ({ ...f, areas: f.areas.map((a) => (a.monitored && caps[a.key] > 0 ? { ...a, capacity: caps[a.key] } : a)) })) };
+    if (withCaps.size > 20) withCaps.clear();
+    withCaps.set(key, p);
+  }
+  return p;
+}
+
+/** The floor plan with the default capacities (before Branch settings). */
+export function defaultPlanOf(clubId: string): GymPlan | undefined {
   return PLANS[clubId];
 }
 
@@ -340,13 +362,15 @@ export interface AreaClimate {
   comfort: 'ok' | 'warm' | 'hot' | 'off' | 'none';
 }
 
-function climateFrom(units: { on: boolean; reading: number; setpoint: number }[]): AreaClimate {
+function climateFrom(units: { on: boolean; reading: number; setpoint: number }[], clubId: string): AreaClimate {
   if (!units.length) return { overBy: 0, unitsOn: 0, units: 0, comfort: 'none' };
   const on = units.filter((u) => u.on);
   const src = on.length ? on : units;
   const temp = Math.round((src.reduce((a, u) => a + u.reading, 0) / src.length) * 10) / 10;
   const overBy = on.reduce((m, u) => Math.max(m, u.reading - u.setpoint), -99);
-  const comfort = !on.length ? 'off' : overBy >= 3 ? 'hot' : overBy >= 1.5 ? 'warm' : 'ok';
+  // comfort band from Branch settings (warm 1.5 °C and hot 3 °C over setpoint by default)
+  const { warmC, hotC } = branchConfig(clubId);
+  const comfort = !on.length ? 'off' : overBy >= hotC ? 'hot' : overBy >= warmC ? 'warm' : 'ok';
   return { temp, setpoint: units[0].setpoint, overBy, unitsOn: on.length, units: units.length, comfort };
 }
 
@@ -355,7 +379,7 @@ export function liveClimate(d: D, clubId: string): Map<string, AreaClimate> {
   const ac = acOf(d, clubId);
   return new Map(areasOf(d, clubId).map((a) => [
     a.id,
-    climateFrom(ac.filter((u) => u.areaId === a.id && u.live).map((u) => ({ on: u.live.on, reading: u.live.reading, setpoint: u.live.setpoint }))),
+    climateFrom(ac.filter((u) => u.areaId === a.id && u.live).map((u) => ({ on: u.live.on, reading: u.live.reading, setpoint: u.live.setpoint })), clubId),
   ]));
 }
 
@@ -381,6 +405,6 @@ export function climateAt(s: StaticData, clubId: string, ms: number): Map<string
   const areas = s.areas.filter((a) => a.clubId === clubId);
   return new Map(areas.map((a) => [
     a.id,
-    climateFrom(s.acUnits.filter((u) => u.areaId === a.id).map((u) => live!.ac[u.id]).filter(Boolean).map((x) => ({ on: x.on, reading: x.reading, setpoint: x.setpoint }))),
+    climateFrom(s.acUnits.filter((u) => u.areaId === a.id).map((u) => live!.ac[u.id]).filter(Boolean).map((x) => ({ on: x.on, reading: x.reading, setpoint: x.setpoint })), clubId),
   ]));
 }

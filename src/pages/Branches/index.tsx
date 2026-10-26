@@ -149,7 +149,7 @@ function ClubCard({ row, current, focused }: { row: ClubRow; current: boolean; f
   const name = pick(c.nameEn, c.nameAr);
   const shown = row.alerts.slice(0, 3);
   const more = row.alerts.length - shown.length;
-  const open = () => { setScope({ level: 'club', clubId: c.id }); navigate('/overview'); };
+  const open = () => { setScope({ level: 'club', clubId: c.id }); navigate('/branch'); };
   const openAlerts = () => { setScope({ level: 'club', clubId: c.id }); navigate('/ai-agents'); };
   const pct = Math.min(100, row.pctFull);
   const capTone = row.pctFull >= 85 ? 'is-high' : '';

@@ -133,7 +133,7 @@ await step('Deep link ?compare=optimo-nakheel-men,optimo-malqa-men opens the dra
 });
 await step('Single-gym scope: comparison still shows both gyms, scope row highlighted, This gym summary', async () => {
   await page.evaluate(() => localStorage.setItem('opt.scope', '{"level":"club","clubId":"optimo-nakheel-men"}'));
-  await page.goto(`${base}?now=${now}&r=club#/overview`); await page.waitForTimeout(2500);
+  await page.goto(`${base}?now=${now}&r=club#/branch`); await page.waitForTimeout(2500);
   if ((await page.locator('.cmp__table tbody tr').count()) !== 2) throw new Error('not 2');
   const hl = await page.locator('.cmp__table tbody tr.is-scope .cmp__gymname').innerText();
   if (!/An Nakheel/.test(hl)) throw new Error(hl);

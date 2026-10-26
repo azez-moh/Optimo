@@ -1,4 +1,4 @@
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { AlertOctagon, Building2, ChevronRight, ListChecks, ThermometerSun } from 'lucide-react';
 import { Card, ChipGroup, EmptyState, KpiTile, StatusBadge } from '../../components';
 import { useI18n } from '../../i18n';
@@ -24,8 +24,9 @@ export function BmsSection({ rows, level, onLevel }: { rows: ClubRow[]; level: s
   const count = (l: Level) => all.filter((a) => a.level === l).length;
 
   const [params] = useSearchParams();
+  const { pathname } = useLocation();
   const cp = new URLSearchParams(params); cp.set('section', 'bms'); cp.set('level', 'critical');
-  const critLink = `/overview?${cp.toString()}`;
+  const critLink = `${pathname}?${cp.toString()}`;
   const go = (clubId: string) => { setScope({ level: 'club', clubId }); navigate('/bms-overview'); };
 
   return (

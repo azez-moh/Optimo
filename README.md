@@ -27,6 +27,7 @@ Other commands:
 | `npm run preview` | Serve the built `dist/` locally |
 | `npm run typecheck` | Type check only |
 | `node scripts/shoot.mjs <label> <routes>` | QA screenshots (EN/AR, light/dark, 1440/390) into `qa/<label>/` |
+| `node scripts/check-ai-agents.mjs [--route=vision-overview]` | One-view (no scroll) check of AI Agents or AI Vision overview |
 
 ## Stack
 
@@ -36,7 +37,12 @@ React 18, TypeScript, Vite 5, React Router (hash routes, one per page), Leaflet 
 
 | Path | Contents |
 |---|---|
-| `src/layout/Shell.tsx` | Top bar (logo, branch switcher, centre menu Overview / Ask OPTIMO / Branches, Settings gear) and the left menu (Map, then the gym's BMS Core and AI Vision groups) |
+| `src/layout/Shell.tsx` | Top bar (logo, branch switcher, centre menu Overview / Ask OPTIMO / Branches, Settings gear) and the left menu (Map; once a gym is picked Branch overview, Branch settings, then the gym's BMS Core and AI Vision groups) |
+| `src/pages/Overview/` | Top "Overview" (`/overview`): always all branches, opening it sets the scope to All branches (the Facility Manager sees his gym, `Fm.tsx`) |
+| `src/pages/Branch/` | Branch overview (`/branch`): the selected gym's overview (same component as Overview in branch mode) |
+| `src/pages/BranchSettings/` | Branch settings (`/branch-settings`): gym details, floor areas and capacity, operating hours, alert thresholds, integrations |
+| `src/data/branchConfig.ts` | Per-gym capacity and thresholds saved on Branch settings, read by the Heatmap, floor plans and recommendations |
+| `src/pages/VisionOverview/` | AI Vision overview (`/vision-overview`), first page of AI Vision, one view without scrolling |
 | `src/layout/nav.ts` | Menu order, routes and labels (single source) |
 | `src/layout/access.ts` | Which pages each role can open |
 | `src/layout/auth.tsx` | Demo sign-in and roles (COO, Facility Manager) |

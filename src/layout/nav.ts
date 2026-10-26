@@ -1,18 +1,19 @@
 import {
   Activity, AirVent, BarChart3, Bot, Building2, Camera, Cctv, Cpu, Dumbbell, FileBarChart, Flame, Gauge, Grid3x3, LayoutDashboard,
-  Library, Lightbulb, ListVideo, Map as MapIcon, MessageCircle, PlugZap, Radar, ScanEye, Settings, Settings2, SlidersHorizontal, Store, type LucideIcon,
+  Library, Lightbulb, Eye, Home, Cog, ListVideo, Map as MapIcon, MessageCircle, PlugZap, Radar, ScanEye, Settings, Settings2, SlidersHorizontal, Store, type LucideIcon,
 } from 'lucide-react';
 
 /**
  * One source of truth for the dashboard pages: menu order (Build 8.7), route path and i18n key.
  * Navigation (src/layout/Shell.tsx):
  *   top centre menu, always the same: CHAIN_PAGES (Overview, Ask OPTIMO, Branches);
- *   left menu: MAP_PAGE always, plus the BMS Core and AI Vision groups when one gym is picked;
+ *   left menu: MAP_PAGE always; when one gym is picked also BRANCH_PAGES (Branch overview, Branch settings) and the
+ *   BMS Core and AI Vision groups (AI Vision starts with AI Vision overview);
  *   Settings is the gear icon in the top bar corner.
  * Route path = `/${id}`. Label = t(`nav.${key}`), tooltip = t(`nav.about.${key}`).
  * Page folders: src/pages/<folder>/index.tsx (lazy-loaded in src/App.tsx).
  */
-export type NavGroup = 'chain' | 'bms' | 'vision';
+export type NavGroup = 'chain' | 'branch' | 'bms' | 'vision';
 
 export interface PageDef {
   id: string;
@@ -31,6 +32,12 @@ export const CHAIN_PAGES: PageDef[] = [
 /** Kingdom map drill-down, always first in the left menu. */
 export const MAP_PAGE: PageDef = { id: 'map', key: 'map', folder: 'Map', group: 'chain', icon: MapIcon };
 
+/** One gym: shown under Map in the left menu when a gym is picked. Overview of all branches stays at /overview. */
+export const BRANCH_PAGES: PageDef[] = [
+  { id: 'branch', key: 'branch', folder: 'Branch', group: 'branch', icon: Home },
+  { id: 'branch-settings', key: 'branchSettings', folder: 'BranchSettings', group: 'branch', icon: Cog },
+];
+
 export const BMS_PAGES: PageDef[] = [
   { id: 'bms-overview', key: 'bmsOverview', folder: 'BmsOverview', group: 'bms', icon: Building2 },
   { id: 'hvac', key: 'hvac', folder: 'Hvac', group: 'bms', icon: AirVent },
@@ -42,6 +49,7 @@ export const BMS_PAGES: PageDef[] = [
 ];
 
 export const VISION_PAGES: PageDef[] = [
+  { id: 'vision-overview', key: 'visionOverview', folder: 'VisionOverview', group: 'vision', icon: Eye },
   { id: 'monitor', key: 'monitor', folder: 'Monitor', group: 'vision', icon: ScanEye },
   { id: 'live-floor', key: 'liveFloor', folder: 'LiveFloor', group: 'vision', icon: Grid3x3 },
   { id: 'heatmap', key: 'heatmap', folder: 'Heatmap', group: 'vision', icon: Flame },
@@ -58,14 +66,14 @@ export const VISION_PAGES: PageDef[] = [
 
 export const SETTINGS_PAGE: PageDef = { id: 'settings', key: 'settings', folder: 'Settings', group: 'chain', icon: Settings };
 
-export const ALL_PAGES: PageDef[] = [...CHAIN_PAGES, MAP_PAGE, SETTINGS_PAGE, ...BMS_PAGES, ...VISION_PAGES];
+export const ALL_PAGES: PageDef[] = [...CHAIN_PAGES, MAP_PAGE, SETTINGS_PAGE, ...BRANCH_PAGES, ...BMS_PAGES, ...VISION_PAGES];
 
 export function pageById(id: string): PageDef | undefined {
   return ALL_PAGES.find((p) => p.id === id);
 }
 
-/** Pages that belong to one gym (BMS Core and AI Vision). Opened at network scope they switch to the live gym. */
-export const GYM_PAGES: PageDef[] = [...BMS_PAGES, ...VISION_PAGES];
+/** Pages that belong to one gym (Branch, BMS Core and AI Vision). Opened at network scope they switch to the live gym. */
+export const GYM_PAGES: PageDef[] = [...BRANCH_PAGES, ...BMS_PAGES, ...VISION_PAGES];
 export const isGymPage = (id: string) => GYM_PAGES.some((p) => p.id === id);
 
 /** Camera icon re-export for pages that want the same glyph as the sidebar. */

@@ -11,7 +11,8 @@ import {
   type AreaClimate, type AreaOccupancy, type FloorId, type PlanArea,
 } from '../../data/floors';
 import { PlanSvg, planWidthForHeight, type PlanKeyItem } from './PlanSvg';
-import { HOT_RATIO, heatColor, legendGradient } from './scale';
+import { heatColor, legendGradient } from './scale';
+import { crowdRatio } from '../../data/branchConfig';
 import { usePeopleText } from './people';
 import './heatmap.css';
 
@@ -118,6 +119,9 @@ function HeatmapView() {
   const gymPeak = useMemo(() => steps.reduce((b, s) => (s.peopleIn > b.peopleIn ? s : b), steps[0]), [steps]);
   const ranked = useMemo(() => [...step.areas].sort((a, b) => b.ratio - a.ratio || b.people - a.people), [step]);
   const busiest = ranked[0];
+  // crowding threshold of this gym (Branch settings, 85% by default)
+  const HOT_RATIO = crowdRatio(club.id);
+  const hotPct = Math.round(HOT_RATIO * 100);
   const hot = ranked.filter((a) => a.ratio > HOT_RATIO);
   const timeOf = (minute: number) => fmtTime(steps.find((s) => s.minute === minute)?.ms ?? step.ms);
 
@@ -201,7 +205,7 @@ function HeatmapView() {
         <span className="hm-legend__ticks num">
           <span style={{ insetInlineStart: '0%' }}>0%</span>
           <span style={{ insetInlineStart: '50%' }}>50%</span>
-          <span style={{ insetInlineStart: '85%' }}>85%</span>
+          {hotPct > 58 && hotPct < 93 && <span className="hm-legend__hot" style={{ insetInlineStart: `${hotPct}%` }}>{fmtNumber(hotPct)}%</span>}
           <span style={{ insetInlineStart: '100%' }}>100%</span>
         </span>
       </span>
@@ -246,7 +250,7 @@ function HeatmapView() {
           hint={busiest && busiest.people > 0
             ? t('heatmap.kpi.busiestHint', { people: ppl(busiest.people), pct: fmtNumber(Math.round(busiest.ratio * 100)) })
             : t('heatmap.kpi.busiestNone')} />
-        <KpiTile icon={TrendingUp} live={isLive} label={t('heatmap.kpi.above')} info={t('heatmap.kpi.aboveInfo')}
+        <KpiTile icon={TrendingUp} live={isLive} label={t('heatmap.kpi.above', { p: fmtNumber(hotPct) })} info={t('heatmap.kpi.aboveInfo', { p: fmtNumber(hotPct) })}
           className={hot.length ? 'hm-kpi-hot' : ''}
           value={fmtNumber(hot.length)} unit={t('heatmap.kpi.aboveOf', { n: fmtNumber(step.areas.length) })}
           hint={hot.length ? <span className="hm-kpi-names">{hot.map((a) => pick(a.area.nameEn, a.area.nameAr)).join(i18n.lang === 'ar' ? '، ' : ', ')}</span> : t('heatmap.kpi.aboveNone')} />
@@ -330,6 +334,7 @@ function AreaDetail({ o, climate, peak, steps, onBack, pctTxt, comfortTxt, deg, 
   const { t, pick, fmtNumber } = useI18n();
   const ppl = usePeopleText();
   const { theme } = useTheme();
+  const HOT_RATIO = crowdRatio(o.areaId.split(':')[0]);
   const series = steps.map((s) => s.areas.find((a) => a.areaId === o.areaId)?.ratio ?? 0).map((r) => Math.round(r * 100));
   const tone = climate?.comfort === 'hot' ? 'txt-danger' : climate?.comfort === 'warm' ? 'txt-warning' : '';
   return (

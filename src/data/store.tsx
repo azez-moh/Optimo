@@ -2,6 +2,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState, t
 import type { DemoContextValue, PatchCollection, Patches, StaticData } from './types';
 import { buildStatic } from './build';
 import { buildLive } from './dynamics';
+import { syncBranchConfigs } from './branchConfig';
 
 /**
  * Data provider. Static inventory is built once; a 10 s tick moves `now` forward and rebuilds the live
@@ -64,6 +65,8 @@ function applyStatic(p: Patches): StaticData {
   for (const [coll, key] of Object.entries(STATIC_KEYS) as [PatchCollection, keyof StaticData][]) {
     (s as unknown as Record<string, unknown>)[key] = applyList(BASE[key] as unknown[], coll, p);
   }
+  // Branch settings (per gym capacity and thresholds) live in a registry read by floor plans, crowd colours and insights
+  syncBranchConfigs(p.set.settings);
   if (p.set.settings?.bms) s.settings = { ...BASE.settings, ...(p.set.settings.bms as object) };
   // keep the per-club counts in step with removals and additions
   s.clubs = BASE.clubs.map((c) => ({

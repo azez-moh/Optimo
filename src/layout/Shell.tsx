@@ -7,7 +7,7 @@ import { BrandMark, StatusBadge } from '../components';
 import { useDemo } from '../data/store';
 import { alertsIn } from '../data/selectors';
 import type { Scope } from '../data/types';
-import { BMS_PAGES, CHAIN_PAGES, MAP_PAGE, VISION_PAGES, isGymPage, type PageDef } from './nav';
+import { BMS_PAGES, BRANCH_PAGES, CHAIN_PAGES, MAP_PAGE, VISION_PAGES, isGymPage, type PageDef } from './nav';
 import { useScope } from './filters';
 import { useAuth } from './auth';
 import { scopeLabel } from './scopeLabel';
@@ -20,7 +20,8 @@ import './layout.css';
     inline start; the centre menu, always Overview, Ask OPTIMO, Branches (filtered by role); controls and the
     Settings gear on the inline end.
     Left menu (slim sidebar, collapsible to icons; a drawer under 1024px): Map always, and when one gym is picked
-    the BMS Core and AI Vision groups with all their pages (filtered by role).
+    Branch overview, Branch settings and the BMS Core and AI Vision groups with all their pages (filtered by role).
+    The top "Overview" is always the overview of all branches: opening it sets the scope to All branches.
   The Facility Manager is locked to his gym: the branch name is shown but not clickable, no Branches and no Map.
   Under 900px the centre menu moves into the drawer, above the left menu items.
 */
@@ -153,7 +154,7 @@ function AlertsBell() {
 /**
  * Current scope beside the logo ("All branches" or the gym name). Click opens a compact list: All branches, then
  * each gym. Choosing keeps the user on the equivalent page: network pages stay; a gym page falls back to Overview
- * when switching to All branches; Branches (the network list) opens the chosen gym's Overview.
+ * when switching to All branches; Overview and Branches (network pages) open the chosen gym's Branch overview.
  * For the Facility Manager it is a plain label (locked to his gym).
  */
 function ScopeSwitcher() {
@@ -195,7 +196,7 @@ function ScopeSwitcher() {
     trigger.current?.focus();
     const page = firstSegment(pathname);
     if (s.level === 'all' && isGymPage(page)) navigate('/overview');
-    else if (s.level === 'club' && page === 'branches') navigate('/overview');
+    else if (s.level === 'club' && (page === 'branches' || page === 'overview')) navigate('/branch');
     setScope(s);
   };
   const items = () => Array.from(list.current?.querySelectorAll<HTMLButtonElement>('button') ?? []);
@@ -299,6 +300,7 @@ function Sidebar({ collapsed, onToggleCollapsed, onNavigate, onClose }: { collap
   const { can } = useAccess();
   const topItems = useTopItems();
   const gym = scope.level === 'club';
+  const branchItems = gym ? BRANCH_PAGES.filter((p) => can(p.id)) : [];
   const groups = (gym ? [
     { id: 'bms', label: t('nav.groupBms'), pages: BMS_PAGES.filter((p) => can(p.id)) },
     { id: 'vision', label: t('nav.groupVision'), pages: VISION_PAGES.filter((p) => can(p.id)) },
@@ -330,9 +332,10 @@ function Sidebar({ collapsed, onToggleCollapsed, onNavigate, onClose }: { collap
         <ul className="sidenav__list sidenav__list--top">
           {topItems.map((p) => <SideLink key={p.id} p={p} collapsed={false} onNavigate={onNavigate} />)}
         </ul>
-        {can(MAP_PAGE.id) && (
+        {(can(MAP_PAGE.id) || branchItems.length > 0) && (
           <ul className="sidenav__list sidenav__list--map">
-            <SideLink p={MAP_PAGE} collapsed={collapsed} onNavigate={onNavigate} />
+            {can(MAP_PAGE.id) && <SideLink p={MAP_PAGE} collapsed={collapsed} onNavigate={onNavigate} />}
+            {branchItems.map((p) => <SideLink key={p.id} p={p} collapsed={collapsed} onNavigate={onNavigate} />)}
           </ul>
         )}
         {groups.map((g) => {

@@ -6,13 +6,14 @@ import { homeFor } from './layout/access';
 import { RequireGym } from './layout/filters';
 import { ComingNext } from './components';
 import SignInPage from './pages/SignIn';
-import { BMS_PAGES, CHAIN_PAGES, MAP_PAGE, VISION_PAGES, isGymPage } from './layout/nav';
+import { BMS_PAGES, BRANCH_PAGES, CHAIN_PAGES, MAP_PAGE, VISION_PAGES, isGymPage } from './layout/nav';
 
 /*
   Routes: /signin (public), then one route per dashboard page inside the shell (ids from src/layout/nav.ts).
   Pages are lazy-loaded from src/pages/<Folder>/index.tsx. The Kingdom map is its own page (/map, first item of the
   left menu); an old /branches?view=map link redirects there and keeps its region/district/club query.
-  BMS Core and AI Vision pages are gym level: opened at network scope they switch to the live gym first.
+  Branch overview, Branch settings, BMS Core and AI Vision pages are gym level: opened at network scope they switch
+  to the live gym first. /overview is always the overview of all branches (the Facility Manager sees his gym).
   Settings has nested routes /settings/<slug> for the Build 8.7 "More pages".
   Every route is guarded by role (src/layout/access.ts): a page the role may not open redirects to its home.
 */
@@ -28,7 +29,7 @@ const lazyPage = (folder: string, key: string) => {
 const SettingsPage = lazyPage('Settings', 'settings');
 const MorePageView = lazy(() => import('./pages/Settings').then((m) => ({ default: (m as unknown as { MorePageView: ComponentType }).MorePageView })));
 
-const DASH = [...CHAIN_PAGES, MAP_PAGE, ...BMS_PAGES, ...VISION_PAGES].map((p) => ({ ...p, Component: lazyPage(p.folder, p.key) }));
+const DASH = [...CHAIN_PAGES, MAP_PAGE, ...BRANCH_PAGES, ...BMS_PAGES, ...VISION_PAGES].map((p) => ({ ...p, Component: lazyPage(p.folder, p.key) }));
 
 /** "/" goes to the role's home: the Kingdom map for the COO, the gym overview for the Facility Manager. */
 function Home() {

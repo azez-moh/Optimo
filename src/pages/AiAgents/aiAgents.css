@@ -125,7 +125,7 @@
   .shell:has(.ag-wall) .sidenav { gap: 8px; padding-block: 8px; }
   .shell:has(.ag-wall) .sidenav__group { padding-block-start: 6px; }
   .shell:has(.ag-wall) .sidenav__grouphead { height: 26px; }
-  .shell:has(.ag-wall) .sidenav__link { height: clamp(24px, calc((100dvh - var(--topbar-h) - 210px) / 22), 36px); }
+  .shell:has(.ag-wall) .sidenav__link { height: clamp(24px, calc((100dvh - var(--topbar-h) - 210px) / 25), 36px); }
   .shell:has(.ag-wall) .sidenav__link.active::before { inset-block: 4px; }
   .shell:has(.ag-wall) .shell__sidemodel { padding-block: 8px; }
   .shell:has(.ag-wall) .shell__sidefoot { padding-block: 10px; }

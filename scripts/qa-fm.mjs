@@ -31,14 +31,16 @@ await step('sign in as Facility Manager lands on Al Malqa overview', async () =>
   const h1 = await page.locator('h1').first().innerText();
   if (!/Al Malqa \(Men\)/.test(h1)) throw new Error(`title ${h1}`);
 });
-await step('menus: top Overview, Ask OPTIMO; gym name fixed; left 6 BMS + 4 AI Vision; no Map/Branches/Settings/Cameras', async () => {
+await step('menus: top Overview, Ask OPTIMO; gym name fixed; left Branch overview, Branch settings, 6 BMS + 5 AI Vision; no Map/Branches/Settings/Cameras', async () => {
   const top = (await page.locator('.topnav .topnav__link').allTextContents()).map((x) => x.trim());
   if (top.join('|') !== 'Overview|Ask OPTIMO') throw new Error(`top ${top}`);
   const links = (await page.locator('.topnav a, .shell__side .sidenav a').allTextContents()).map((x) => x.trim());
   for (const bad of ['Map', 'Cameras', 'Settings', 'Branches', 'Integration', 'Monitor', 'Usage Report']) if (links.includes(bad)) throw new Error(`menu shows ${bad}`);
   const vision = (await page.locator('#navgroup-vision .sidenav__text').allTextContents()).map((x) => x.trim());
-  if (vision.join('|') !== 'Live Floor|Heatmap|Reports|Machines and Devices') throw new Error(`AI Vision ${vision}`);
-  if (await groupCounts() !== '6,4') throw new Error(`counts ${await groupCounts()}`);
+  if (vision.join('|') !== 'AI Vision overview|Live Floor|Heatmap|Reports|Machines and Devices') throw new Error(`AI Vision ${vision}`);
+  if (await groupCounts() !== '6,5') throw new Error(`counts ${await groupCounts()}`);
+  const main = (await page.locator('.shell__side .sidenav__list--map .sidenav__text').allTextContents()).map((x) => x.trim());
+  if (main.join('|') !== 'Branch overview|Branch settings') throw new Error(`side ${main}`);
   if (await page.locator('.scopesw__btn, .topbar__gear').count()) throw new Error('branch switcher or Settings gear shown');
   const gym = (await page.locator('.scopesw--fixed .scopesw__name').innerText()).trim();
   if (gym !== 'OPTIMO Al Malqa (Men)') throw new Error(`gym ${gym}`);
@@ -61,6 +63,28 @@ for (const r of ['cameras', 'map', 'branches', 'settings', 'settings/site-entiti
     if (!(await hash()).startsWith('#/overview')) throw new Error(`at ${await hash()}`);
   });
 }
+await step('Branch overview shows his gym overview; Branch settings: only hours and thresholds editable', async () => {
+  await page.locator('.shell__side a', { hasText: 'Branch overview' }).click(); await page.waitForTimeout(1000);
+  if (!(await hash()).startsWith('#/branch')) throw new Error(`at ${await hash()}`);
+  if (!(await page.locator('.fm-log').count())) throw new Error('not the FM overview');
+  await page.locator('.shell__side a', { hasText: 'Branch settings' }).click(); await page.waitForTimeout(1000);
+  if (!(await hash()).startsWith('#/branch-settings')) throw new Error(`at ${await hash()}`);
+  if (!(await page.locator('.bs-contact input').first().getAttribute('readonly') !== null)) throw new Error('contacts editable');
+  if ((await page.locator('.bs-cap input').first().getAttribute('readonly')) === null) throw new Error('capacity editable');
+  if ((await page.locator('.bs-th__row[data-k=crowdPct] input').getAttribute('readonly')) !== null) throw new Error('threshold read only');
+  await page.locator('.bs-th__row[data-k=crowdPct] input').fill('80');
+  await page.getByRole('button', { name: 'Save', exact: true }).click();
+  await page.getByRole('dialog').getByRole('button', { name: 'Save changes' }).click(); await page.waitForTimeout(400);
+  if (!/Last saved by Facility Manager/.test(await page.locator('.bs-savebar__line').innerText())) throw new Error('not saved');
+});
+await step('AI Vision overview: no camera images, fits one view', async () => {
+  await page.goto(`${base}#/vision-overview`); await page.waitForTimeout(1500);
+  if (!(await hash()).startsWith('#/vision-overview')) throw new Error(`at ${await hash()}`);
+  if (await page.locator('.vo-wall img, .vo-wall video, .vo-wall canvas').count()) throw new Error('image shown');
+  if (await page.locator('.vo-alerts a[href*="camera-list"]').count()) throw new Error('camera link shown');
+  const sc = await page.evaluate(() => document.scrollingElement.scrollHeight - window.innerHeight);
+  if (sc > 1) throw new Error(`page scrolls ${sc}`);
+});
 await step('menu has no Cameras; no way to change the gym', async () => {
   if ((await menuText()).includes('Cameras')) throw new Error('Cameras in menu');
   if (await page.locator('.scopesw__btn, .scopesw__menu').count()) throw new Error('branch switcher shown');
@@ -81,7 +105,7 @@ await step('COO: sign in lands on the Kingdom map, sees every page', async () =>
     if (!(await hash()).startsWith(`#/${r}`)) throw new Error(`${r} -> ${await hash()}`);
   }
   await page.goto(`${base}#/cameras`); await page.waitForTimeout(600); // gym level
-  if (await groupCounts() !== '7,12') throw new Error(`counts ${await groupCounts()}`);
+  if (await groupCounts() !== '7,13') throw new Error(`counts ${await groupCounts()}`);
 });
 console.log(results.join('\n')); console.log(errors.length ? `PAGE ERRORS: ${errors.join(' | ')}` : 'no page errors');
 await browser.close();

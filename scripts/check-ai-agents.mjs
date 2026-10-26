@@ -1,5 +1,6 @@
 // Wall-screen check for the AI Agents page: no page scroll and no inner scrollbars.
 // Usage: node scripts/check-ai-agents.mjs [--base=http://localhost:5199/] [--now=<ms>] [--out=qa/ai-agents-wall]
+//   [--route=vision-overview] checks the AI Vision overview (wall selector .vo-wall) instead of AI Agents.
 // Signs in with the Sign in button (COO and Facility Manager), opens #/ai-agents at 1920x1080, 1680x1050,
 // 1536x864 and 1440x900 in EN dark and AR light, asserts the layout fits and saves a screenshot of each.
 import { chromium } from 'playwright-core';
@@ -10,7 +11,9 @@ import { fileURLToPath } from 'node:url';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const flags = Object.fromEntries(process.argv.slice(2).filter((a) => a.startsWith('--')).map((a) => { const [k, v] = a.slice(2).split('='); return [k, v ?? 'true']; }));
-const out = path.resolve(root, flags.out || 'qa/ai-agents-wall');
+const ROUTE = flags.route || 'ai-agents';
+const WALL = ROUTE === 'vision-overview' ? '.vo-wall' : '.ag-wall';
+const out = path.resolve(root, flags.out || `qa/${ROUTE}-wall`);
 mkdirSync(out, { recursive: true });
 // Riyadh 18:30 on 2026-10-22 by default; pass --now to test other times (e.g. just after midnight).
 const nowMs = flags.now || String(Date.UTC(2026, 9, 22, 15, 30));
@@ -60,8 +63,8 @@ try {
         await page.locator('.rolepick__opt').nth(role === 'fm' ? 1 : 0).click();
         await page.locator('.signin__submit').click();
         await page.waitForURL(/#\/(map|overview)/);
-        await page.goto(`${base}?now=${nowMs}#/ai-agents`, { waitUntil: 'load' });
-        await page.waitForSelector('.ag-wall');
+        await page.goto(`${base}?now=${nowMs}#/${ROUTE}`, { waitUntil: 'load' });
+        await page.waitForSelector(WALL);
         await page.evaluate(() => document.fonts.ready);
         await page.waitForTimeout(1500);
         const r = await page.evaluate(() => {
@@ -82,7 +85,7 @@ try {
         if (w >= 1200 && r.sh > r.ih + 1) failures.push(`${tag}: page scrolls ${r.sh} > ${r.ih}`);
         if (r.sw > r.iw + 1) failures.push(`${tag}: horizontal overflow ${r.sw} > ${r.iw}`);
         for (const x of r.inner) failures.push(`${tag}: inner scroll ${x}`);
-        const file = path.join(out, `ai-agents-${tag}.png`);
+        const file = path.join(out, `${ROUTE}-${tag}.png`);
         await page.screenshot({ path: file, fullPage: w < 1200 });
         console.log(`${(w < 1200 || r.sh <= r.ih + 1) && !r.inner.length ? 'ok  ' : 'FAIL'} ${path.relative(root, file)}`);
         await ctx.close();
